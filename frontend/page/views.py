@@ -7,7 +7,3 @@ def service(request):
 
 def help(request):
     return render(request, 'page/help.html')
-
-
-def statistics(request):
-    return render(request, 'page/statistics.html')

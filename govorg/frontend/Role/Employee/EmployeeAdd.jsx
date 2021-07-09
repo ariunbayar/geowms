@@ -162,7 +162,7 @@ export class EmployeeAdd extends Component {
             'level_1': aimag_name,
             'level_2': sum_name,
             'level_3': horoo_name,
-            'point_coordinate': point_coordinate,
+            'point': point_coordinate,
             'address_state': address_state,
         }
         if(is_address_map) {

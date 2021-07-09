@@ -380,6 +380,8 @@ def getFields(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, tid, fid):
+
+    file_list = list()
     file_detail = dict()
 
     theme = get_object_or_404(LThemes, theme_id=tid)
@@ -400,6 +402,7 @@ def propertyFields(request, tid, fid):
 
             file_detail['name'] = str(file)
             file_detail['size'] = file_stat.st_size
+            file_list.append(file_detail)
 
     geom_type = ''
     if geom:
@@ -436,7 +439,7 @@ def propertyFields(request, tid, fid):
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
             'geom_type': geom_type,
             'cache_values': cache_values,
-            'file': file_detail
+            'files': file_list,
         }
     else:
         rsp = {
@@ -447,7 +450,7 @@ def propertyFields(request, tid, fid):
             'view': '',
             'geom_type': geom_type,
             'cache_values': cache_values,
-            'file': file_detail,
+            'files': file_list,
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
         }
 
@@ -462,7 +465,6 @@ def make_view(request):
     fid = request.POST.get('fid')
     file = request.FILES['files'] if request.FILES else ''
     values = request.POST.get('values')
-
     values = utils.json_load(values)
     values = values['values']
 
@@ -495,7 +497,6 @@ def make_view(request):
 
 
 def _import_feature_template(file, theme, feature, get_options ):
-
     main_folder = 'feature-template'
     theme_name = theme.theme_name_eng
     feature_name = feature.feature_name_eng
@@ -504,22 +505,20 @@ def _import_feature_template(file, theme, feature, get_options ):
     feature_folder = os.path.join(theme_folder, feature_name)
 
     if not get_options:
-        if file:
-            if not os.path.exists(theme_folder):
-                os.makedirs(theme_folder)
-            if not os.path.exists(feature_folder):
-                    os.makedirs(feature_folder)
+        if not os.path.exists(theme_folder):
+            os.makedirs(theme_folder)
+        if not os.path.exists(feature_folder):
+                os.makedirs(feature_folder)
 
-            folder_list = os.listdir(feature_folder)
+        folder_list = os.listdir(feature_folder)
+        for item in folder_list:
+            utils.remove_file(feature_folder + '/' + item)
 
-            for item in folder_list:
-                utils.remove_file(feature_folder + '/' + item)
-
+        if file :
             utils.save_file_to_storage(file, feature_folder, file.name)
 
     else :
         return feature_folder
-
 
 
 @require_POST
@@ -531,7 +530,6 @@ def propertyFieldsSave(request):
     tid = request.POST.get('tid')
     fid = request.POST.get('fid')
     view_id = request.POST.get('view_id')
-    view_id = utils.json_load(view_id)
 
     values = request.POST.get('values')
 
@@ -564,18 +562,19 @@ def propertyFieldsSave(request):
         }
     )[0]
 
-    if file:
-        _import_feature_template(file, theme, feature, False)
+    _import_feature_template(file, theme, feature, False)
 
     view_prop_qs = ViewProperties.objects
     view_prop_qs.filter(view=view).delete()
 
     for prop_id in id_list:
-        view_prop_qs.create(view=view, property_id=prop_id)
+        if prop_id:
+            view_prop_qs.create(view=view, property_id=prop_id)
 
     is_created = _check_geoserver_detail(table_name, theme)
     if values or not is_created:
         rsp = _create_geoserver_detail(table_name, theme, request.user.id, feature, values)
+
     else:
         rsp = {
             "success": True,

@@ -1,4 +1,3 @@
-from govorg.backend.role import employee
 import os
 import io
 from django.http.response import Http404
@@ -9,7 +8,6 @@ from collections import Counter
 
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.postgres.search import SearchVector
-from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.db import transaction
 from django.http import JsonResponse
@@ -20,12 +18,6 @@ from django.conf import settings
 from django.forms.models import model_to_dict
 
 from backend.govorg.models import GovOrg
-from backend.inspire.models import LDataTypeConfigs
-from backend.inspire.models import LDataTypes
-from backend.inspire.models import LFeatureConfigs
-from backend.inspire.models import LFeatures
-from backend.inspire.models import LPackages
-from backend.inspire.models import LProperties
 from backend.inspire.models import LThemes
 from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
@@ -38,13 +30,11 @@ from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, Position
 from govorg.backend.org_request.models import ChangeRequest
-from .forms import EmployeeAddressForm
 from main.components import Datatable
-from geoportal_app.forms import UserForm
-from .forms import EmployeeForm
 
 from main.decorators import ajax_required
 from main import utils
+from backend.org import utils as backend_org_utils
 
 
 @require_POST
@@ -67,28 +57,14 @@ def all(request, payload, level):
     })
 
 
-def _get_address_state_db_value(address_state):
-    if address_state == EmployeeAddress.STATE_REGULER_CODE:
-        address_state = True
-    else:
-        address_state = False
-    return address_state
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_detail(request, pk):
 
-    user = get_object_or_404(User, pk=pk)
-
-    employee = Employee.objects
-    employee = employee.filter(user=user)
-    employee = employee.first()
-
-    address = EmployeeAddress.objects
-    address = address.filter(employee=employee)
-    address = address.first()
+    employee = get_object_or_404(Employee, pk=pk)
+    user = get_object_or_404(User, pk=employee.user_id)
+    address = get_object_or_404(EmployeeAddress, employee=employee)
 
     employees_display = {
         'id': user.id,
@@ -122,7 +98,7 @@ def employee_detail(request, pk):
         'apartment': address.apartment if hasattr(address, 'apartment') else '',
         'door_number': address.door_number if hasattr(address, 'door_number') else '',
         'point': address.point.json if hasattr(address, 'point') else '',
-        'address_state': _get_address_state_db_value(address.address_state) if hasattr(address, 'address_state') else '',
+        'address_state': backend_org_utils._get_address_state_db_value(address.address_state) if hasattr(address, 'address_state') else '',
         'address_state_display': address.get_address_state_display() if hasattr(address, 'address_state') else '',
     }
 
@@ -133,7 +109,7 @@ def employee_detail(request, pk):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_token_refresh(request, pk):
-    employee = get_object_or_404(Employee, user_id=pk)
+    employee = get_object_or_404(Employee, pk=pk)
     employee.token = TokenGeneratorEmployee().get()
     employee.save()
 
@@ -144,14 +120,6 @@ def employee_token_refresh(request, pk):
     return JsonResponse(rsp)
 
 
-def _get_address_state_code(address_state):
-    if address_state:
-        address_state = EmployeeAddress.STATE_REGULER_CODE
-    elif not address_state:
-        address_state = EmployeeAddress.STATE_SHORT_CODE
-    return address_state
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -160,33 +128,33 @@ def employee_update(request, payload, pk, level):
     values = payload.get('values')
     password = values.get('password')
     is_user = values.get('is_user')
+    errors = dict()
 
     qs_user = User.objects
-    qs_user = qs_user.filter(id=pk)
-    if not qs_user:
-        raise Http404
-
-    user = qs_user.first()
-    user_detail = _make_user_detail(values)
-
-    employee_detail = _make_employee_detail(values)
     qs_employee = Employee.objects
-    qs_employee = qs_employee.filter(user_id=pk)
-    if not qs_employee:
-        raise Http404
-
-    employee = qs_employee.first()
-
-    employee_add = _make_employee_add(payload)
     qs_address = EmployeeAddress.objects
-    qs_address = qs_address.filter(employee=employee)
-    if not qs_address:
-        raise Http404
 
+    qs_update_employee = qs_employee.filter(id=pk)  # TODO нэг албан хаагчийн query set
+    employee = qs_update_employee.first()
+    user_id = employee.user_id
+    qs_employee = qs_employee.filter(~Q(id=pk), user_id=user_id)
+    qs_user = backend_org_utils._check_qs(qs_user, {"id": user_id})
+    user = qs_user.first()
+    qs_address = backend_org_utils._check_qs(qs_address, {"employee": employee})
     employee_address = qs_address.first()
-    errors = _user_validition(user_detail, user)
-    errors.update(_employee_validition(employee_detail, employee))
-    errors.update(_employee_add_validator(employee_add, employee_address))
+
+    user_detail = backend_org_utils._make_user_detail(values)
+    employee_detail = backend_org_utils._make_employee_detail(values, employee)
+    employee_address_detail = backend_org_utils._make_employee_add(payload)
+    is_fired_employee = backend_org_utils._is_fired_employee(user, qs_employee)
+
+    errors = backend_org_utils._user_validition(user_detail, user)
+    errors.update(backend_org_utils._employee_validition(employee_detail, employee))
+    errors.update(backend_org_utils._employee_add_validator(employee_address_detail, employee_address))
+
+    if not is_fired_employee:
+        error = {"username": 'Хэрэглэгч бүртгэлтэй байна!'}
+        errors.update(error)
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
@@ -197,12 +165,12 @@ def employee_update(request, payload, pk, level):
             user_detail['password'] = password
 
         qs_user.update(**user_detail)
-        qs_employee.update(**employee_detail)
-        if qs_address:
-            qs_address.update(**employee_add)
+        qs_update_employee.update(**employee_detail)    # TODO тухайн албан хаагчаа update хийнэ
+        if employee_address:
+            qs_address.update(**employee_address_detail)
         else:
-            employee_add['employee'] = employee
-            qs_address.create(**employee_add)
+            employee_address_detail['employee'] = employee
+            qs_address.create(**employee_address_detail)
 
         if is_user:
             utils.send_approve_email(user)
@@ -218,106 +186,6 @@ def employee_update(request, payload, pk, level):
         return JsonResponse(rsp)
 
 
-def _get_point_for_db(coordinate):
-    if not coordinate:
-        return ''
-
-    if isinstance(coordinate, str):
-        coordinate = coordinate.split(",")
-
-    point = utils.get_geom_for_filter_from_coordinate(coordinate, 'Point')
-    return point
-
-
-def _make_user_detail(values):
-    keys = ['id', 'is_super', 'position', 'is_admin', 'phone_number', 'state', 'pro_class']
-    user_detail = utils.key_remove_of_dict(values, keys)
-
-    user_detail['is_superuser'] = values.get('is_super') if values.get('is_super') else False
-    user_detail['is_active'] = values.get('is_user')
-    user_detail['register'] = values.get('register').upper()
-
-    return user_detail
-
-
-def _user_validition(user_detail, user=None):
-    if user:
-        form = UserForm(user_detail, instance=user)
-    else:
-        form = UserForm(user_detail)
-
-    if not form.is_valid():
-        return form.errors
-
-    return {}
-
-
-def _make_employee_detail(values):
-    keys = [
-        'id', 'username',  'first_name', 'last_name', 'email',
-        'position', 'gender', 'is_super', 'is_user', 'register',
-    ]
-    employee_detail = utils.key_remove_of_dict(values, keys)
-    employee_detail['position_id'] = values.get('position')
-    employee_detail['token'] = TokenGeneratorEmployee().get()
-    employee_detail['pro_class'] = int(values.get('pro_class')) if values.get('pro_class') else None
-
-    return employee_detail
-
-
-def _employee_validition(employee_detail, employee=None):
-    if employee:
-        form = EmployeeForm(employee_detail, instance=employee)
-    else:
-        form = EmployeeForm(employee_detail)
-    if not form.is_valid():
-        return form.errors
-
-    return {}
-
-
-def _make_employee_add(payload):
-    address = payload.get('address')
-    point_coordinate = address.get('point')
-    point = _get_point_for_db(point_coordinate)
-    address_state = address.get('address_state')
-
-    address['point'] = point
-    address['address_state'] = _get_address_state_code(address_state)
-
-    return address
-
-
-def _employee_add_validator(employee_add, employee_address=None):
-    if employee_address:
-        form = EmployeeAddressForm(employee_add, instance=employee_address)
-    else:
-        form = EmployeeAddressForm(employee_add)
-
-    if not form.is_valid():
-        return form.errors
-
-    return {}
-
-
-def _is_fired_employee(username, qs_user, qs_employee):
-    qs_user = qs_user.filter(username=username)
-    user = qs_user.first()
-
-    if not user:
-        return False, None, None
-
-    qs_employee = qs_employee.filter(user=user)
-    employee = qs_employee.first()
-    if not employee:
-        return False, None, None
-
-    if employee.state == 3:
-        return True, user, employee
-
-    return False, None, None
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -326,50 +194,41 @@ def employee_add(request, payload, level, pk):
     values = payload.get('values')
     is_user = values.get('is_user')
     username = values.get('username')
+    errors = dict()
 
     org = get_object_or_404(Org, pk=pk, level=level)
     qs_user = User.objects
     qs_employee = Employee.objects
     qs_employee_address = EmployeeAddress.objects
 
-    user_detail = _make_user_detail(values)
-    employee_detail = _make_employee_detail(values)
-    employee_add_detail = _make_employee_add(payload)
-    is_fired_employee, user, employee = _is_fired_employee(username, qs_user, qs_employee)
+    qs_user = qs_user.filter(username=username)
+    user = qs_user.first()
 
-    if is_fired_employee:
-        errors = _user_validition(user_detail, user)
-        errors.update(_employee_validition(employee_detail, employee))
-        employee_address = qs_employee_address.filter(employee=employee).first()
-        errors.update(_employee_add_validator(employee_add_detail, employee_address))
+    user_detail = backend_org_utils._make_user_detail(values)
+    employee_detail = backend_org_utils._make_employee_detail(values)
+    employee_add_detail = backend_org_utils._make_employee_add(payload)
+
+    if int(employee_detail.get('state')) == 3:   # TODO халагдсан төлөвт ажилтан нэмэхгүй
+        error = {"state": '"ЧӨЛӨӨЛӨГДСӨН"-өөс бусад төлөвт шинээр албан хаагч үүсгэх боломжтой!'}
+        errors.update(error)
+
+    if user:
+        is_fired_employee = backend_org_utils._is_fired_employee(user, qs_employee)
+        if is_fired_employee:
+            errors.update(backend_org_utils._user_validition(user_detail, user))
+        else:
+            errors.update(backend_org_utils._user_validition(user_detail))
     else:
-        errors = _user_validition(user_detail)
-        errors.update(_employee_validition(employee_detail))
-        errors.update(_employee_add_validator(employee_add_detail))
+        errors.update(backend_org_utils._user_validition(user_detail))
+
+    errors.update(backend_org_utils._employee_validition(employee_detail))
+    errors.update(backend_org_utils._employee_add_validator(employee_add_detail))
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
     with transaction.atomic():
-        if is_fired_employee:
-            state = int(employee_detail.get('state'))
-            if state == 3:
-                rsp = {
-                    "success": False,
-                    "errors": {
-                        "state": 'Энэ хэрэглэгч нь нь бүртгэлтэй байна. "ЧӨЛӨӨЛӨГДСӨН"-өөс бусад төлөвт шинээр үүсгэх боломжтой!'
-                    }
-                }
-                return JsonResponse(rsp)
-
-            user.is_superuser = user_detail.get('is_superuser')
-            user.first_name = user_detail.get('first_name')
-            user.last_name = user_detail.get('last_name')
-            user.gender = user_detail.get('gender')
-            user.register = user_detail.get('register')
-            user.save()
-        else:
-            user = qs_user.create(**user_detail)
+        user, created = qs_user.update_or_create(username=username, defaults=user_detail)
 
         employee_detail['org'] = org
         employee_detail['user'] = user
@@ -392,25 +251,18 @@ def employee_add(request, payload, level, pk):
         return JsonResponse(rsp)
 
 
-def _set_state(employee):
-    employee.state = 3
-    employee.save()
-
-    return True
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_remove(request, pk):
-    user = get_object_or_404(User, id=pk)
-    employee = get_object_or_404(Employee, user=user)
-    user_log = Payment.objects.filter(user=user)
+
+    employee = get_object_or_404(Employee, pk=pk)
+    user_log = Payment.objects.filter(user=employee.user_id)
     if user_log:
         return JsonResponse({'success': False})
 
-    check = _set_state(employee)
-    return JsonResponse({'success': check})
+    is_success = backend_org_utils._set_state(employee)
+    return JsonResponse({'success': is_success})
 
 
 def _remove_user(user, employee):
@@ -430,33 +282,6 @@ def _remove_user(user, employee):
         return True
 
 
-def _org_validation(org_name, org_id):
-    org = Org.objects.filter(pk=org_id).first()
-    errors = {}
-
-    if not org_name:
-        errors['org_name'] = 'Хоосон байна утга оруулна уу.'
-    elif org_name.isspace():
-        errors['org_name'] = 'Хоосон байна утга оруулна уу.'
-    elif len(org_name) > 150:
-        errors['org_name'] = '150-с илүүгүй урттай утга оруулна уу!'
-
-    if org:
-        if org.name != org_name:
-            if Org.objects.filter(name=org_name).first():
-                errors['org_name'] = 'Ийм нэр бүртгэлтэй байна.'
-    else:
-        if Org.objects.filter(name=org_name).first():
-            errors['org_name'] = 'Ийм нэр бүртгэлтэй байна.'
-
-    return errors
-
-
-def _delete_perms(perms_inspire):
-    perms_inspire.delete()
-    return
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -469,7 +294,7 @@ def org_add(request, payload, level):
     geo_id = payload.get('geo_id')
     objs = []
 
-    errors = _org_validation(org_name, org_id)
+    errors = backend_org_utils._org_validation(org_name, org_id)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
     # Байгууллага засах хэсэг
@@ -529,10 +354,10 @@ def org_add(request, payload, level):
         org = Org.objects.create(name=org_name, level=level, geo_id=geo_id)
 
         gov_perm = GovPerm.objects.create(
-                org=org,
-                created_by=request.user,
-                updated_by=request.user
-            )
+            org=org,
+            created_by=request.user,
+            updated_by=request.user
+        )
         if org_role_filter:
             gov_perm.gov_role = org_role_filter
             gov_perm.save()
@@ -666,110 +491,60 @@ def detail(request, level, pk):
     })
 
 
-def _get_employee(employee, filter_from_user):
-    if filter_from_user:
-        emp_obj = Employee.objects.filter(user=employee).first()
-        id = employee.id
-        last_name = employee.last_name
-        first_name = employee.last_name[0].upper() + '.' + employee.first_name.upper()
-        email = employee.email
-        is_active = employee.is_active
-        is_sso = employee.is_sso
-        is_admin = emp_obj.is_admin
-        position = emp_obj.position.name
-        created_at = emp_obj.created_at.strftime('%Y-%m-%d')
-        updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
-        is_user = employee.is_user
-    else:
-        user = User.objects.filter(pk=employee.user_id).first()
-        id = user.id
-        last_name = user.last_name
-        first_name = user.last_name[0].upper() + '.' + user.first_name.upper()
-        email = user.email
-        is_active = user.is_active
-        is_sso = user.is_sso
-        is_admin = employee.is_admin
-        position = employee.position.name
-        created_at = employee.created_at.strftime('%Y-%m-%d')
-        updated_at = employee.updated_at.strftime('%Y-%m-%d')
-        is_user = user.is_user
-
-    employee_detail = {
-        'id': id,
-        'last_name': last_name,
-        'first_name': first_name,
-        'email': email,
-        'is_active': is_active,
-        'is_sso': is_sso,
-        'is_admin': is_admin,
-        'position': position,
-        'created_at': created_at,
-        'updated_at': updated_at,
-        "is_user": is_user
-    }
-
-    return employee_detail
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_list(request, payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
-    employees_display = []
-    page = payload.get('page')
-    query = payload.get('query') or ''
-    per_page = payload.get('perpage')
-    sort_name = payload.get('sort_name') or 'first_name'
     is_user = payload.get('is_user')
 
-    if sort_name == 'first_name' or sort_name == '-first_name' or sort_name == 'email' or sort_name == '-email':
-        qs = User.objects
-        if is_user:
-            qs = qs.filter(employee__org=org, is_user=is_user)
-        else:
-            qs = qs.filter(employee__org=org)
-        qs = qs.annotate(search=SearchVector(
-                'last_name',
-                'first_name',
-                'email'
-            )
-        )
+    qs = Employee.objects
+    qs = qs.filter(org=org)
+    qs = qs.annotate(search=SearchVector(
+        "user__email",
+        "user__first_name",
+        "user__last_name"
+    ))
 
-    else:
-        qs = Employee.objects
-        qs = qs.filter(org=org)
-        qs = qs.annotate(search=SearchVector(
-                'is_admin',
-                'created_at',
-                'updated_at'
-            )
-        )
+    if is_user:
+        qs = qs.filter(user__is_user=True)
 
-    if query:
-        qs = qs.filter(search__contains=query)
-    qs = qs.order_by(sort_name)
-    emp_list = qs
+    qs = qs.filter(search__icontains=payload.get('query'))
+    if not qs:
+        rsp = {
+            'items': [],
+            'page': payload.get('page'),
+            'total_page': 1,
+        }
+        return JsonResponse(rsp)
 
-    total_items = Paginator(emp_list, per_page)
-    items_page = total_items.page(page)
-    page_items = items_page.object_list
+    оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token', 'created_at', 'updated_at']
+    хувьсах_талбарууд = [
+        {"field": "user_id", "action": backend_org_utils._get_name, "new_field": "user__first_name"},
+        {"field": "user_id", "action": backend_org_utils._get_email, "new_field": "user__email"},
+        {"field": "position_id", "action": backend_org_utils._get_position_name, "new_field": "position"},
+    ]
+    нэмэлт_талбарууд = [
+        {"field": "role_name", "action": backend_org_utils._get_role_name},
+    ]
 
-    for employee in page_items:
-        if sort_name == 'first_name' or sort_name == '-first_name' or sort_name == 'email' or sort_name == '-email':
-            filter_from_user = True
-        else:
-            filter_from_user = False
+    datatable = Datatable(
+        model=Employee,
+        payload=payload,
+        initial_qs=qs,
+        оруулах_талбарууд=оруулах_талбарууд,
+        нэмэлт_талбарууд=нэмэлт_талбарууд,
+        хувьсах_талбарууд=хувьсах_талбарууд,
+        has_search=False,
+    )
 
-        employee_detail = _get_employee(employee, filter_from_user)
-        employees_display.append(employee_detail)
+    items, total_page, start_index = datatable.get()
 
-    total_page = total_items.num_pages
     rsp = {
-        'items': employees_display,
-        'page': page,
+        'items': items,
+        'page': payload.get('page'),
         'total_page': total_page,
-        'start_index': utils.get_start_index(per_page, page),
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -827,25 +602,48 @@ def perm_get_list(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def create_perm(request, payload):
     values = payload.get('values')
-    name_check = GovRole.objects.filter(name=values['name'])
-    errors = {}
-    if name_check:
-        errors['name'] = 'Нэр давхцаж байна'
-        rsp = {
-            'success': False,
-            'errors': errors,
-        }
-    elif values['name'].isspace():
-        errors['name'] = 'Хоосон байна утга оруулна уу!'
-        rsp = {
-            'success': False,
-            'errors': errors,
-        }
+    role_id = payload.get('pk')
+    if role_id:
+        gov_role = get_object_or_404(GovRole, pk=role_id)
+        errors = backend_org_utils._perm_name_validation(payload, gov_role)
+    else:
+        errors = backend_org_utils._perm_name_validation(payload, None)
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
+
+    if role_id:
+        GovRole.objects.filter(id=role_id).update(name=values['name'], description=values['description'])
     else:
         GovRole.objects.create(name=values['name'], description=values['description'], created_by=request.user, updated_by=request.user)
-        rsp = {
-            'success': True,
-        }
+
+    return JsonResponse({'success': True, 'errors': errors})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def role_detail(request, pk):
+    role = GovRole.objects.filter(id=pk).first()
+
+    rsp = {
+        'success': True,
+        'name': role.name,
+        'description': role.description
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def remove_role(request, pk):
+    role = GovRole.objects.filter(id=pk).first()
+    role.delete()
+
+    rsp = {
+        'success': True,
+    }
 
     return JsonResponse(rsp)
 
@@ -859,8 +657,9 @@ def get_inspire_roles(request, pk):
     roles = []
     govRole = get_object_or_404(GovRole, pk=pk)
     for themes in LThemes.objects.order_by('theme_id'):
-        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = _get_theme_packages_gov(themes.theme_id, govRole)
-        data.append({
+        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = backend_org_utils._get_theme_packages_gov(themes.theme_id, govRole)
+        data.append(
+            {
                 'id': themes.theme_id,
                 'code': themes.theme_code,
                 'name': themes.theme_name,
@@ -872,206 +671,25 @@ def get_inspire_roles(request, pk):
                 'perm_update': t_perm_update,
                 'perm_approve': t_perm_approve,
                 'perm_revoke': t_perm_revoke,
-            })
+            }
+        )
 
     for datas in GovRoleInspire.objects.filter(gov_role=govRole):
-        roles.append({
+        roles.append(
+            {
                 'perm_kind': datas.perm_kind,
                 'feature_id': datas.feature_id,
                 'data_type_id': datas.data_type_id,
                 'property_id': datas.property_id,
                 'geom': datas.geom,
-            })
+            }
+        )
 
     return JsonResponse({
         'data': data,
         'roles': roles,
         'success': True
     })
-
-
-def _get_theme_packages_gov(theme_id, govRole):
-    package_data = []
-    t_perm_all = 0
-    t_perm_view = 0
-    t_perm_create = 0
-    t_perm_remove = 0
-    t_perm_update = 0
-    t_perm_approve = 0
-    t_perm_revoke = 0
-    for package in LPackages.objects.filter(theme_id=theme_id):
-        t_perm_all = t_perm_all + 1
-        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke = _get_package_features_gove(package.package_id, govRole)
-        package_data.append({
-                'id': package.package_id,
-                'code': package.package_code,
-                'name': package.package_name,
-                'features': features_all,
-                'perm_all': p_perm_all,
-                'perm_view': p_perm_view,
-                'perm_create': p_perm_create,
-                'perm_remove': p_perm_remove,
-                'perm_update': p_perm_update,
-                'perm_approve': p_perm_approve,
-                'perm_revoke': p_perm_revoke,
-            })
-        if p_perm_all == p_perm_view and p_perm_all != 0:
-            t_perm_view = t_perm_view + 1
-        elif 0 < p_perm_view and p_perm_all != 0:
-            t_perm_view = t_perm_view + 0.5
-
-        if p_perm_all == p_perm_create  and p_perm_all != 0:
-            t_perm_create = t_perm_create + 1
-        elif 0 < p_perm_create and p_perm_all != 0:
-            t_perm_create = t_perm_create + 0.5
-
-        if p_perm_all == p_perm_remove  and p_perm_all != 0:
-            t_perm_remove = t_perm_remove + 1
-        elif 0 < p_perm_remove and p_perm_all != 0:
-            t_perm_remove = t_perm_remove + 0.5
-
-        if p_perm_all == p_perm_update  and p_perm_all != 0:
-            t_perm_update = t_perm_update + 1
-        elif 0 < p_perm_update and p_perm_all != 0:
-            t_perm_update = t_perm_update + 0.5
-
-        if p_perm_all == p_perm_approve  and p_perm_all != 0:
-            t_perm_approve = t_perm_approve + 1
-        elif 0 < p_perm_approve and p_perm_all != 0:
-            t_perm_approve = t_perm_approve + 0.5
-
-        if p_perm_all == p_perm_revoke  and p_perm_all != 0:
-            t_perm_revoke = t_perm_revoke + 1
-        elif 0 < p_perm_revoke and p_perm_all != 0:
-            t_perm_revoke = t_perm_revoke + 0.5
-
-        if p_perm_all == 0:
-            t_perm_all = t_perm_all - 1
-    return package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke
-
-
-def _get_package_features_gove(package_id, govRole):
-    feat_values = []
-    p_perm_all = 0
-    p_perm_view = 0
-    p_perm_create = 0
-    p_perm_remove = 0
-    p_perm_update = 0
-    p_perm_approve = 0
-    p_perm_revoke = 0
-    for feat in LFeatures.objects.filter(package_id=package_id):
-        data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke = _get_feature_property_gov(feat.feature_id, govRole)
-        if not perm_all == 1:
-            p_perm_all = p_perm_all + 1
-            feat_values.append({
-                'id':feat.feature_id,
-                'code':feat.feature_code,
-                'name':feat.feature_name,
-                'data_types': data_type_list,
-                'perm_all': perm_all,
-                'perm_view': perm_view,
-                'perm_create': perm_create,
-                'perm_remove': perm_remove,
-                'perm_update': perm_update,
-                'perm_approve': perm_approve,
-                'perm_revoke': perm_revoke,
-            })
-            if perm_all == perm_view and perm_all != 0:
-                p_perm_view = p_perm_view + 1
-            elif 0 < perm_view and perm_all != 0 and perm_view < perm_all:
-                p_perm_view = p_perm_view + 0.5
-            if perm_all == perm_create and perm_all != 0:
-                p_perm_create = p_perm_create + 1
-            elif 0 < perm_create and perm_all != 0 and perm_create < perm_all:
-                p_perm_create = p_perm_create + 0.5
-            if perm_all == perm_remove and perm_all != 0:
-                p_perm_remove = p_perm_remove + 1
-            elif 0 < perm_remove and perm_all != 0 and perm_remove < perm_all:
-                p_perm_remove = p_perm_remove + 0.5
-            if perm_all == perm_update and perm_all != 0:
-                p_perm_update = p_perm_update + 1
-            elif 0 < perm_update and perm_all != 0 and perm_update < perm_all:
-                p_perm_update = p_perm_update + 0.5
-            if perm_all == perm_approve and perm_all != 0:
-                p_perm_approve = p_perm_approve + 1
-            elif 0 < perm_approve and perm_all != 0 and perm_approve < perm_all:
-                p_perm_approve = p_perm_approve + 0.5
-            if perm_all == perm_revoke and perm_all != 0:
-                p_perm_revoke = p_perm_revoke + 1
-            elif 0 < perm_revoke and perm_all != 0 and perm_revoke < perm_all:
-                p_perm_revoke = p_perm_revoke + 0.5
-            if perm_all == 0:
-                p_perm_all = p_perm_all - 1
-
-    return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke
-
-
-def _get_feature_property_gov(feature_id, govRole):
-    data_type_list = []
-    data_types_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
-    perm_all = 1
-    perm_view = 0
-    perm_create = 0
-    perm_remove = 0
-    perm_update = 0
-    perm_approve = 0
-    perm_revoke = 0
-    for data_type_idx in data_types_ids:
-        data_type = LDataTypes.objects.filter(data_type_id=data_type_idx.data_type_id).first()
-        if data_type:
-            data_type_obj = {
-                'id': data_type.data_type_id,
-                'code': data_type.data_type_code,
-                'name': data_type.data_type_name,
-                'definition': data_type.data_type_definition,
-                'properties': [],
-            }
-            property_ids = LDataTypeConfigs.objects.filter(data_type_id=data_type.data_type_id).values_list('property_id', flat=True)
-            properties = LProperties.objects.filter(property_id__in=property_ids).values('property_id', "property_code", "property_name")
-            for prop in properties:
-                perm_all = perm_all + 1
-                property_obj = {
-                    'id':prop['property_id'],
-                    'code':prop['property_code'],
-                    'name':prop['property_name'],
-                    'perm_all': 6,
-                    'perm_view': 0,
-                    'perm_create': 0,
-                    'perm_remove': 0,
-                    'perm_update': 0,
-                    'perm_approve': 0,
-                    'perm_revoke': 0,
-                }
-                for gov_role_inspire in GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, data_type_id=data_type.data_type_id):
-                    if (prop['property_id'] == gov_role_inspire.property_id) and feature_id == gov_role_inspire.feature_id:
-                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_VIEW:
-                            perm_view = perm_view + 1
-                            property_obj['perm_view'] = property_obj['perm_view'] + 1
-                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_CREATE:
-                            perm_create = perm_create + 1
-                            property_obj['perm_create'] = property_obj['perm_create'] + 1
-                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_REMOVE:
-                            perm_remove = perm_remove + 1
-                            property_obj['perm_remove'] = property_obj['perm_remove'] + 1
-                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_UPDATE:
-                            perm_update = perm_update + 1
-                            property_obj['perm_update'] = property_obj['perm_update'] + 1
-                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_APPROVE:
-                            perm_approve = perm_approve + 1
-                            property_obj['perm_approve'] = property_obj['perm_approve'] + 1
-                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_REVOKE:
-                            perm_revoke = perm_revoke + 1
-                            property_obj['perm_revoke'] = property_obj['perm_revoke'] + 1
-                data_type_obj['properties'].append(property_obj)
-            data_type_list.append(data_type_obj)
-
-    perm_view = perm_view + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_VIEW).count()
-    perm_create = perm_create + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_CREATE).count()
-    perm_remove = perm_remove + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_REMOVE).count()
-    perm_update = perm_update + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_UPDATE).count()
-    perm_approve = perm_approve + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_APPROVE).count()
-    perm_revoke = perm_revoke + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_REVOKE).count()
-    return data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke
 
 
 @require_POST
@@ -1153,7 +771,7 @@ def get_gov_roles(request, level, pk):
     gov_perm = GovPerm.objects.filter(org=org).first()
 
     for themes in LThemes.objects.order_by('theme_id'):
-        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = _get_theme_packages(themes.theme_id, gov_perm)
+        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = backend_org_utils._get_theme_packages(themes.theme_id, gov_perm)
         data.append({
             'id': themes.theme_id,
             'code': themes.theme_code,
@@ -1188,218 +806,6 @@ def get_gov_roles(request, level, pk):
         'roles': roles,
         'success': True
     })
-
-
-def _get_theme_packages(theme_id, gov_perm):
-    package_data = []
-    t_perm_all = 0
-    t_perm_view = 0
-    t_perm_create = 0
-    t_perm_remove = 0
-    t_perm_update = 0
-    t_perm_approve = 0
-    t_perm_revoke = 0
-    for package in LPackages.objects.filter(theme_id=theme_id):
-        t_perm_all = t_perm_all + 1
-        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke = _get_package_features(package.package_id, gov_perm)
-        package_data.append({
-            'id': package.package_id,
-            'code': package.package_code,
-            'name': package.package_name,
-            'features': features_all,
-            'perm_all': p_perm_all,
-            'perm_view': p_perm_view,
-            'perm_create': p_perm_create,
-            'perm_remove': p_perm_remove,
-            'perm_update': p_perm_update,
-            'perm_approve': p_perm_approve,
-            'perm_revoke': p_perm_revoke,
-        })
-        if p_perm_all == p_perm_view and p_perm_all != 0:
-            t_perm_view = t_perm_view + 1
-        elif 0 < p_perm_view and p_perm_all != 0:
-            t_perm_view = t_perm_view + 0.5
-
-        if p_perm_all == p_perm_create  and p_perm_all != 0:
-            t_perm_create = t_perm_create + 1
-        elif 0 < p_perm_create and p_perm_all != 0:
-            t_perm_create = t_perm_create + 0.5
-
-        if p_perm_all == p_perm_remove  and p_perm_all != 0:
-            t_perm_remove = t_perm_remove + 1
-        elif 0 < p_perm_remove and p_perm_all != 0:
-            t_perm_remove = t_perm_remove + 0.5
-
-        if p_perm_all == p_perm_update  and p_perm_all != 0:
-            t_perm_update = t_perm_update + 1
-        elif 0 < p_perm_update and p_perm_all != 0:
-            t_perm_update = t_perm_update + 0.5
-
-        if p_perm_all == p_perm_approve  and p_perm_all != 0:
-            t_perm_approve = t_perm_approve + 1
-        elif 0 < p_perm_approve and p_perm_all != 0:
-            t_perm_approve = t_perm_approve + 0.5
-
-        if p_perm_all == p_perm_revoke  and p_perm_all != 0:
-            t_perm_revoke = t_perm_revoke + 1
-        elif 0 < p_perm_revoke and p_perm_all != 0:
-            t_perm_revoke = t_perm_revoke + 0.5
-
-        if p_perm_all == 0:
-            t_perm_all = t_perm_all - 1
-    return package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke
-
-
-def _get_package_features(package_id, gov_perm):
-    feat_values = []
-    p_perm_all = 0
-    p_perm_view = 0
-    p_perm_create = 0
-    p_perm_remove = 0
-    p_perm_update = 0
-    p_perm_approve = 0
-    p_perm_revoke = 0
-
-    for feat in LFeatures.objects.filter(package_id=package_id):
-        data_type_list, perm_all, perms = _get_feature_property(feat.feature_id, gov_perm)
-        if not perm_all == 1:
-            p_perm_all = p_perm_all + 1
-            feat_values.append({
-                'id':feat.feature_id,
-                'code':feat.feature_code,
-                'name':feat.feature_name,
-                'data_types': data_type_list,
-                'perm_all': perm_all,
-                'perm_view': perms['perm_view'],
-                'perm_create': perms['perm_create'],
-                'perm_remove': perms['perm_remove'],
-                'perm_update': perms['perm_update'],
-                'perm_approve': perms['perm_approve'],
-                'perm_revoke': perms['perm_revoke'],
-            })
-            perm_view = perms['perm_view']
-            perm_create = perms['perm_create']
-            perm_remove = perms['perm_remove']
-            perm_update = perms['perm_update']
-            perm_approve = perms['perm_approve']
-            perm_revoke = perms['perm_revoke']
-
-            if perm_all == perm_view and perm_all != 0:
-                p_perm_view = p_perm_view + 1
-
-            elif 0 < perm_view and perm_all != 0 and perm_view < perm_all:
-                p_perm_view = p_perm_view + 0.5
-            if perm_all == perm_create and perm_all != 0:
-                p_perm_create = p_perm_create + 1
-            elif 0 < perm_create and perm_all != 0 and perm_create < perm_all:
-                p_perm_create = p_perm_create + 0.5
-            if perm_all == perm_remove and perm_all != 0:
-                p_perm_remove = p_perm_remove + 1
-            elif 0 < perm_remove and perm_all != 0 and perm_remove < perm_all:
-                p_perm_remove = p_perm_remove + 0.5
-            if perm_all == perm_update and perm_all != 0:
-                p_perm_update = p_perm_update + 1
-            elif 0 < perm_update and perm_all != 0 and perm_update < perm_all:
-                p_perm_update = p_perm_update + 0.5
-            if perm_all == perm_approve and perm_all != 0:
-                p_perm_approve = p_perm_approve + 1
-            elif 0 < perm_approve and perm_all != 0 and perm_approve < perm_all:
-                p_perm_approve = p_perm_approve + 0.5
-            if perm_all == perm_revoke and perm_all != 0:
-                p_perm_revoke = p_perm_revoke + 1
-            elif 0 < perm_revoke and perm_all != 0 and perm_revoke < perm_all:
-                p_perm_revoke = p_perm_revoke + 0.5
-            if perm_all == 0:
-                p_perm_all = p_perm_all - 1
-
-    return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke
-
-
-def _get_feature_property(feature_id, gov_perm):
-    data_type_list = []
-    perm_all = 1
-
-    perms = {
-        'perm_view': 0,
-        'perm_create': 0,
-        'perm_remove': 0,
-        'perm_update': 0,
-        'perm_approve': 0,
-        'perm_revoke': 0,
-    }
-
-    perms_obj = {
-        GovPermInspire.PERM_VIEW: 'perm_view',
-        GovPermInspire.PERM_CREATE: 'perm_create',
-        GovPermInspire.PERM_REMOVE: 'perm_remove',
-        GovPermInspire.PERM_UPDATE: 'perm_update',
-        GovPermInspire.PERM_APPROVE: 'perm_approve',
-        GovPermInspire.PERM_REVOKE: 'perm_revoke',
-    }
-
-    feature_c_qs = LFeatureConfigs.objects.filter(feature_id=feature_id)
-    feature_c_qs = feature_c_qs.values('data_type_id', 'data_type_display_name')
-    inspire_perms = gov_perm.govperminspire_set.filter(feature_id=feature_id)
-
-    for feature_c in feature_c_qs:
-        ldata_type_c_qs = LDataTypeConfigs.objects
-        ldata_type_c_qs = ldata_type_c_qs.filter(data_type_id=feature_c['data_type_id'])
-        if ldata_type_c_qs:
-            gov_data_type_qs = inspire_perms.filter(data_type_id=feature_c['data_type_id'])
-
-            data_type_obj = {
-                'id': feature_c['data_type_id'],
-                'name': feature_c['data_type_display_name'],
-                # 'code': feature_c['data_type_display_name'],
-                # 'definition': data_type.data_type_definition,
-                'properties': [],
-            }
-
-            property_ids = ldata_type_c_qs.values_list('property_id', flat=True)
-
-            qs_properties = LProperties.objects
-            qs_properties = qs_properties.filter(property_id__in=property_ids)
-            properties = qs_properties.values('property_id', 'property_code', 'property_name', 'value_type_id')
-
-            for prop in properties:
-                if prop['property_code'].lower() != 'localid':
-                    if prop['value_type_id'] != 'data-type':
-                        perm_all = perm_all + 1
-                        property_obj = {
-                            'id': prop['property_id'],
-                            'code': prop['property_code'],
-                            'name': prop['property_name'],
-                            'perm_all': 6,
-                            'perm_view': 0,
-                            'perm_create': 0,
-                            'perm_remove': 0,
-                            'perm_update': 0,
-                            'perm_approve': 0,
-                            'perm_revoke': 0,
-                        }
-
-                        if gov_perm:
-                            for gov_role_inspire in gov_data_type_qs:
-                                if (prop['property_id'] == gov_role_inspire.property_id) and feature_id == gov_role_inspire.feature_id:
-                                    for perm_kind, perm_name in perms_obj.items():
-                                        if perm_kind == gov_role_inspire.perm_kind:
-                                            perms[perm_name] = perms[perm_name] + 1
-                                            property_obj[perm_name] = property_obj[perm_name] + 1
-
-                            data_type_obj['properties'].append(property_obj)
-            data_type_list.append(data_type_obj)
-
-    inspire_perms = inspire_perms.filter(geom=True, property_id=None)
-    if inspire_perms:
-        inspire_perms = inspire_perms.values('perm_kind')
-        inspire_perms = inspire_perms.annotate(perm_count=Count('perm_kind'))
-
-        if gov_perm:
-            for inspire_perm in inspire_perms.values():
-                kind_name = perms_obj[inspire_perm['perm_kind']]
-                perms[kind_name] = perms[kind_name] + inspire_perm['perm_count']
-
-    return data_type_list, perm_all, perms
 
 
 @require_POST
@@ -1456,24 +862,13 @@ def save_gov_roles(request, payload, level, pk):
     return JsonResponse(rsp)
 
 
-def _get_roles_display():
-
-    return [
-        {
-            'id': gov_role.id,
-            'name': gov_role.name,
-        }
-        for gov_role in GovRole.objects.all()
-    ]
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def form_options(request, option):
 
     admin_levels = utils.get_administrative_levels()
-    roles = _get_roles_display()
+    roles = backend_org_utils._get_roles_display()
 
     if option == 'second':
         rsp = {
@@ -1490,14 +885,6 @@ def form_options(request, option):
         }
 
     return JsonResponse(rsp)
-
-
-def _is_cloned_feature(address_qs):
-    is_cloned = False
-    erguul_id = address_qs.employeeerguul_set.values_list('id', flat=True).first()
-    if erguul_id:
-        is_cloned = True
-    return is_cloned
 
 
 @require_GET
@@ -1517,9 +904,9 @@ def get_addresses(request, level, pk):
             point_info = dict()
             point = addresses.point
             point_info['id'] = addresses.employee.id
-            point_info['first_name'] = addresses.employee.user.first_name # etseg
-            point_info['last_name'] = addresses.employee.user.last_name # onooj ogson ner
-            point_info['is_cloned'] = _is_cloned_feature(addresses)
+            point_info['first_name'] = addresses.employee.user.first_name   # etseg
+            point_info['last_name'] = addresses.employee.user.last_name     # onooj ogson ner
+            point_info['is_cloned'] = backend_org_utils._is_cloned_feature(addresses)
             feature = utils.get_feature_from_geojson(point.json, properties=point_info)
             points.append(feature)
 
@@ -1531,8 +918,8 @@ def get_addresses(request, level, pk):
             point = erguul.point
             erguul_info['id'] = employee.id
             erguul_info['is_erguul'] = True
-            erguul_info['first_name'] = employee.user.first_name # etseg
-            erguul_info['last_name'] = employee.user.last_name # onooj ogson ner
+            erguul_info['first_name'] = employee.user.first_name    # etseg
+            erguul_info['last_name'] = employee.user.last_name  # onooj ogson ner
 
             feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)
             points.append(feature)
@@ -1552,15 +939,8 @@ def get_addresses(request, level, pk):
 def get_address(request, pk):
     points = list()
 
-    user = get_object_or_404(User, pk=pk)
-
-    employee = Employee.objects
-    employee = employee.filter(user=user)
-    employee = employee.first()
-
-    addresses = EmployeeAddress.objects
-    addresses = addresses.filter(employee=employee)
-    addresses = addresses.first()
+    employee = get_object_or_404(Employee, pk=pk)
+    addresses = get_object_or_404(EmployeeAddress, employee=employee)
 
     if addresses:
         point_info = dict()
@@ -1568,7 +948,7 @@ def get_address(request, pk):
         point_info['id'] = addresses.employee.id
         point_info['first_name'] = addresses.employee.user.first_name  # etseg
         point_info['last_name'] = addresses.employee.user.last_name  # onooj ogson ner
-        point_info['is_cloned'] = _is_cloned_feature(addresses)
+        point_info['is_cloned'] = backend_org_utils._is_cloned_feature(addresses)
         feature = utils.get_feature_from_geojson(point.json, properties=point_info)
         points.append(feature)
 
@@ -1578,8 +958,8 @@ def get_address(request, pk):
         point = erguul.point
         erguul_info['id'] = employee.id
         erguul_info['is_erguul'] = True
-        erguul_info['first_name'] = employee.user.first_name # etseg
-        erguul_info['last_name'] = employee.user.last_name # onooj ogson ner
+        erguul_info['first_name'] = employee.user.first_name    # etseg
+        erguul_info['last_name'] = employee.user.last_name  # onooj ogson ner
 
         feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)
         points.append(feature)
@@ -1595,6 +975,7 @@ def get_address(request, pk):
             'success': True,
             'points': feature_collection,
         }
+
     return JsonResponse(rsp)
 
 
@@ -1608,7 +989,7 @@ def get_emp_info(request, payload, pk):
     title = ''
 
     info['org_name'] = employee.org.name
-    info['last_name'] = employee.user.last_name # ovog
+    info['last_name'] = employee.user.last_name     # ovog
     info['first_name'] = employee.user.first_name
     info['phone_number'] = employee.phone_number or ''
 
@@ -1626,7 +1007,7 @@ def get_emp_info(request, payload, pk):
         erguul_qs = EmployeeErguul.objects
         erguul_qs = erguul_qs.filter(address=address_id)
         erguul = erguul_qs.first()
-        erguul_address = erguul.level_3 + ", " + erguul.street  + " гудамж " + erguul.apartment + " байр"
+        erguul_address = erguul.level_3 + ", " + erguul.street + " гудамж " + erguul.apartment + " байр"
 
         info['erguul_address'] = erguul_address
         info['part_time'] = erguul.get_part_time_display()
@@ -1642,22 +1023,6 @@ def get_emp_info(request, payload, pk):
     return JsonResponse(rsp)
 
 
-def _get_erguul_qs(employee):
-    address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
-    erguul_qs = EmployeeErguul.objects
-    erguul_qs = erguul_qs.filter(address_id=address_id)
-    erguul_qs = erguul_qs.filter(is_over=False)
-    erguul = erguul_qs.values().first()
-    return erguul
-
-
-def _get_erguul(erguul, field):
-    value = ''
-    if erguul:
-        value = erguul[field]
-    return value
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -1666,7 +1031,7 @@ def get_erguuleg_fields(request, pk):
     send_fields = list()
 
     employee = get_object_or_404(Employee, pk=pk)
-    erguul = _get_erguul_qs(employee)
+    erguul = backend_org_utils._get_erguul_qs(employee)
 
     if erguul:
         erguul_id = erguul['id']
@@ -1678,7 +1043,7 @@ def get_erguuleg_fields(request, pk):
             not_field = ['created_at']
             if f.name not in not_field:
                 if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
-                    value = _get_erguul(erguul, f.name)
+                    value = backend_org_utils._get_erguul(erguul, f.name)
                     field_type = ''
                     if 'date' in f.name:
                         field_type = 'date'
@@ -1713,7 +1078,7 @@ def save_erguul(request, payload):
 
     employee = get_object_or_404(Employee, id=emp_id)
 
-    point = _get_point_for_db(payload.get('point'))
+    point = backend_org_utils._get_point_for_db(payload.get('point'))
     values['point'] = point
 
     if 'date_start' in values:
@@ -1821,8 +1186,8 @@ def get_erguuls(request):
             employee = erguul.address.employee
             point = erguul.point
             data['id'] = employee.id
-            data['first_name'] = employee.user.first_name # etseg
-            data['last_name'] = employee.user.last_name # onooj ogson ner
+            data['first_name'] = employee.user.first_name  # etseg
+            data['last_name'] = employee.user.last_name  # onooj ogson ner
             feature = utils.get_feature_from_geojson(point.json, properties=data)
             points.append(feature)
 
@@ -1834,29 +1199,22 @@ def get_erguuls(request):
     return JsonResponse(rsp)
 
 
-def _get_choices(Model, field_name):
-    choices = list()
-    for f in Model._meta.get_fields():
-        if f.name == field_name:
-            choices = f.choices
-    return choices
-
-
 @require_POST
 @ajax_required
 @login_required
 def get_select_values(request, payload):
     org_id = payload.get('org_id')
+
     if not org_id:
-        employee = get_object_or_404(Employee, user=request.user)
+        employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
         org_id = employee.org_id
 
     qs = Position.objects
     qs = qs.filter(org_id=org_id)
     positions = list(qs.values())
 
-    states = _get_choices(Employee, 'state')
-    pro_classes = _get_choices(Employee, 'pro_class')
+    states = backend_org_utils._get_choices(Employee, 'state')
+    pro_classes = backend_org_utils._get_choices(Employee, 'pro_class')
 
     rsp = {
         'success': True,
@@ -2020,32 +1378,15 @@ def pos_remove(request, pk):
     return JsonResponse(rsp)
 
 
-def _pos_name_or_id_check(qs_pos, name, pos_id=None):
-    has_pos_name = False
-    qs_pos = qs_pos.filter(name=name)
-    if qs_pos:
-        if pos_id:
-            if qs_pos.first().id != pos_id:
-                has_pos_name = True
-        else:
-            has_pos_name = True
-    return has_pos_name
-
-
-def _make_pos_data(datas, pk):
-    datas['org_id'] = pk
-    return datas
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def pos_create(request, payload, pk):
     name = payload.get("name")
-    datas = _make_pos_data(payload, pk)
+    payload['org_id'] = pk
     qs = Position.objects
     qs_pos = qs.filter(org_id=pk)
-    has_pos_name = _pos_name_or_id_check(qs_pos, name)
+    has_pos_name = backend_org_utils._pos_name_or_id_check(qs_pos, name)
 
     if has_pos_name:
         rsp = {
@@ -2053,21 +1394,13 @@ def pos_create(request, payload, pk):
             'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
         }
     else:
-        qs.create(**datas)
+        qs.create(**payload)
         rsp = {
             'success': True,
             'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
         }
 
     return JsonResponse(rsp)
-
-
-def _del_unneed_keys(obj):
-    del_keys = ['pos_id']
-    for key in del_keys:
-        del obj[key]
-
-    return obj
 
 
 @require_POST
@@ -2078,7 +1411,7 @@ def pos_update(request, payload, pk):
     pos_id = int(payload.get("pos_id"))
     qs = Position.objects
     qs_pos = qs.filter(org_id=pk)
-    has_pos_name = _pos_name_or_id_check(qs_pos, name, pos_id)
+    has_pos_name = backend_org_utils._pos_name_or_id_check(qs_pos, name, pos_id)
 
     if has_pos_name:
         rsp = {
@@ -2086,13 +1419,15 @@ def pos_update(request, payload, pk):
             'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
         }
     else:
-        payload = _del_unneed_keys(payload)
+        keys = ['pos_id']
+        payload = utils.key_remove_of_dict(payload, keys)
+
         qs_pos.filter(
             id=pos_id
         ).update(**payload)
         rsp = {
             'success': True,
-            'data': 'Албан тушаалыг амжилттай шинэчлэлээ.'.format(name=name)
+            'data': 'Албан тушаалыг амжилттай шинэчлэлээ.'
         }
 
     return JsonResponse(rsp)

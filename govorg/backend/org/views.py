@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.db.models import F
+from django.db.models import F, Q
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -207,12 +207,16 @@ def frontend(request):
 
     approve = False
     revoke = False
-
-    employee = get_object_or_404(Employee, user=request.user)
+    has_position = False
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org = get_object_or_404(Org, employee=employee)
+    emp_perm = employee.empperm_set.first()
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
 
-    emp_perm = employee.empperm_set.first()
+    if  employee.org.level == 2 and employee.position:
+        if employee.position.name.lower() == 'мэргэжилтэн':
+            has_position = True
+
     if emp_perm:
         emp_perm_insp = emp_perm.empperminspire_set
         approve = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_APPROVE).first()
@@ -227,6 +231,7 @@ def frontend(request):
                 'username': employee.user.username,
                 'geo_id': org.geo_id or None
             },
+            'has_position': has_position,
             'allowed_geom': geom.json if geom else None,
             'approve': True if approve else False,
             'revoke': True if revoke else False,
@@ -234,7 +239,6 @@ def frontend(request):
     }
 
     return render(request, 'org/index.html', context)
-
 
 @require_GET
 @ajax_required
@@ -259,7 +263,8 @@ def get_perms(request):
 @login_required(login_url='/gov/secure/login/')
 def emp_role(request):
 
-    org = get_object_or_404(Org, employee__user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
+    org = get_object_or_404(Org, employee=employee)
     rsp = {
         'success': True,
         'emp_role': _emp_role(org, request.user)
@@ -272,7 +277,7 @@ def emp_role(request):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_approve_and_revoke(request):
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
 
     approve = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_APPROVE).first()

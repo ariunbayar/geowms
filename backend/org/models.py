@@ -32,6 +32,8 @@ class Employee(models.Model):
     STATE_FIRED = 'Чөлөөлөгдсөн'
     STATE_SICK = 'Өвчтэй'
 
+    STATE_FIRED_CODE = 3
+
     STATE_CHOICES = [
         (1, STATE_WORKING),
         (2, STATE_BREAK),
