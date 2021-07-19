@@ -1238,7 +1238,6 @@ def get_request_data(request, id):
             package_name = package.package_name
 
         datas.append({
-            'id': shape_geometry.id,
             'features': FeatureCollection(_get_shape_datas(shape_geometry)),
             'theme': {
                 'id': theme_id,
@@ -1424,11 +1423,11 @@ def _has_overlap(request_file_shapes):
     return False
 
 
-def _form_check(item, file_shape):
+def _form_check(item, list_idx):
     errors = dict()
     form = RequestFilesShapeForm(item)
     if not form.is_valid():
-        errors['id'] = file_shape.get('id')
+        errors['list_idx'] = list_idx
         errors.update(form.errors)
     return errors
 
@@ -1489,13 +1488,18 @@ def llc_request_approve(request, request_id):
             if len(shape_geoms) == 1:
                 shape_geom = shape_geoms.first()
                 item = _make_datas(shape_geom, file_shape)
-                errors = _form_check(item, file_shape)
+                errors = _form_check(item, list_idx)
+                if errors:
+                    rsp = {
+                        'success': False,
+                        'error': errors,
+                    }
+                    return JsonResponse(rsp)
                 _make_request_datas(item)
             else:
                 item = _make_datas(shape_geoms.first(), file_shape, True)
-                errors = _form_check(item, file_shape)
+                errors = _form_check(item, list_idx)
                 if errors:
-                    errors['list_idx'] = list_idx
                     rsp = {
                         'success': False,
                         'error': errors,
@@ -1517,6 +1521,8 @@ def llc_request_approve(request, request_id):
             req_file_shape.state = REQUEST_SHAPE_SENT_GOV['state']
             req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
             req_file_shape.save()
+
+        raise Exception('llo')
 
     rsp = {
         'success': True,
