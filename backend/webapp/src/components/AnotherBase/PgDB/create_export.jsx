@@ -4,8 +4,10 @@ import BackButton from "@utils/Button/BackButton"
 import SelectField from '@utils/Tools/Form/select_field'
 import Loader from "@utils/Loader"
 import Modal from "@utils/Modal/Modal"
-import { checkedFonts } from 'ol/render/canvas';
 import FieldForm from './field_form'
+import SelectOption from './components/selectOptions'
+import {GPIcon} from "@utils/Tools"
+
 
 export default class  ExportCreate extends Component {
 
@@ -54,6 +56,7 @@ export default class  ExportCreate extends Component {
         this.modalChange = this.modalChange.bind(this)
         this.setSelectedField = this.setSelectedField.bind(this)
         this.dataTypeValidation = this.dataTypeValidation.bind(this)
+        this.getFilterType = this.getFilterType.bind(this)
     }
 
     componentDidMount(){
@@ -350,6 +353,17 @@ export default class  ExportCreate extends Component {
         })
     }
 
+    getFilterType() {
+        var modal = {}
+        modal['modal_status'] = 'open'
+        modal['title'] = 'Шүүлтүүрийн төрөл'
+        modal['icon_color'] = 'success'
+        modal['modal_icon'] = 'fa fa-exclamation-circle'
+        modal['text'] = 'Шүүлтүүрийн төрлийг сонгоно уу !!!'
+
+        global.MODAL(modal)
+    }
+
     render() {
         const {
             table_id, id,
@@ -427,54 +441,51 @@ export default class  ExportCreate extends Component {
                     feature_name &&
                     <div className="col-md-12 px-3 mt-5">
                         <div className='row'>
-                            <div className='col-md-3 '>
+                            <div className='col-md-3'>
                             </div>
                             <div className='col-md-9 px-0'>
                                 <div className='row d-flex mr-3'>
-                                        <span
-                                            className="col-md-6 m-1 border rounded mr-auto"
-                                            name='inspire_property'
-                                        >
-                                            Геометр талбар
-                                        </span>&nbsp;
-                                        <span
-                                            className={"col-md-5 m-1 border rounded form-control" + ( !geo_data_field ? ' is-invalid border-danger' : '')}
-                                            name='inspire_property'
-                                            title={!geo_data_field ? 'Геометр талбаргүй хүснэгт байна !!!': ''}
-                                        >
-                                            {geo_data_field}
-                                        </span>
+                                    <span
+                                        className="col-md-6 m-1 border rounded mr-auto"
+                                        name='inspire_property'
+                                    >
+                                        Геометр талбар
+                                    </span>&nbsp;
+                                    <span
+                                        className={"col-md-5 m-1 border rounded form-control" + ( !geo_data_field ? ' is-invalid border-danger' : '')}
+                                        name='inspire_property'
+                                        title={!geo_data_field ? 'Геометр талбаргүй хүснэгт байна !!!': ''}
+                                    >
+                                        {geo_data_field}
+                                    </span>
                                 </div>
-                            </div>
-                        </div>
-                        <div className='row'>
-                            <div className='col-md-3 '>
-                            </div>
-                            <div className='col-md-9 px-0'>
-                                <div className='row d-flex mr-3'>
-                                        <span
-                                            className="col-md-6 m-1 border rounded mr-auto"
-                                            name='inspire_property'
-                                        >
-                                            Давтагдашгүй талбар
-                                        </span>&nbsp;
-                                        <SelectField
-                                            state_name='pk_field_name'
-                                            data_list={ano_table_fields}
-                                            option_name = "data_type"
-                                            option_key = "column_name"
-                                            option_text = 'column_name'
-                                            default_value={pk_field_name}
-                                            className={"d-flex col-md-5 m-1 p-0 align-items-middle"}
-                                            handleSelectField={this.handleChange}
-                                        />
-                                    </div>
+                                <div className="row d-flex mr-4 justify-content-center">
+                                    <a
+                                        className="text-primary text-uppercase"
+                                        onClick={this.getFilterType}
+                                    >
+                                        <GPIcon icon={"fa fa-plus-circle mx-1 text-success mt-2"}/>
+                                        шүүлтүүр нэмэх
+                                    </a>
                                 </div>
-                            </div>
-                            <div className='row'>
-                            <div className='col-md-3 '>
-                            </div>
-                            <div className='col-md-9 px-0'>
+                                {/* <div className='row d-flex mr-3'>
+                                    <span
+                                        className="col-md-6 m-1 border rounded mr-auto"
+                                        name='inspire_property'
+                                    >
+                                        Давтагдашгүй талбар
+                                    </span>&nbsp;
+                                    <SelectField
+                                        state_name='pk_field_name'
+                                        data_list={ano_table_fields}
+                                        option_name = "data_type"
+                                        option_key = "column_name"
+                                        option_text = 'column_name'
+                                        default_value={pk_field_name}
+                                        className={"d-flex col-md-5 m-1 p-0 align-items-middle"}
+                                        handleSelectField={this.handleChange}
+                                    />
+                                </div>
                                 <div className='row d-flex mr-3'>
                                     <span
                                         className="col-md-6 m-1 border rounded mr-auto"
@@ -493,10 +504,6 @@ export default class  ExportCreate extends Component {
                                     >
                                     </input>
                                 </div>
-                            </div>
-                            <div className='col-md-3 '>
-                            </div>
-                            <div className='col-md-9 px-0'>
                                 <div className='row d-flex mr-3'>
                                     <span
                                         className="col-md-6 m-1 border rounded mr-auto"
@@ -514,10 +521,6 @@ export default class  ExportCreate extends Component {
                                     >
                                     </input>
                                 </div>
-                            </div>
-                            <div className='col-md-3 '>
-                            </div>
-                            <div className='col-md-9 px-0'>
                                 <div className='row d-flex mr-3'>
                                     <span
                                         className="col-md-6 m-1 border rounded mr-auto"
@@ -534,7 +537,7 @@ export default class  ExportCreate extends Component {
                                         onChange={(e) => {this.setState({pk_field_count: e.target.value})}}
                                     >
                                     </input>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                         <hr />
