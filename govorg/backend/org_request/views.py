@@ -1363,10 +1363,6 @@ def _create_request(request_datas):
     change_request['order_at'] = request_datas['order_at'] if 'order_at' in request_datas else None
     change_request['order_no'] = request_datas['order_no'] if 'order_no' in request_datas else None
     change_request['llc_request_id'] = llc_req_id
-    form = ChangeRequestForm(change_request)
-    if not form.is_valid():
-        return False
-
     request = ChangeRequest(**change_request)
     request.save()
     return request.id
@@ -1539,28 +1535,17 @@ def inspire_save(request, payload):
     feature_id = values.get('feature').get('id') or None
     package_id = values.get('package').get('id') or None
 
-    form_values = _make_form_values(values)
-    form = RequestFilesShapeForm(form_values)
+    RequestFilesShape.objects.filter(id=id).update(
+        theme_id=theme_id,
+        package_id=package_id,
+        feature_id=feature_id,
+        order_no=order_no,
+        order_at=order_at or None,
+    )
 
-    is_valid = form.is_valid()
-    if not is_valid:
-        rsp = {
-            "success": False,
-            "errors": form.errors
-        }
-    else:
-        RequestFilesShape.objects.filter(id=id).update(
-            theme_id=theme_id,
-            package_id=package_id,
-            feature_id=feature_id,
-            order_no=order_no,
-            order_at=order_at or None,
-        )
-        rsp = {
-            "success": True,
-        }
-
-    return JsonResponse(rsp)
+    return JsonResponse({
+        'success': True,
+    })
 
 
 @require_GET
@@ -1650,6 +1635,7 @@ def get_file_shapes(request, id):
             "state": utils.get_value_from_types(RequestFilesShape.STATE_CHOICES, shape_geometry.state),
             "kind": utils.get_value_from_types(RequestFilesShape.KIND_CHOICES, shape_geometry.kind),
             "description": shape_geometry.description,
+            "icon_state": True,
         })
 
     return JsonResponse({
