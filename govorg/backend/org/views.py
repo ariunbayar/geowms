@@ -262,6 +262,7 @@ def frontend(request):
             'employee': {
                 'is_admin': employee.is_admin,
                 'username': employee.user.username,
+                'email': employee.user.email,
                 'geo_id': org.geo_id or None
             },
             'has_position': has_position,
