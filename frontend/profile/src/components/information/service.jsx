@@ -1,21 +1,24 @@
 import { handleResponse, getGetOptions, getPostOptions} from "../helpers/service"
 
+
 export const service = {
     userInfo,
-    updateEmail
+    updateEmail,
 }
 
-function userInfo (){
+
+function userInfo() {
     const rsp = {
         ...getGetOptions(),
     }
-    return fetch(`/profile/api/information/`, rsp).then(handleResponse)
+    return fetch(`/profile/information/`, rsp).then(handleResponse)
 }
 
 
-function updateEmail (){
+function updateEmail(email) {
     const response = {
         ...getPostOptions(),
+        body: JSON.stringify({ email }),
     }
-    return fetch(`/profile/api/information/updateEmail/`, response).then(handleResponse)
+    return fetch(`/profile/updateEmail/`, response).then(handleResponse)
 }

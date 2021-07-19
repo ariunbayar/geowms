@@ -440,31 +440,33 @@ def user_info_all(request):
 
     return JsonResponse(rsp)
 
+
 @require_POST
 @ajax_required
 @login_required
-def user_update_email(request, payload):
-    errors = dict()
+def update_email(request, payload):
+
     email = payload.get('email')
 
     if not utils.is_email(email):
-        errors['email'] = 'Email хаяг алдаатай байна.'
-    if User.objects.filter(email=email).first():
-        errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+        return JsonResponse({ 'success':False, 'errors': 'Email хаяг алдаатай байна.'})
 
-    if errors:
+    if User.objects.filter(email=email).first():
+        return JsonResponse({ 'success':False, 'errors': 'Email хаяг бүртгэлтэй байна.'})
+
+    if not email:
+        return JsonResponse({'success': False, 'errors': 'Email хаяг хоосон байна'})
+
+    try:
+        user = request.user
+        user.email = email
+        user.save()
         rsp = {
-            'success': False,
-            'errors': errors
+            'success': True,
+            'info': 'Амжилттай'
         }
+
         return JsonResponse(rsp)
 
-    user = request.user
-    user.email = email
-    user.save()
-    rsp = {
-        'success': True,
-        'info': 'Амжилттай'
-    }
-
-    return JsonResponse(rsp)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Email хаяг солиход алдаа гарлаа.'})

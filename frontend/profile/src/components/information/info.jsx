@@ -26,29 +26,29 @@ export class Info extends Component {
             <div className="col-sm-12">
                 <div className="card-block">
                     <div className="card_header">
-                        <h6 className="m-b-20 p-b-5 b-b-default f-w-600">Хэрэглэгчийн мэдээлэл</h6>
+                        <h5 className="m-b-20 p-b-5 b-b-default f-w-600">Хэрэглэгчийн мэдээлэл</h5>
                     </div>
                     <div className="row" >
-                        <div className="col-sm-6">
-                            <label className="font-weight-bold">Хэрэглэгчийн нэр: </label>
-                            <span className="m-b-10 f-w-600">{username}</span>
+                        <div className="form-group col-sm-6">
+                            <label className="col-form-label font-weight-bold">Хэрэглэгчийн нэр: </label>
+                            <span className="input-group-text">{username}</span>
                         </div>
                         <div className="col-sm-6">
-                            <label className="font-weight-bold">Цахим хаяг: </label>
-                            <span className="">{email}</span>
+                            <label className="col-form-label font-weight-bold">Цахим хаяг: </label>
+                            <span className="input-group-text">{email}</span>
                         </div>
                         <div className="col-sm-6">
-                            <label className="font-weight-bold">Овог: </label>
-                            <span className="">{last_name}</span>
+                            <label className="col-form-label font-weight-bold">Овог: </label>
+                            <span className="input-group-text">{last_name}</span>
+                        </div>
+                        <div className="col-sm-6">
+                            <button className="btn btn-primary" onClick={() => this.props.history.push(`/profile/update-mail/`)}>Цахим хаяг шинэчлэх</button>
                         </div>
                     </div>
                     <div className="row">
                         <div className="col-sm-6">
-                            <label className="font-weight-bold">Нэр: </label>
-                            <span className="">{first_name}</span>
-                        </div>
-                        <div className="col-sm-6">
-                            <button className="btn btn-primary" onClick={() => this.props.history.push(`/profile/api/information/updateEmail`)}>Цахим хаяг солих</button>
+                            <label className="col-form-label font-weight-bold">Нэр: </label>
+                            <span className="input-group-text">{first_name}</span>
                         </div>
                     </div>
                 </div>

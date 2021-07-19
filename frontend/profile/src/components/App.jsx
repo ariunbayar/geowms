@@ -4,6 +4,7 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 
 import {Info} from './information/info'
 import {Bar} from './tsegPersonal/Index'
+import EmailUpdate from './information/EmailUpdate'
 
 export class App extends Component {
 
@@ -22,12 +23,12 @@ export class App extends Component {
                     <div className="col-md-2">
                         <div className="my-0 pt-2">
                             <div className="list-group border">
-                                <NavLink className="menu" exact to={'/profile/api/information'} activeClassName="active">
+                                <NavLink className="menu" to={'/profile/'}>
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
                                         Хувийн мэдээлэл
                                     </div>
                                 </NavLink>
-                                <NavLink className="menu" exact to={"/profile/tseg-personal/"} activeClassName="active"
+                                <NavLink className="menu" to={"/profile/tseg-personal/"}
                                     onClick={() => this.setState({ is_display: true })}
                                 >
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
@@ -39,10 +40,11 @@ export class App extends Component {
                     </div>
                     <div className="col-md-10 p-0">
                         <Switch>
-                            <Route path="/profile/api/information" component={Info}/>
+                            <Route exact path="/profile/" component={Info} activeClassName="selected"/>
                             <Route path="/profile/tseg-personal/"
-                                component={(props) => <Bar {...props} is_display={this.state.is_display} />}
+                                component={(props) => <Bar {...props} is_display={this.state.is_display} activeClassName="selected"/>}
                             />
+                            <Route path="/profile/update-mail/" component={EmailUpdate} />
                         </Switch>
                     </div>
                 </div>
