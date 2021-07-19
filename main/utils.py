@@ -12,7 +12,7 @@ import json
 import psycopg2
 import socket
 import shutil
-from django.shortcuts import get_object_or_404
+import uuid
 
 from collections import namedtuple
 from datetime import timedelta, datetime
@@ -29,6 +29,7 @@ from django.db import connections
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
 from django.core.cache import cache
+from django.shortcuts import get_object_or_404
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
@@ -47,6 +48,7 @@ import main.geoserver as geoserver
 
 
 LAYERPREFIX = 'gp_layer_'
+RE_REGISTER = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -567,7 +569,7 @@ def get_geom(geo_id, geom_type=None, srid=4326):
 
 
 def is_register(register):
-    re_register = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
+    re_register = RE_REGISTER
     return re.search(re_register, register.upper()) is not None
 
 
@@ -653,8 +655,7 @@ def _geom_contains_feature_geoms(geo_json, feature_ids, perm_kind=None):
             AND feature_id in ({feature_ids})
         """.format(feature_ids=', '.join(['{}'.format(f) for f in feature_ids]))
         cursor.execute(sql, [str(geo_json), str(geo_json), str(geo_json)])
-        is_included = [dict((cursor.description[i][0], value) \
-            for i, value in enumerate(row)) for row in cursor.fetchall()]
+        is_included = [dict((cursor.description[i][0], value) for i, value in enumerate(row)) for row in cursor.fetchall()]
 
     return is_included
 
@@ -672,12 +673,12 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
 
     if not qs:
         success = False
-        info = "Албан хаагчийн эрх олгогдоогүй байна."
+        info = "Албан хаагчийн эрх олгогдоогүй байна. Системийн админд хандана уу !!!."
     if geo_json:
         is_included = _is_geom_included(geo_json, employee.org.geo_id)
         if not is_included:
             success = False
-            info = "Байгууллагын эрх олгогдоогүй байна."
+            info = "Байгууллагын эрх олгогдоогүй байна. Системийн админд хандана уу !!!."
         overlap_feature_id = FeatureOverlaps.objects.filter(feature_id=fid).values_list('overlap_feature_id', flat=True)
         overlap_feature_id = [i for i in overlap_feature_id]
         overlap_feature_id.append(fid)
@@ -702,7 +703,7 @@ def get_emp_property_roles(employee, fid):
             if prop.get('property_id') not in property_ids:
                 property_ids.append(prop.get('property_id'))
         for property_id in property_ids:
-            property_roles = {'PERM_VIEW': True, 'PERM_CREATE':True, 'PERM_REMOVE':True, 'PERM_UPDATE':True, 'PERM_APPROVE':True, 'PERM_REVOKE':True}
+            property_roles = {'PERM_VIEW': True, 'PERM_CREATE': True, 'PERM_REMOVE': True, 'PERM_UPDATE': True, 'PERM_APPROVE': True, 'PERM_REVOKE': True}
             for prop in property_perms:
                 if property_id == prop['property_id']:
                     if prop.get('perm_kind') == EmpPermInspire.PERM_VIEW:
@@ -765,7 +766,6 @@ def get_1stOrder_geo_id():
     qs = qs.filter(code_list_id=code_list_id)
 
     return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
-
 
 
 def get_geoJson(data):
@@ -861,7 +861,7 @@ def geoJsonConvertGeom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
     return geom
@@ -1059,13 +1059,11 @@ def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
 
 
 def save_img_to_folder(image, folder_name, file_name, ext):
-    import PIL.Image as Image
-    import io, uuid
     uniq = uuid.uuid4().hex[:8]
     file_full_name = file_name + '_' + uniq + ext
     bytes = bytearray(image)
     image = Image.open(io.BytesIO(bytes))
-    image = image.resize((720,720), Image.ANTIALIAS)
+    image = image.resize((720, 720), Image.ANTIALIAS)
     image = image.save(os.path.join(settings.MEDIA_ROOT, folder_name, file_full_name))
     return folder_name + '/' + file_full_name
 
@@ -1110,7 +1108,8 @@ def image_to_byte_array(image_path):
     image.save(img_byte_arr, format=image.format)
     img_byte_arr = img_byte_arr.getvalue()
     return img_byte_arr
-# ------------------------------------------------------------------------------------------------
+
+
 # feature code oor feature iin qs awah
 def get_feature_from_code(feature_code):
     Lfeature = apps.get_model('backend_inspire', 'LFeatures')
@@ -1270,7 +1269,7 @@ def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, p
 
 
 def _get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[]):
-    datas = list ()
+    datas = list()
     for prop in properties_qs:
         data = dict()
         if property_codes:
@@ -1647,10 +1646,10 @@ def get_colName_type(view_name, data):
             ST_Extent(geo_data)
         from
             {view_name} group by geo_data limit 1
-            '''.format(
-                view_name=view_name.lower(),
-                data=data
-                )
+    '''.format(
+        view_name=view_name.lower(),
+        data=data
+    )
 
     sql = '''
         SELECT
@@ -1726,17 +1725,18 @@ def check_gp_design():
     else:
         srs = 4326
     if check_layer.status_code == 404:
-        layer_create = geoserver.create_layer(
-                        ws_name,
-                        ds_name,
-                        layer_name,
-                        layer_title,
-                        table_name,
-                        srs,
-                        geom_att,
-                        extends,
-                        False
+        geoserver.create_layer(
+            ws_name,
+            ds_name,
+            layer_name,
+            layer_title,
+            table_name,
+            srs,
+            geom_att,
+            extends,
+            False
         )
+
 
 # Тухай Folder -т байгаа файлуудыг буцаадаг
 def get_all_file_paths(directory):
@@ -1753,7 +1753,7 @@ def get_all_file_paths(directory):
 
 def check_pg_connection(host, db, port, user, password, schema):
     try:
-        schema =schema or 'public'
+        schema = schema or 'public'
         connection = psycopg2.connect(
             user=user,
             password=password,
@@ -1766,7 +1766,7 @@ def check_pg_connection(host, db, port, user, password, schema):
         cursor = connection.cursor()
         connection.autocommit = True
         return cursor
-    except Exception as error:
+    except Exception:
         return []
 
 
@@ -1785,7 +1785,7 @@ def get_pg_cursor(conn_details):
 
 
 def get_pg_conf(conn_id):
-    another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
+    another_db = get_object_or_404(AnotherDatabase, pk=conn_id) # TODO get object 404 hereglku
     connection = json_load(another_db.connection)
     form_datas = {
         'id': conn_id,
@@ -1985,3 +1985,34 @@ def test_json_dumps(dct):
 # datatable хэрэглээгүй тохиолдолд хүснэгтийн эхлэлийн тоог өгнө
 def get_start_index(per_page, page):
     return (per_page * (page - 1)) + 1
+
+
+# dict-ээс өөрт хэрэггүй field-үүдээ устгана
+def key_remove_of_dict(values, keys):
+    new_values = dict(values)
+    for key in keys:
+        if key in values:
+            del new_values[key]
+
+    return new_values
+
+
+# TODO хэрэглэгч байгааг шалгаж болно
+def has_user(id=None, username=None, email=None):
+    User = apps.get_model('geoportal_app', 'User')
+    is_valid = False
+
+    if username:
+        user = User.objects.filter(username=username).first()
+        if user:
+            is_valid = True
+    elif id:
+        user = User.objects.filter(id=id).first()
+        if user:
+            is_valid = True
+    elif email:
+        user = User.objects.filter(email=email).first()
+        if user:
+            is_valid = True
+
+    return is_valid

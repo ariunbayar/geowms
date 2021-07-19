@@ -109,11 +109,11 @@ def wms_layers(request, pk):
                 feature_id = feature.feature_id
                 wmts_obj = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
                 if wmts_obj:
-                    if wmts_obj.zoom_start < 4:
+                    if wmts_obj.zoom_start and wmts_obj.zoom_start < 4:
                         zoom_start = 5
                     else:
                         zoom_start = wmts_obj.zoom_start
-                    if wmts_obj.zoom_stop < 13:
+                    if wmts_obj.zoom_stop and wmts_obj.zoom_stop < 13:
                         zoom_stop = 21
                     else:
                         zoom_stop = wmts_obj.zoom_stop
@@ -133,21 +133,23 @@ def wms_layers(request, pk):
 
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         chache_url = ''
+        url = ''
         if wms.is_active:
-            url = wms.url
-            if utils.check_nsdi_address(request) and ('geo.nsdi.gov.mn' in url or '192.168.10.15' in url):
-                ws_name = url.split('/')[3]
+            check_url = wms.url
+            if utils.check_nsdi_address(request) and ('geo.nsdi.gov.mn' in check_url or '192.168.10.15' in check_url):
+                ws_name = check_url.split('/')[3]
                 if wms.cache_url:
                     chache_url = 'https://geo.nsdi.gov.mn/{ws_name}/gwc/service/wmts'.format(
                         ws_name=ws_name,
                     )
+                url = check_url
             else:
                 url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
                 chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
 
             wms_data = {
                 'name': wms.name,
-                'url': request.build_absolute_uri(url),
+                'url': url,
                 'chache_url': chache_url,
                 'layers': [_layer_to_display(layer) for layer in layers],
                 'wms_or_cache_ur': True if wms.cache_url else False,
