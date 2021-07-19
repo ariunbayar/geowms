@@ -1522,8 +1522,6 @@ def llc_request_approve(request, request_id):
             req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
             req_file_shape.save()
 
-        raise Exception('llo')
-
     rsp = {
         'success': True,
         'data': 'Амжилттай хүсэлт үүслээ'
