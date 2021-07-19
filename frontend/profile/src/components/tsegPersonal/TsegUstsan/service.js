@@ -1,7 +1,7 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../../service'
 
 
-const prefix = '/api/tseg-ustsan'
+const prefix = '/a/tseg-ustsan'
 
 export const service = {
     tsegustsanEdit,

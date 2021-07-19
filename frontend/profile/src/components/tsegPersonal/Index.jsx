@@ -16,7 +16,7 @@ export class Bar extends Component {
 
     setButton(is_display) {
         if (is_display) {
-            this.props.history.push(`/api/tseg-personal/`)
+            this.props.history.push(`/a/tseg-personal/`)
         }
         this.setState({ is_display })
     }
@@ -33,7 +33,7 @@ export class Bar extends Component {
                                 <div className="card-body">
                                     <div className="col-md-12 py-0 my-0">
                                         <NavLink
-                                            to="/api/tseg-personal/tseg-ustsan/"
+                                            to="/a/tseg-personal/tseg-ustsan/"
                                             className="list-group-item col-md-12 ml-2 text-center"
                                             activeClassName="text-white gp-bg-primary"
                                             onClick={() => this.setButton(false)}
@@ -46,7 +46,7 @@ export class Bar extends Component {
                         <div>
                         <Switch>
                             <Route
-                                path="/api/tseg-personal/tseg-ustsan/"
+                                path="/a/tseg-personal/tseg-ustsan/"
                                 component={
                                     (props) => <DanForm {...props} setButton={this.setButton}/>
                                 }

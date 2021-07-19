@@ -81,7 +81,7 @@ urlpatterns = [
         path('updateEmail/', profile_views.update_email),
     ], 'profile'))),
 
-    path('api/', include(([
+    path('a/', include(([
         path('all/', profile_views.all, name='all'),
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
@@ -90,7 +90,7 @@ urlpatterns = [
         path('set-email/', profile_views.set_email, name='set-email'),
         path('info/', profile_views.user_info),
         path('update-password/', profile_views.user_update_password),
-    ], 'api'))),
+    ], 'a'))),
 
     re_path('^payment/.*', payment_views.index, name='payment'),
     re_path('^open-layer/.*', open_layer_views.index, name='open-layer'),

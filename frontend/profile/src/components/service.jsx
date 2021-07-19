@@ -60,7 +60,7 @@ function paginatedList(page, per_page) {
     body: JSON.stringify({ page, per_page }),
     }
 
-    return fetch(`/profile/api/all/`, requestOptions).then(handleResponse)
+    return fetch(`/a/all/`, requestOptions).then(handleResponse)
 }
 
 function downloadPurchase(payment_id) {

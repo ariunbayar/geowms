@@ -67,7 +67,7 @@ function detail() {
         ...getGetOptions(),
     }
 
-    return fetch(`/api/info/`, opts).then(handleResponse)
+    return fetch(`/a/info/`, opts).then(handleResponse)
 }
 
 function updatePassword(new_password, old_password, re_password) {
@@ -75,7 +75,7 @@ function updatePassword(new_password, old_password, re_password) {
         ...getPostOptions(),
         body: JSON.stringify({ new_password, old_password, re_password }),
     }
-    return fetch(`/api/update-password/`, requestOptions).then(handleResponse)
+    return fetch(`/a/update-password/`, requestOptions).then(handleResponse)
 }
 
 function getEmpRoles() {

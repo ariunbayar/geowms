@@ -22,6 +22,7 @@ export default class EmailUpdate extends Component {
 
 
     handleChange = (e) => {
+        const {email} = this.state
         this.setState({email: e.target.value});
       }
 
