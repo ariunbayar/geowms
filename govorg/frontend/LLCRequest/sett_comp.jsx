@@ -83,7 +83,6 @@ export class LLCSettings extends Component {
                 list_of_datas[index_of_list]['feature']['id'] = ''
                 list_of_datas[index_of_list]['feature'].list = []
             }
-
             else {
                 data_list['model_status'] = true
             }
