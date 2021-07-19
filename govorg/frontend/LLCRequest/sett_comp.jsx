@@ -67,8 +67,8 @@ export class LLCSettings extends Component {
             if ( name == 'theme' ) {
                 seleted_datas = this.getArray(packages, selected_value)
                 data_list['selected_packages'] = seleted_datas
-                list_of_datas[index_of_list]['package']['name'] = ''
-                list_of_datas[index_of_list]['package']['id'] = ''
+                // list_of_datas[index_of_list]['package']['name'] = ''
+                // list_of_datas[index_of_list]['package']['id'] = ''
                 list_of_datas[index_of_list]['feature']['name'] = ''
                 list_of_datas[index_of_list]['feature']['id'] = ''
                 data_list['selected_features'] = []
@@ -162,10 +162,17 @@ export class LLCSettings extends Component {
                 modalAction: () => this.Save(value, idx),
                 modalClose: () => this.modalClose(idx)
             }
+            global.MODAL(modal)
         }
         else {
             this.Save(value, idx)
         }
+    }
+
+    modalClose(idx) {
+        var { list_of_datas } = this.state
+        list_of_datas[idx].icon_state = true
+        this.setState({ list_of_datas })
     }
 
     Save(value, idx) {
@@ -274,6 +281,7 @@ export class LLCSettings extends Component {
                                             <td>
                                                 {value.feature.name}
                                             </td>
+                                            <td>
                                                 {
                                                     value.icon_state
                                                     ?
@@ -281,6 +289,7 @@ export class LLCSettings extends Component {
                                                     :
                                                         <a className='text-success fa fa-floppy-o' role="button" onClick={(e) => this.handleSaveModal(value, idx)}/>
                                                 }
+                                            </td>
                                             <td>
                                                 <a className='gp-text-primary fa fa-commenting' role="button" onClick={(e) => this.goLink(value)}/>
                                             </td>
@@ -300,8 +309,6 @@ export class LLCSettings extends Component {
                                     getGeomType={(...values) => this.getGeomType(...values)}
                                     {...this.state}
                                     title={'Дэд сан тохируулах'}
-                                    handleSave={this.handleSave}
-                                    errors={errors}
                                 />
                         }
                         <Modal
