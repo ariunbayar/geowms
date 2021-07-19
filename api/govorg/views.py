@@ -283,55 +283,63 @@ def _get_property_data(values, employee, feature_id, geo_id):
     return datas
 
 
-def create_change_request(request_datas, feature_id, request_perm, employee):
+def create_change_request(request_datas, feature_id, employee):
     objs = []
-    request_type = ''
-    for request_data in request_datas:
-        old_geo_id = request_data['att'].get('localid') or None
-        new_geo_id = None
-        package = LFeatures.objects.filter(feature_id=feature_id).first()
-        theme = LPackages.objects.filter(package_id=package.package_id).first()
+    info = ''
 
-        geo_json = _geojson_convert_3d_geojson(request_data['geom'])
-        form_json = _get_property_data(request_data['att'], employee, feature_id, old_geo_id)
+    for datas in request_datas:
+        check_data = False
 
-        success, info = utils.has_employee_perm(employee, feature_id, True, request_perm , geo_json)
-        if not success:
-            return success, info, []
+        for data in datas['data_list']:
+            new_geo_id = None
+            old_geo_id = data['att'].get('localid') or None
+            package = LFeatures.objects.filter(feature_id=feature_id).first()
+            theme = LPackages.objects.filter(package_id=package.package_id).first()
 
-        form_json = utils.json_dumps(form_json)
-        if request_perm == EmpPermInspire.PERM_UPDATE:
-            request_type = ChangeRequest.KIND_UPDATE
+            geo_json = _geojson_convert_3d_geojson(data['geom'])
+            form_json = _get_property_data(data['att'], employee, feature_id, old_geo_id)
 
-        elif request_perm == EmpPermInspire.PERM_REMOVE:
-            request_type = ChangeRequest.KIND_DELETE
-            form_json = None
+            success, info = utils.has_employee_perm(employee, feature_id, True, datas['perm_kind'], geo_json)
 
-        else:
-            new_geo_id = GEoIdGenerator(feature_id, package.feature_code).get()
-            request_type = ChangeRequest.KIND_CREATE
+            if not success:
+                check_data = True
+                break
 
-        objs.append(ChangeRequest(
-            old_geo_id=old_geo_id,
-            new_geo_id=new_geo_id,
-            theme_id=theme.theme_id,
-            package_id=package.package_id,
-            feature_id=feature_id,
-            employee=employee,
-            org=employee.org,
-            state=ChangeRequest.STATE_CONTROL,
-            kind=request_type,
-            form_json=form_json,
-            geo_json=geo_json,
-        ))
+            form_json = utils.json_dumps(form_json)
 
-    return True, '', objs
+            if datas['perm_kind'] == EmpPermInspire.PERM_REMOVE:
+                form_json = None
+
+            elif datas['perm_kind'] == EmpPermInspire.PERM_CREATE:
+                new_geo_id = GEoIdGenerator(feature_id, package.feature_code).get()
+
+            objs.append(ChangeRequest(
+                old_geo_id=old_geo_id,
+                new_geo_id=new_geo_id,
+                theme_id=theme.theme_id,
+                package_id=package.package_id,
+                feature_id=feature_id,
+                employee=employee,
+                org=employee.org,
+                state=ChangeRequest.STATE_CONTROL,
+                kind=datas['request_type'],
+                form_json=form_json,
+                geo_json=geo_json,
+            ))
+
+        if check_data:
+            return False, info, objs
+
+    return True, info, objs
 
 
 @require_POST
 @csrf_exempt
 def qgis_submit(request, token, fid):
     employee = get_object_or_404(Employee, token=token)
+
+    request_list = []
+    request_list_data = {}
 
     update = request.POST.get('update')
     delete = request.POST.get('delete')
@@ -340,33 +348,43 @@ def qgis_submit(request, token, fid):
     update_lists = json.loads(update)
     delete_lists = json.loads(delete)
     create_lists = json.loads(create)
-    data_list = []
-    msg = []
-    request_list = []
 
     if update_lists:
-        success, info, data_list = create_change_request(update_lists, fid, EmpPermInspire.PERM_UPDATE, employee)
-        if not success:
-            return JsonResponse({'success': False, 'msg': info})
 
-        request_list = request_list + data_list
+        request_list_data = {
+            'data_list': update_lists,
+            'perm_kind': EmpPermInspire.PERM_UPDATE,
+            'request_type': ChangeRequest.KIND_UPDATE
+        }
 
-    if delete_lists:
-        success, info, data_list = create_change_request(delete_lists, fid, EmpPermInspire.PERM_REMOVE, employee)
-        if not success:
-            return JsonResponse({'success': False, 'msg': info})
-
-        request_list = request_list + data_list
+        request_list.append(request_list_data)
 
     if create_lists:
-        success, info, data_list = create_change_request(create_lists, fid, EmpPermInspire.PERM_CREATE, employee)
-        if not success:
-            return JsonResponse({'success': False, 'msg': info})
 
-        request_list = request_list + data_list
+        request_list_data = {
+            'data_list': create_lists,
+            'perm_kind': EmpPermInspire.PERM_CREATE,
+            'request_type': ChangeRequest.KIND_CREATE
+        }
 
-    ChangeRequest.objects.bulk_create(request_list)
-    return JsonResponse({'success': True, 'msg': msg})
+        request_list.append(request_list_data)
+
+    if delete_lists:
+
+        request_list_data = {
+            'data_list': delete_lists,
+            'perm_kind': EmpPermInspire.PERM_REMOVE,
+            'request_type': ChangeRequest.KIND_DELETE
+        }
+
+        request_list.append(request_list_data)
+
+    success, info, objs = create_change_request(request_list, fid, employee)
+    if not success:
+        return JsonResponse({'success': False, 'msg': info})
+
+    ChangeRequest.objects.bulk_create(objs)
+    return JsonResponse({'success': True, 'msg': info})
 
 
 def _get_layer_name(employee, fid):
