@@ -108,6 +108,8 @@ export class ConfigureBundle extends Component {
         const { theme, feature } = selected_values
 
         var feature_data = selected_values.features[geom_state_count]
+        var feat_data_type = utils.checkMultiGeomTypeName(feature_data.geometry.type)
+        const is_valid_type = this.checkValidType(feat_data_type, geom_type)
 
         return (
             <div className="col-md-12">
