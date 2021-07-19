@@ -31,11 +31,6 @@ class User(AbstractUser):
     gender = models.CharField(max_length=10, null=True)
     is_sso = models.BooleanField(default=False)
     is_user = models.BooleanField(default=False)
-    username = models.CharField(max_length=100, unique=True)
-    email = models.EmailField(max_length=254)
-    last_name= models.CharField(max_length=150)
-    first_name = models.CharField(max_length=150)
-
 
 class UserValidationEmail(models.Model):
     user  = models.ForeignKey(User, on_delete=models.CASCADE)
