@@ -13,7 +13,14 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET
 
-from api.utils import filter_layers, replace_src_url, filter_layers_wfs, get_cql_filter
+from api.utils import (
+    filter_layers,
+    replace_src_url,
+    filter_layers_wfs,
+    get_cql_filter,
+    calc_radius,
+    get_buffer_of_point,
+)
 from backend.bundle.models import Bundle
 from backend.wms.models import WMS
 from backend.inspire.models import LProperties
@@ -40,14 +47,19 @@ def _get_service_url(request, bundle_id, wms, url_type):
 
 def _access_filter_keys():
     return [
-        'within'
+        'within', 'buffer', 'scale'
     ]
 
 
 def _check_access_query_keys(query, access_keys):
+    remove_keys = list()
     for key in query.keys():
         if key not in access_keys:
-            del query[key]
+            remove_keys.append(key)
+
+    for remove_key in remove_keys:
+        del query[remove_key]
+
     return query
 
 
@@ -87,6 +99,12 @@ def _public_filter(querys):
         filter_cql_filter_key: cql_filters
     }
 
+    def _append_to_list(item, filter_key=filter_cql_filter_key):
+        cql_filters.append(item)
+        filter[filter_key] = cql_filters
+        filters.append(filter)
+
+    # within үеийн хайлт
     within = "within"
     if within in filter_query:
         geo_id = filter_query[within]
@@ -95,10 +113,19 @@ def _public_filter(querys):
             return filters
 
         within = utils.geo_cache('search', geo_id, get_cql_filter(geo_id, srid=4326), 1800)
-        cql_filters.append(within)
+        _append_to_list(within)
 
-        filter[filter_cql_filter_key] = cql_filters
-        filters.append(filter)
+    # buffer үеийн хайлт
+    coordinates = 'buffer'
+    if coordinates in filter_query:
+        coordinates = filter_query[coordinates]
+        coordinates = utils.json_load(coordinates)
+
+        radius = calc_radius(filter_query['radius'])
+        buffer_circle = get_buffer_of_point(coordinates, radius)
+
+        buffer = get_cql_filter('', srid=4326, cql_data=buffer_circle)
+        _append_to_list(buffer)
 
     return filters  # return list
 

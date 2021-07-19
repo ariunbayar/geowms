@@ -2042,3 +2042,9 @@ def get_feature_ids_of_theme(theme_code):
                 feature_ids = feature_ids + feature_ids_new
 
     return feature_ids
+
+
+# file ruu text bichih
+def write_to_file(text, file_name='test.txt'):
+    with open(file_name, 'w') as f:
+        f.write(text)

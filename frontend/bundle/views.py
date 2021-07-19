@@ -2,27 +2,31 @@
 
 
 import os
-import re
-from django.conf import settings
-from django.http import HttpResponse, Http404
 from itertools import groupby
 
+from django.conf import settings
 from django.http import JsonResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, render, reverse, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from django.core.cache import cache
+from django.contrib.postgres.search import SearchVector
+from django.db import connections
 
-from main.decorators import ajax_required
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
-from django.db import connections
 from backend.inspire.models import LThemes, LPackages, LFeatures, LFeatureConfigs, MDatas, MDatas, MGeoDatas
-from main import utils
 from backend.geoserver.models import WmtsCacheConfig
 from backend.config.models import Config
 from geoportal_app.models import User
 
-from django.contrib.postgres.search import SearchVector
+from main import utils
+from main.decorators import ajax_required
+
+from api.utils import (
+    calc_radius,
+    get_buffer_of_point,
+)
 
 
 def all(request):
@@ -341,3 +345,21 @@ def download_ppt(request):
             response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
             return response
     raise Http404
+
+
+@require_POST
+@ajax_required
+def get_point_buffer_geom(request, payload):
+    center = payload.get('center')
+    scale = payload.get('scale')
+
+    radius = calc_radius(scale)
+    buffer = get_buffer_of_point(center, radius)
+    feature = utils.get_feature_from_geojson(buffer.json)
+
+    rsp = {
+        'success': True,
+        'data': feature
+    }
+
+    return JsonResponse(rsp)

@@ -1032,7 +1032,7 @@ export default class BundleMap extends Component {
         })
     }
 
-    setFeatureOnMap(feature, refreshLayerFn) {
+    setFeatureOnMap(feature, refreshLayerFn, is_feature=false) {
         if (feature) {
             const { vector_layer } = this.state
 
@@ -1040,14 +1040,17 @@ export default class BundleMap extends Component {
             const source = vector_layer.getSource()
             utils.removeFeatureFromSource(id, source)
 
-            const parsed_feature = utils.vars.format.readFeatures(feature, {
-                dataProjection: utils.vars.display_projection,
-                featureProjection: utils.vars.feature_projection,
-            })[0];
+            let new_feature = feature
+            if (!is_feature) {
+                new_feature = utils.vars.format.readFeatures(feature, {
+                    dataProjection: utils.vars.display_projection,
+                    featureProjection: utils.vars.feature_projection,
+                })[0];
+            }
 
-            parsed_feature.setProperties({ id })
-            source.addFeature(parsed_feature)
-            this.map.getView().fit(parsed_feature.getGeometry(),{ padding: [100, 100, 100, 100], duration: 2000 })
+            new_feature.setProperties({ id })
+            source.addFeature(new_feature)
+            this.map.getView().fit(new_feature.getGeometry(), { padding: [100, 100, 100, 100], duration: 2000 })
             if (refreshLayerFn) {
                 this.setState({ refreshLayerFn })
             }

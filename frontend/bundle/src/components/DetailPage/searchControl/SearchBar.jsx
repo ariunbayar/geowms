@@ -55,7 +55,6 @@ export class SearchBarComponent extends Component {
 
     async getGeom(geo_id, refreshLayerFn) {
 
-        // try {
         const { success, data } = await service.getGeom(geo_id)
         if (data) {
             this.props.setFeatureOnMap(data, refreshLayerFn)
@@ -75,11 +74,6 @@ export class SearchBarComponent extends Component {
             )
         }
         return data
-        // }
-        // catch {
-            // alert("Алдаа гарсан байна")
-            // return
-        // }
     }
 
     setCenterOfMap() {
@@ -157,10 +151,10 @@ export class SearchBarComponent extends Component {
                         resetButton={this.resetButton}
                         aimag={this.state.aimag}
                         map_wms_list={this.props.map_wms_list}
-                        resetSearchLayerFeatures={this.resetSearchLayerFeatures}
                         getGeom={this.getGeom}
                         vector_layer={this.props.vector_layer}
                         funcs={this.props.funcs}
+                        resetSearchLayerFeatures={this.resetSearchLayerFeatures}
                     />
                 ),
                 'order': 1,
@@ -171,6 +165,11 @@ export class SearchBarComponent extends Component {
                     <PlaceSearch
                         resetButton={this.resetButton}
                         setFeatureOnMap={this.props.setFeatureOnMap}
+                        vector_layer={this.props.vector_layer}
+                        map_wms_list={this.props.map_wms_list}
+                        setCenterOfMap={() => this.setCenterOfMap()}
+                        funcs={this.props.funcs}
+                        resetSearchLayerFeatures={this.resetSearchLayerFeatures}
                     />
                 ),
                 'order': 3,

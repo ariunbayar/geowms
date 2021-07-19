@@ -177,79 +177,7 @@ class index extends Component {
                 }
             })
         })
-        // this.onClickCloser()
-        // this.funcs.setVisibleMarket(false)
-
-        // let parsed_geojson
-        // let km_scale = null
-
-        // if (feature) {
-        //     const geom = this.writeFeat(feature[0])
-        //     parsed_geojson = JSON.parse(geom).geometry
-        // }
-        // else {
-        //     parsed_geojson = point_coordinate
-        //     km_scale = this.getKiloFromScale(scale)
-        // }
-
-        // const wms_array = this.getWMSArray()
-        // wms_array.map(({ layers }, w_idx) => {
-        //     if(layers) {
-        //         layers.map(({tile, code}, idx) => {
-        //             if (tile.getVisible()) {
-        //                 const {layer_code, is_feature} = this.check_inspire_layer(code)
-        //                 if (is_feature) {
-        //                     this.func.is_not_visible_layers.push(layer_code)
-        //                 }
-        //             }
-        //         })
-        //     }
-        // })
-
-        // this.allLayerVisible('inside')
-
-        // service
-        //     .getContainGeoms(this.func.is_not_visible_layers, parsed_geojson, km_scale)
-        //     .then(({ features, layers_code, buffer, success }) => {
-        //         if (success) {
-        //             this.func.is_not_visible_layers = layers_code
-        //             const features_col = (this.state.format.readFeatures(features, {
-        //                 dataProjection: this.state.data_projection,
-        //                 featureProjection: this.state.feature_projection,
-        //             }))
-        //             const style = new Style({
-        //                 image: new CircleStyle({
-        //                     radius: 5,
-        //                     fill: new Fill({
-        //                     color: 'red',
-        //                     }),
-        //                 }),
-        //                 stroke: new Stroke({
-        //                     color: 'blue',
-        //                     width: 2,
-        //                 }),
-        //                 fill: new Fill({
-        //                     color: 'rgba(0,191,255,0.3)',
-        //                 }),
-        //             })
-        //             const source =  new VectorSource({
-        //                 features: features_col,
-        //             })
-        //             const layer = new VectorLayer({
-        //                 source: source,
-        //                 name: "inside",
-        //                 style: style,
-        //             })
-        //             if (buffer) {
-        //                 this.drawBorderCircle(buffer)
-        //             }
-        //             this.map.addLayer(layer)
-        //             layer.setVisible(true)
-        //             this.setState({ filtered_layer: layer })
-        //         }
-        //     })
     }
-
 
     render() {
         const { sum, aimag, horoo } = this.state

@@ -1,7 +1,13 @@
 import re
+
 from frontend.page.views import service
+
 from xml.etree import ElementTree
+
 from main import utils
+
+from django.contrib.gis import geos
+
 
 re_layer = re.compile(r'^(.*?<Layer[^>]*>)(.*)(</Layer>.*)$', re.S)
 re_layer_wfs = re.compile(r'^(.*?<FeatureTypeList[^>]*>)(.*)(</FeatureTypeList>.*)$', re.S)
@@ -125,7 +131,23 @@ def replace_src_url(content, old_url, new_url, service_type):
     return content.encode()
 
 
-def get_cql_filter(geo_id, srid=4326):
-    cql_data = utils.get_2d_data(geo_id, srid=srid)
+def get_cql_filter(geo_id, srid=4326, cql_data=[]):
+    if not cql_data and geo_id:
+        cql_data = utils.get_2d_data(geo_id, srid=srid)
     cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data=cql_data)
     return cql_filter if cql_data else ''
+
+
+# openlayer аас ирж байгаа scale аас radius бодох
+def calc_radius(scale):
+    scale = int(scale)
+    radius = scale / 10000
+    return radius
+
+
+# point ийн coordiantes аас buffer radius тай хамт үүсгэж авах
+def get_buffer_of_point(coordinates, radius):
+    coordinates = [float(i) for i in coordinates]
+    center = geos.Point(coordinates)
+    buffer = center.buffer(radius)
+    return buffer
