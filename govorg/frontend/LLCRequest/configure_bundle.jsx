@@ -151,7 +151,14 @@ export class ConfigureBundle extends Component {
                         className={"col-md-4"}
                         default_text={'feature-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
-                        />
+                    />
+                    <div className="col-md-8"></div>
+                    <div className="col-md-4">
+                        {
+                            !is_valid_type && feature?.id &&
+                                <small className="text-danger">Төрөл таарахгүй байна!</small>
+                        }
+                    </div>
                 </div>
                 <div className="col-md-12 d-flex justify-content-between">
                     <div className="col-md-6">
