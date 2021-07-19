@@ -76,16 +76,16 @@ class index extends Component {
                 {
                     search_datas.map((data, idx) =>
                         <li key={idx}
-                            className="list-group-item form-control list-active"
+                            className="list-group-item form-control list-active d-flex align-items-center"
                             onClick={(e) => this.props.getGeom(data.geo_id)}
+                            role="button"
                         >
                             <i
-                                className="fa fa-history mr-3 d-flex align-items-center"
-                                role="button"
+                                className="fa fa-history mr-2"
                                 onClick={(e) => this.props.getGeom(data.geo_id)}
                             >
-                                {} {data.name}
                             </i>
+                            {} {data.name}
                         </li>
                     )
                 }
