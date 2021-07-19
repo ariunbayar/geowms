@@ -189,7 +189,7 @@ def json_proxy(request, base_url, token, code):
 
 def _geojson_convert_3d_geojson(geojson):
     with connections['default'].cursor() as cursor:
-        sql = """ SELECT ST_AsGeoJSON(ST_Transform(ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326),4326)) as geo_json """
+        sql = """ SELECT ST_AsGeoJSON(ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326)) as geo_json """
         cursor.execute(sql, [str(geojson)])
         geo_json = {
             cursor.description[i][0]: value
