@@ -34,6 +34,9 @@
     color: black;
     transition: width 0.4s linear
 }
+.search-bundle.is-invalid {
+    border: 1px solid red;
+}
 
 .search-bundle-icon {
     height: 34px;

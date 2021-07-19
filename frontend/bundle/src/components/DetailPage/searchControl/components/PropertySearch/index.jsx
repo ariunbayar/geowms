@@ -12,24 +12,24 @@ class index extends Component {
             search_datas: [],
             is_searching: false,
             bundle_id: props.bundle_id,
+            errors: {},
         }
-
     }
 
     handleChange(value) {
         this.setState({ search_value: value })
     }
 
-    handleSearch() {
+    handleSearch(e) {
+        e.preventDefault()
         if (!this.state.is_searching) {
-            const { bundle_id, search_value } = this.state
+            const { bundle_id, search_value, errors } = this.state
             this.setState({ is_searching: true })
             service
                 .getFindValues(bundle_id, search_value)
-                .then(({ datas }) => {
-                    if (datas) {
-                        this.setState({ search_datas: datas })
-                    }
+                .then(({ success, data, error }) => {
+                    errors['search'] = error
+                    this.setState({ search_datas: data, errors })
                 })
                 .catch(() => {
                     alert("Алдаа гарсан байна")
@@ -41,19 +41,19 @@ class index extends Component {
     }
 
     render() {
-        const { search_value, search_datas, is_searching } = this.state
+        const { search_value, search_datas, is_searching, errors } = this.state
         return (
             <div className="row mx-0">
                 <div className="d-flex justify-content-center">
-                    <div className="search-bundle">
+                    <form className={`search-bundle ${errors?.search ? "is-invalid" : ""}`} onSubmit={(e) => this.handleSearch(e)}>
                         <input
                             type="search"
-                            className="search-bundle-input"
+                            className={`search-bundle-input`}
                             placeholder="Хайх..."
                             value={search_value}
                             onChange={e => this.handleChange(e.target.value)}
                         />
-                        <a role="button" className="search-bundle-icon text-white" onClick={() => this.handleSearch()}>
+                        <button className="search-bundle-icon text-white">
                             {
                                 is_searching
                                 ?
@@ -61,9 +61,18 @@ class index extends Component {
                                 :
                                     <i className="fa fa-search"></i>
                             }
-                        </a>
-                    </div>
+                        </button>
+                    </form>
                 </div>
+                {
+                    errors?.search
+                    ?
+                        <small className="text-danger">
+                            {errors.search}
+                        </small>
+                    :
+                        null
+                }
                 {
                     search_datas.map((data, idx) =>
                         <li key={idx}

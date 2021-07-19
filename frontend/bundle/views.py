@@ -277,41 +277,58 @@ def findPoints(request, payload):
 def get_search_value(request, payload):
     bundle_id = payload.get('bundle_id')
     search_value = payload.get('value')
-    pk = cache.get('pk')
-    if pk != bundle_id:
-        cache.set('pk', bundle_id, 300)
-        bundle = get_object_or_404(Bundle, pk=bundle_id)
-        theme_id = bundle.ltheme.theme_id
-
-        qs_packages = LPackages.objects
-        qs_packages = qs_packages.filter(theme_id=theme_id)
-        package_ids = list(qs_packages.values_list('package_id', flat=True))
-        qs_features = LFeatures.objects
-        qs_features = qs_features.filter(package_id__in=package_ids)
-        feature_ids = list(qs_features.values_list('feature_id', flat=True))
-
-        qs_feature_configs = LFeatureConfigs.objects
-        qs_feature_configs = qs_feature_configs.filter(feature_id__in=feature_ids)
-        feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
-        cache.set('feature_config_ids', feature_config_ids, 300)
-    else:
-        feature_config_ids = cache.get('feature_config_ids')
-
-    qs_datas = MDatas.objects
-    qs_datas = qs_datas.annotate(search=SearchVector('value_text'))
-    qs_datas = qs_datas.filter(feature_config_id__in=feature_config_ids, search__icontains=search_value)
-    first_5_datas = list(qs_datas.order_by('geo_id')[:5])
-
-    datas = list()
-    for obj in first_5_datas:
-        data = dict()
-        data['geo_id'] = obj.geo_id
-        data['name'] = obj.value_text
-        datas.append(data)
 
     rsp = {
-        'datas': datas,
+        'success': False,
+        'data': [],
+        'error': ""
     }
+
+    if not search_value:
+        rsp['error'] = 'Хайх утгаа оруулна уу'
+        return JsonResponse(rsp)
+
+    bundle_pk_cache_key = 'bundle_{}'.format(bundle_id)
+    geo_ids_cache_key = 'bundle_{}_geo_ids'.format(bundle_id)
+    cache_time = 3000
+
+    pk = cache.get(bundle_pk_cache_key)
+    if pk != bundle_id:
+        cache.set(bundle_pk_cache_key, bundle_id, cache_time)
+        bundle = get_object_or_404(Bundle, pk=bundle_id)
+        theme_code = bundle.ltheme.theme_code
+
+        feature_ids = utils.get_feature_ids_of_theme(theme_code)
+        mgeo_qs = MGeoDatas.objects
+        mgeo_qs = mgeo_qs.filter(feature_id__in=feature_ids)
+        geo_ids = list(mgeo_qs.values_list('geo_id', flat=True))
+
+        cache.set(geo_ids_cache_key, geo_ids, cache_time)
+    else:
+        geo_ids = cache.get(geo_ids_cache_key)
+
+    qs_datas = MDatas.objects
+    qs_datas = qs_datas.filter(
+        geo_id__in=geo_ids,
+    )
+    qs_datas = qs_datas.filter(
+        value_text__icontains=search_value
+    )
+    qs_datas = qs_datas.extra(
+        select={
+            'name': 'value_text'
+        }
+    )  # select value_text as name
+    qs_datas = qs_datas.order_by('geo_id')[:5]
+    datas = list(qs_datas.values('geo_id', 'name'))
+
+    if not datas:
+        rsp['error'] = 'Мэдээлэл олдсонгүй'
+        return JsonResponse(rsp)
+
+    rsp['success'] = True
+    rsp['data'] = datas
+
     return JsonResponse(rsp)
 
 
