@@ -106,17 +106,18 @@ export default class SelectField extends Component {
                     }
                 </select>
                 {
-                    errors.map((row) =>
-                        row['field_name'] === state_name
-                        &&
-                            row['errors'].map((error, idx) =>
-                                <div key={idx} className='form-group-row'>
-                                    <small className="text-danger">
-                                        {error}
-                                    </small>
-                                </div>
-                            )
-                    )
+                    errors &&
+                        errors.map((row) =>
+                            row['field_name'] === state_name
+                            &&
+                                row['errors'].map((error, idx) =>
+                                    <div key={idx} className='form-group-row'>
+                                        <small className="text-danger">
+                                            {error}
+                                        </small>
+                                    </div>
+                                )
+                        )
                 }
             </div>
         );

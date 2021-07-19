@@ -8,18 +8,6 @@ import { LLCMap } from '../../../llc/frontend/LLCMap'
 import { service } from './service'
 
 
-function HasError(key, errors) {
-    var new_errors = []
-    var has_error = errors.hasOwnProperty(key)
-    if (has_error) {
-        errors[key].map((item, idx) =>
-            new_errors.push(item)
-        )
-    }
-
-    return new_errors
-}
-
 export class ConfigureBundle extends Component {
 
     constructor(props) {
@@ -46,12 +34,10 @@ export class ConfigureBundle extends Component {
             selected_dt_list: [],
             data_type_list: [],
             geom_state_count: 0,
-            new_errors: [],
         }
         this.handleChange = this.handleChange.bind(this)
         this.changeGeom = this.changeGeom.bind(this)
         this.getType = this.getType.bind(this)
-        this.handleMakeErrors = this.handleMakeErrors.bind(this)
     }
 
     componentDidMount() {
@@ -83,11 +69,6 @@ export class ConfigureBundle extends Component {
         const select = selection.code
         this.props.model_action(name, e, selected_values)
         this.getType(select)
-
-        var has_feature__id = selected_values.feature.id
-        if (has_feature__id) {
-            this.setState({ new_errors: [] }, () => this.handleMakeFeatureErrors())
-        }
     }
 
     getType(selected_feature_id) {
@@ -110,9 +91,6 @@ export class ConfigureBundle extends Component {
         if (pS.selected_features != selected_features) {
             this.setState({selected_features})
         }
-        if (pP.errors != this.props.errors) {
-            this.handleMakeErrors()
-        }
     }
 
     checkValidType(feat_data_type, geom_type) {
@@ -124,33 +102,10 @@ export class ConfigureBundle extends Component {
         return true
     }
 
-    handleMakeErrors(name, add_errors) {
-        const { errors } = this.props
-
-        var new_errors = [
-            { "field_name": 'theme', "errors": HasError('theme_id', errors) },
-            { "field_name": 'package', "errors": HasError('package_id', errors) },
-            { "field_name": 'feature', "errors": HasError('feature_id', errors) },
-            { "field_name": 'order_no', "errors": HasError('order_no', errors) },
-            { "field_name": 'order_at', "errors": HasError('order_at', errors) },
-        ]
-
-        if (add_errors){
-            add_errors.map((item, idx) =>
-                new_errors.map((row) => {
-                    if (row['field_name'] == name) {
-                        row['errors'].push(item)
-                    }
-                })
-            )
-        }
-        this.setState({ new_errors })
-    }
-
     handleMakeFeatureErrors() {
-        const { geom_state_count, geom_type } = this.state
-        const { selected_values } = this.props
-        const { feature } = selected_values
+        const { themes, geom_state_count, geom_type } = this.state
+        const { selected_values, selected_packages, selected_features } = this.props
+        const { theme, feature } = selected_values
 
         var feature_data = selected_values.features[geom_state_count]
         var feat_data_type = utils.checkMultiGeomTypeName(feature_data.geometry.type)
@@ -164,7 +119,7 @@ export class ConfigureBundle extends Component {
     }
 
     render() {
-        const { themes, geom_state_count, new_errors } = this.state
+        const { themes, geom_state_count, geom_type } = this.state
         const { selected_values, selected_packages, selected_features } = this.props
         const { theme, feature } = selected_values
 
@@ -182,7 +137,6 @@ export class ConfigureBundle extends Component {
                         default_value={theme?.id || ''}
                         default_text={'theme-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
-                        errors={new_errors}
                     />
                     <SelectField
                         state_name='package'
@@ -197,7 +151,6 @@ export class ConfigureBundle extends Component {
                         className={"col-md-4"}
                         default_text={'package-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
-                        errors={new_errors}
                     />
                     <SelectField
                         state_name='feature'
@@ -212,7 +165,6 @@ export class ConfigureBundle extends Component {
                         className={"col-md-4"}
                         default_text={'feature-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
-                        errors={new_errors}
                         />
                 </div>
                 <div className="col-md-12 d-flex justify-content-between">
@@ -225,19 +177,6 @@ export class ConfigureBundle extends Component {
                             value={selected_values.order_no || ''}
                             onChange={(e) => {this.handleChange('order_no', [], e)}}
                         />
-                        {
-                            new_errors.map((row) =>
-                                row['field_name'] === 'order_no'
-                                &&
-                                    row['errors'].map((error, idx) =>
-                                        <div key={idx} className='form-group-row'>
-                                            <small className="text-danger">
-                                                {error}
-                                            </small>
-                                        </div>
-                                    )
-                            )
-                        }
                     </div>
                     <div className="col-md-6 mb-2">
                         <label htmlFor="">Тушаал гарсан огноо</label>
@@ -248,19 +187,6 @@ export class ConfigureBundle extends Component {
                             value={selected_values.order_at || ''}
                             onChange={(e) => {this.handleChange('order_at', [], e)}}
                         />
-                        {
-                            new_errors.map((row) =>
-                                row['field_name'] === 'order_at'
-                                &&
-                                    row['errors'].map((error, idx) =>
-                                        <div key={idx} className='form-group-row'>
-                                            <small className="text-danger">
-                                                {error}
-                                            </small>
-                                        </div>
-                                    )
-                            )
-                        }
                     </div>
                 </div>
                 <div className="p-4 mx-1">
@@ -307,11 +233,6 @@ export class ConfigureBundle extends Component {
                     <div className="col-md-12 d-flex justify-content-between px-1">
                         <label className="col-md-6 fa fa-angle-double-left fa-2x text-dark btn btn-outline-primary mr-2" onClick={(e) => this.changeGeom(false)}></label>
                         <label className="col-md-6 fa fa-angle-double-right fa-2x text-dark btn btn-outline-primary" onClick={(e) => this.changeGeom(true)}></label>
-                    </div>
-                    <div className="row justify-content-center">
-                        <div className="col-6">
-                            <button type="button" className="btn btn-primary btn-block waves-effect waves-light m-1" onClick={this.props.handleSave}>Хадгалах</button>
-                        </div>
                     </div>
                 </div>
             </div>
