@@ -1112,36 +1112,6 @@ class UnAcceptedValueError(Exception):
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def findPoints(request, payload):
-    try:
-        point_id = str(payload.get("point_id"))
-        find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT ST_X(ST_TRANSFORM(ST_CENTROID(geom),4327)) AS X,  ST_Y(ST_CENTROID(ST_TRANSFORM(geom,4327))) AS Y FROM mpoint_view where point_id = %s limit 1 ''', [point_id])
-        data = find_cursor.fetchone()
-        if(data):
-
-            rsp = {
-                'success': True,
-                'info': data
-            }
-            return JsonResponse(rsp)
-        else:
-            rsp = {
-                'success': False,
-                'info': "Уучлаарай энэ мэдээлэл олдсонгүй",
-            }
-            return JsonResponse(rsp)
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
-        return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
 def findSum(request, payload):
     info = []
     L = payload.get('y')

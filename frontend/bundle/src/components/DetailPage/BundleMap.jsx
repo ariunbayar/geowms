@@ -372,7 +372,7 @@ export default class BundleMap extends Component {
             this.controls.popup,
         ]
 
-        if (this.state.bundle.can_draw) {
+        if (!this.state.bundle.is_point) {
             buttons.push(
                 new DrawButton({ toggleDraw: this.toggleDraw }),
                 this.controls.drawModal,
@@ -1083,6 +1083,7 @@ export default class BundleMap extends Component {
                         vector_layer={this.state.vector_layer}
                         map_wms_list={this.state.map_wms_list}
                         bundle_id={this.state.bundle.id}
+                        is_point={this.state.bundle.is_point}
                         funcs={funcs}
                     />
                 </div>

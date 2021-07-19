@@ -2,6 +2,7 @@ import React, { Component } from "react"
 
 import Modal from "@utils/Modal/Modal"
 import * as utils from "@helpUtils/ol"
+import * as fnUtils from "@helpUtils/functions"
 
 import {
     AdministrativeUnitSearch,
@@ -28,6 +29,7 @@ export class SearchBarComponent extends Component {
             modal_status: 'closed',
             aimag: [],
             selected_tab: '',
+            is_point: props.is_point,
         }
 
         this.resetButton = this.resetButton.bind(this)
@@ -134,7 +136,7 @@ export class SearchBarComponent extends Component {
     }
 
     render() {
-        const { bundle_id, selected_tab } = this.state
+        const { bundle_id, selected_tab, is_point } = this.state
 
         const search_tabs = [
             {
@@ -145,6 +147,7 @@ export class SearchBarComponent extends Component {
                         bundle_id={bundle_id}
                     />
                 ),
+                'order': 0,
             },
             {
                 'title': "Аймгаар хайх",
@@ -159,13 +162,8 @@ export class SearchBarComponent extends Component {
                         vector_layer={this.props.vector_layer}
                         funcs={this.props.funcs}
                     />
-                )
-            },
-            {
-                'title': "Цэгийн дугаараар хайх",
-                'component': (
-                    <PointIdSearch />
                 ),
+                'order': 1,
             },
             {
                 'title': "Байрлалаар хайх",
@@ -175,14 +173,30 @@ export class SearchBarComponent extends Component {
                         setFeatureOnMap={this.props.setFeatureOnMap}
                     />
                 ),
+                'order': 3,
             },
             {
                 'title': "Өргөрөг уртраг",
                 'component': (
                     <CoordinateGradusSearch />
                 ),
+                'order': 4,
             },
         ]
+
+        if (is_point) {
+            search_tabs.push(
+                {
+                    'title': "Цэгийн дугаараар хайх",
+                    'component': (
+                        <PointIdSearch />
+                    ),
+                    'order': 2,
+                },
+            )
+        }
+
+        fnUtils.sortArrayOfObj(search_tabs, 'order')
 
         return (
             <div className="mt-3">

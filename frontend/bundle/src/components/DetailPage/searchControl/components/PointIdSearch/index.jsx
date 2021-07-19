@@ -9,49 +9,59 @@ class index extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            error_msg: '',
             point_id: '',
-            tseg_dugaar_zoom: 7.3376399772248575,
+            tseg_dugaar_zoom: '14.383305008368451',
+            errors: {},
         }
         this.handleSubmitCoordinateName = this.handleSubmitCoordinateName.bind(this)
     }
 
     handleSubmitCoordinateName(event) {
         event.preventDefault()
-        console.log('dsadsadsadjksajdklsadjklsa');
+        const { point_id, tseg_dugaar_zoom, errors } = this.state
+
         service
-            .searchPoint(this.state.point_id)
-            .then(({ info, success }) => {
-                if(success){
-                    utils.setCenter(info, parseInt(this.state.tseg_dugaar_zoom))
+            .searchPoint(point_id)
+            .then(({ data, success, error }) => {
+                if (success) {
+                    utils.setCenter(data, parseInt(tseg_dugaar_zoom))
+                    errors['point_id'] = ''
                 }
-                else{
-                    this.setState({error_msg: info})
-                }setTimeout(() => {
-                    this.setState({error_msg: ''})
-                }, 2222);
+                else {
+                    errors['point_id'] = error
+                }
+                this.setState({ errors })
             })
     }
 
     render() {
-        const { error_msg, point_id } = this.state
+        const { point_id, tseg_dugaar_zoom, errors } = this.state
         const { options_scale } = utils.vars
         return (
             <form onSubmit={this.handleSubmitCoordinateName}>
                 <div className="form-group">
-                    {error_msg ? <label className="text-danger" htmlFor="formGroupInput">{error_msg}</label>: null}
                     <div className="input-group mb-3">
                         <input type="text"
-                            className="form-control"
+                            className={`form-control ${errors?.point_id ? "is-invalid" : ""}`}
                             name="point_id"
-                            onChange={(e) => this.setState({ point_id: e.target.value }) }
-                            value={this.state.point_id}
+                            onChange={(e) => this.setState({ point_id: e.target.value })}
+                            value={point_id}
                         />
+                        {
+                            errors?.point_id
+                            ?
+                                <span className="invalid-feedback">
+                                    {errors.point_id}
+                                </span>
+                            :
+                                null
+                        }
                     </div>
                     <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
-                    <select name="tseg_dugaar_zoom" as="select"
-                        onChange={(e) => this.setState({ tseg_dugaar_zoom: e.target.value }) }
-                        value={this.state.tseg_dugaar_zoom}
+                    <select
+                        name="tseg_dugaar_zoom"
+                        onChange={(e) => this.setState({ tseg_dugaar_zoom: e.target.value })}
+                        value={tseg_dugaar_zoom}
                         className='form-control'
                     >
                         {

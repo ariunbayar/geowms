@@ -16,7 +16,7 @@ from main.decorators import ajax_required
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
 from django.db import connections
-from backend.inspire.models import LThemes, LPackages, LFeatures, LFeatureConfigs, MDatas, MDatas
+from backend.inspire.models import LThemes, LPackages, LFeatures, LFeatureConfigs, MDatas, MDatas, MGeoDatas
 from main import utils
 from backend.geoserver.models import WmtsCacheConfig
 from backend.config.models import Config
@@ -54,12 +54,9 @@ def _not_hesegchlen_hudaldan_awalt():
 
 def detail(request, pk):
 
-    can_draw = True
-
     bundle = get_object_or_404(Bundle, pk=pk)
     theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
-    if theme.theme_code in _not_hesegchlen_hudaldan_awalt():
-        can_draw = False
+    is_point = theme.theme_code in _not_hesegchlen_hudaldan_awalt()
 
     bundle_layers = BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()
 
@@ -71,7 +68,7 @@ def detail(request, pk):
             (WMS.objects.get(pk=wms[0]).name)
             for wms in bundle_layers
         ],
-        'can_draw': can_draw,
+        'is_point': is_point,
     }
 
     context = {
@@ -224,6 +221,55 @@ def sumfind(request, payload):
             'info': "Алдаа гарсан",
         }
         return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def findPoints(request, payload):
+
+    rsp = {
+        'success': False,
+        'data': [],
+        'error': '',
+    }
+
+    point_id = payload.get("point_id")
+    if not point_id:
+        rsp['error'] = 'Цэгийн дугаарыг оруулна уу'
+        return JsonResponse(rsp)
+
+    point_id = str(point_id)
+    theme_code = 'gnp'
+
+    feature_ids = utils.geo_cache(
+        'feature_ids_of_theme_code',
+        theme_code,
+        utils.get_feature_ids_of_theme(theme_code),
+        30000
+    )
+
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.filter(
+        geo_id=point_id,
+        feature_id__in=feature_ids
+    )
+
+    if not mgeo_qs:
+        rsp['error'] = 'Цэг олдсонгүй'
+        return JsonResponse(rsp)
+
+    mgeo = mgeo_qs.first()
+    geo_json = mgeo.geo_data.json
+    geo_json = utils.json_load(geo_json)
+
+    data = geo_json['coordinates']
+    if 'Multi' in geo_json['type']:
+        data = data[0]
+
+    rsp['success'] = True
+    rsp['data'] = data
+
+    return JsonResponse(rsp)
 
 
 @require_POST

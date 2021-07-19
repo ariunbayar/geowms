@@ -6,7 +6,8 @@ export {
     makeKindColor,
     checkMultiGeomTypeName,
     copyToClipboard,
-    logicOp
+    logicOp,
+    sortArrayOfObj,
 }
 
 //энэ жишээ ийм маягаар явна
@@ -64,4 +65,18 @@ function logicOp(op_name, a, b) {
         return a == b
     }
     return a[op_name](b)
+}
+
+// objected array ыг эрэмблэх, эрэмбэлэх key ээ өгнө
+function sortArrayOfObj(array, key, is_reverse=false) {
+    array.sort((a, b) => {
+        let first = a
+        let second = b
+        if (is_reverse) {
+            first = b
+            second = a
+        }
+        return first[key] - second[key]
+    })
+    return array
 }

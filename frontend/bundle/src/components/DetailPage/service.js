@@ -129,7 +129,7 @@ function searchPoint(point_id) {
         ..._getPostOptions(),
         body: JSON.stringify({ point_id })
     }
-    return fetch('/gov/api/tseg-personal/find-point/', requestOptions).then(handleResponse)
+    return fetch('/api/find-point/', requestOptions).then(handleResponse)
 }
 
 function getAimags() {
