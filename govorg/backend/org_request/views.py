@@ -1430,7 +1430,6 @@ def llc_request_approve(request, request_id):
     llc_request = get_object_or_404(LLCRequest, id=request_id)
     request_file_shape_qs = RequestFilesShape.objects.filter(files_id=llc_request.file.id)
     request_file_shapes = request_file_shape_qs.exclude(**REQUEST_SHAPE_APPROVED)
-    is_valid = True
 
     if not request_file_shapes:
         rsp = {
@@ -1471,56 +1470,34 @@ def llc_request_approve(request, request_id):
         # TODO huseltiin logiig enechee bichij boloh ym
         has_req_qs.delete()
 
-    with transaction.atomic():
-        for file_shape in request_file_shapes.values():
-            shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
-            if len(shape_geoms) == 1:
-                shape_geom = shape_geoms.first()
-                item = _make_datas(shape_geom, file_shape)
-                is_valid = _make_request_datas(item)
-            else:
-                item = _make_datas(shape_geoms.first(), file_shape, True)
-                root_id = _make_request_datas(item)
-                is_valid = root_id
-                if root_id:
-                    for shape in shape_geoms:
-                        item = _make_datas(shape, file_shape)
-                        item['group_id'] = root_id
-                        _make_request_datas(item)
+    for file_shape in request_file_shapes.values():
+        shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
+        if len(shape_geoms) == 1:
+            shape_geom = shape_geoms.first()
+            item = _make_datas(shape_geom, file_shape)
+            _make_request_datas(item)
+        else:
+            item = _make_datas(shape_geoms.first(), file_shape, True)
+            root_id = _make_request_datas(item)
+            for shape in shape_geoms:
+                item = _make_datas(shape, file_shape)
+                item['group_id'] = root_id
+                _make_request_datas(item)
 
-            if not is_valid:
-                rsp = {
-                    'success': False,
-                    'error': 'Формыг гүйцэт бөглөнө үү!'
-                }
-                return JsonResponse(rsp)
+    llc_request.state = LLC_REQUEST_SENT_GOV['state']
+    llc_request.kind = LLC_REQUEST_SENT_GOV['kind']
+    llc_request.save()
 
-        llc_request.state = LLC_REQUEST_SENT_GOV['state']
-        llc_request.kind = LLC_REQUEST_SENT_GOV['kind']
-        llc_request.save()
+    for req_file_shape in request_file_shapes:
+        req_file_shape.state = REQUEST_SHAPE_SENT_GOV['state']
+        req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
+        req_file_shape.save()
 
-        for req_file_shape in request_file_shapes:
-            req_file_shape.state = REQUEST_SHAPE_SENT_GOV['state']
-            req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
-            req_file_shape.save()
-
-        rsp = {
-            'success': True,
-            'data': 'Амжилттай хүсэлт үүслээ'
-        }
-        return JsonResponse(rsp)
-
-
-def _make_form_values(datas):
-    values = {
-        "theme_id": datas.get('theme').get('id') or '',
-        "feature_id": datas.get('feature').get('id') or '',
-        "package_id": datas.get('package').get('id') or '',
-        "order_no": datas.get('order_no'),
-        "order_at": datas.get('order_at')
+    rsp = {
+        'success': True,
+        'data': 'Амжилттай хүсэлт үүслээ'
     }
-
-    return values
+    return JsonResponse(rsp)
 
 
 @require_POST

@@ -67,8 +67,8 @@ export class LLCSettings extends Component {
             if ( name == 'theme' ) {
                 seleted_datas = this.getArray(packages, selected_value)
                 data_list['selected_packages'] = seleted_datas
-                // list_of_datas[index_of_list]['package']['name'] = ''
-                // list_of_datas[index_of_list]['package']['id'] = ''
+                list_of_datas[index_of_list]['package']['name'] = ''
+                list_of_datas[index_of_list]['package']['id'] = ''
                 list_of_datas[index_of_list]['feature']['name'] = ''
                 list_of_datas[index_of_list]['feature']['id'] = ''
                 data_list['selected_features'] = []
