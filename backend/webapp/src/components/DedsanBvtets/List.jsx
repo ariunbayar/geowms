@@ -10,7 +10,7 @@ export class List extends Component {
         super(props)
 
         this.state = {
-            list_all:[],
+            list_all: [],
             feature_lists: [],
             check: '',
             form_is_laod: true,
@@ -54,14 +54,14 @@ export class List extends Component {
                     this.getProperties(code, feature_id)
                     this.setState({ hideRight: true })
                 }
-                if ( formLorR == 'left') this.setState({ hideRight: false })
+                if (formLorR == 'left') this.setState({ hideRight: false })
             })
     }
 
     getProperties(code, feature_id) {
         this.setState({ form_is_laod: true })
         service.getprop(code).then(rsp => {
-            if(rsp.success){
+            if(rsp.success) {
                 this.setState({
                     feature_lists: rsp.feature_lists,
                     check: rsp.check,
@@ -79,7 +79,6 @@ export class List extends Component {
         }
         else {
             this.setState({ form_is_laod: false, model_name, model_id, edit_name: '', hideRight: true })
-
         }
     }
 
@@ -92,11 +91,11 @@ export class List extends Component {
         }
     }
 
-    done(){
-        this.setState({form_is_laod_left: true})
+    done() {
+        this.setState({ form_is_laod_left: true })
     }
 
-    isDelete(){
+    isDelete() {
         this.setState({ is_delete: !this.state.is_delete })
     }
 
@@ -107,7 +106,6 @@ export class List extends Component {
             modal_bg: "",
             icon_color: "success",
             title: "Амжилттай устгалаа",
-            text: data,
             has_button: false,
             actionNameBack: "",
             actionNameDelete: "",
@@ -118,7 +116,7 @@ export class List extends Component {
         this.setState({ model_name, model_id, name, formLorR })
     }
 
-    deleteAndRemove(model_name, model_id){
+    deleteAndRemove(model_name, model_id) {
         service.remove(model_name, model_id).then(({ success, info }) => {
             if (success) {
                 this.setState({ hideRight: false })
@@ -295,8 +293,6 @@ export class List extends Component {
                                     />
                                 </div>
                         }
-
-
                     </div>
                 </div>
                 <div className="card col-md-8" style={{left:"10px"}}>

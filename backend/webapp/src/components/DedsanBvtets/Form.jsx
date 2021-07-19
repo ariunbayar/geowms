@@ -28,24 +28,6 @@ export default class Forms extends Component {
         this.handleRemove = this.handleRemove.bind(this)
     }
 
-    // handleModalopen() {
-    //     this.openModal('check-circle text-success', btn_name, 
-    //     const modal = {
-    //         modal_status: "open",
-    //         modal_icon: "fa fa-exclamation-circle",
-    //         modal_bg: '',
-    //         icon_color: 'warning',
-    //         title: 'Хадгалах',
-    //         text: `Та ${edit_name ? `${prop_edit_name} нэртэй` : ''} ${prop_name}-г ${btn_name.toLowerCase()}даа итгэлтэй байна уу ?`,
-    //         has_button: true,
-    //         actionNameBack: 'Үгүй',
-    //         actionNameDelete: 'Тийм',
-    //         modalAction: () => this.Save(value, idx),
-    //         modalClose: () => this.modalClose(idx)
-    //     }
-    //     global.MODAL(modal)
-    // }
-
     onSubmit() {
         this.setState({ is_loading: true })
         const { values, model_name, code, model_id, edit_name } = this.state
