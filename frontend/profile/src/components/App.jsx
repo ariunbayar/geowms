@@ -28,7 +28,7 @@ export class App extends Component {
                                         Хувийн мэдээлэл
                                     </div>
                                 </NavLink>
-                                <NavLink className="menu" to={"/profile/tseg-personal/"}
+                                <NavLink className="menu" to={"/api/tseg-personal/"}
                                     onClick={() => this.setState({ is_display: true })}
                                 >
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
@@ -41,10 +41,10 @@ export class App extends Component {
                     <div className="col-md-10 p-0">
                         <Switch>
                             <Route exact path="/profile/" component={Info} activeClassName="selected"/>
-                            <Route path="/profile/tseg-personal/"
+                            <Route path="/profile/update-mail/" component={EmailUpdate} />
+                            <Route exact path="/api/tseg-personal/"
                                 component={(props) => <Bar {...props} is_display={this.state.is_display} activeClassName="selected"/>}
                             />
-                            <Route path="/profile/update-mail/" component={EmailUpdate} />
                         </Switch>
                     </div>
                 </div>
