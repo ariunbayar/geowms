@@ -9,7 +9,7 @@ export default class InspireField extends Component {
     }
 
     render() {
-        const {title_name, defualt_value, className} = this.props
+        const { title_name, defualt_value, className } = this.props
         return (
             <div className={`form-group ${className ? className : 'col-md-4'}`}>
                 <label htmlFor={`id_${title_name}`}>{title_name ? title_name : ''}</label>

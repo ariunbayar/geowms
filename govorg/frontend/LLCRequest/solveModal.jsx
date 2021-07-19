@@ -21,6 +21,7 @@ export class DetailModalBody extends Component {
         }
         this.selectedFeature = this.selectedFeature.bind(this)
         this.changeCurrentData = this.changeCurrentData.bind(this)
+        this.handleErrors = this.handleErrors.bind(this)
     }
 
     changeCurrentData(state) {
@@ -59,6 +60,10 @@ export class DetailModalBody extends Component {
                 }
             })
         }
+    }
+
+    handleErrors(errors) {
+        this.setState({ current_count: errors['list_idx'] })
     }
 
     render() {
@@ -132,6 +137,7 @@ export class DetailModalBody extends Component {
                         {...this.props}
                         {...this.state}
                         modalClose={this.props.modalClose}
+                        handleErrors={this.handleErrors}
                     />
                 </div>
             </>
@@ -298,16 +304,7 @@ class Form extends Component {
                     global.refreshCount()
                 }
                 else {
-                    this.modalChange(
-                        '',
-                        'fa fa-times-circle',
-                        'danger',
-                        'Алдаа гарлаа',
-                        error,
-                        false,
-                        "",
-                        this.handleClose
-                    )
+                    this.props.handleErrors(error)
                 }
                 this.setState({ is_loading: false })
             })

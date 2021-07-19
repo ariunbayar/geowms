@@ -1214,6 +1214,7 @@ def get_request_data(request, id):
     shape_geometries = RequestFilesShape.objects
     shape_geometries = shape_geometries.filter(files=llc_data.file)
     shape_geometries = shape_geometries.exclude(**REQUEST_SHAPE_APPROVED)
+    shape_geometries = shape_geometries.order_by('id')
 
     for shape_geometry in shape_geometries:
         theme_name = ''
@@ -1237,6 +1238,7 @@ def get_request_data(request, id):
             package_name = package.package_name
 
         datas.append({
+            'id': shape_geometry.id,
             'features': FeatureCollection(_get_shape_datas(shape_geometry)),
             'theme': {
                 'id': theme_id,
@@ -1422,6 +1424,15 @@ def _has_overlap(request_file_shapes):
     return False
 
 
+def _form_check(item, file_shape):
+    errors = dict()
+    form = RequestFilesShapeForm(item)
+    if not form.is_valid():
+        errors['id'] = file_shape.get('id')
+        errors.update(form.errors)
+    return errors
+
+
 @require_GET
 @ajax_required
 def llc_request_approve(request, request_id):
@@ -1430,6 +1441,8 @@ def llc_request_approve(request, request_id):
     llc_request = get_object_or_404(LLCRequest, id=request_id)
     request_file_shape_qs = RequestFilesShape.objects.filter(files_id=llc_request.file.id)
     request_file_shapes = request_file_shape_qs.exclude(**REQUEST_SHAPE_APPROVED)
+    request_file_shapes = request_file_shapes.order_by('id')
+    list_idx = 0
 
     if not request_file_shapes:
         rsp = {
@@ -1470,28 +1483,40 @@ def llc_request_approve(request, request_id):
         # TODO huseltiin logiig enechee bichij boloh ym
         has_req_qs.delete()
 
-    for file_shape in request_file_shapes.values():
-        shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
-        if len(shape_geoms) == 1:
-            shape_geom = shape_geoms.first()
-            item = _make_datas(shape_geom, file_shape)
-            _make_request_datas(item)
-        else:
-            item = _make_datas(shape_geoms.first(), file_shape, True)
-            root_id = _make_request_datas(item)
-            for shape in shape_geoms:
-                item = _make_datas(shape, file_shape)
-                item['group_id'] = root_id
+    with transaction.atomic():
+        for file_shape in request_file_shapes.values():
+            shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
+            if len(shape_geoms) == 1:
+                shape_geom = shape_geoms.first()
+                item = _make_datas(shape_geom, file_shape)
+                errors = _form_check(item, file_shape)
                 _make_request_datas(item)
+            else:
+                item = _make_datas(shape_geoms.first(), file_shape, True)
+                errors = _form_check(item, file_shape)
+                if errors:
+                    errors['list_idx'] = list_idx
+                    rsp = {
+                        'success': False,
+                        'error': errors,
+                    }
+                    return JsonResponse(rsp)
 
-    llc_request.state = LLC_REQUEST_SENT_GOV['state']
-    llc_request.kind = LLC_REQUEST_SENT_GOV['kind']
-    llc_request.save()
+                root_id = _make_request_datas(item)
+                for shape in shape_geoms:
+                    item = _make_datas(shape, file_shape)
+                    item['group_id'] = root_id
+                    _make_request_datas(item)
+            list_idx += 1
 
-    for req_file_shape in request_file_shapes:
-        req_file_shape.state = REQUEST_SHAPE_SENT_GOV['state']
-        req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
-        req_file_shape.save()
+        llc_request.state = LLC_REQUEST_SENT_GOV['state']
+        llc_request.kind = LLC_REQUEST_SENT_GOV['kind']
+        llc_request.save()
+
+        for req_file_shape in request_file_shapes:
+            req_file_shape.state = REQUEST_SHAPE_SENT_GOV['state']
+            req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
+            req_file_shape.save()
 
     rsp = {
         'success': True,
