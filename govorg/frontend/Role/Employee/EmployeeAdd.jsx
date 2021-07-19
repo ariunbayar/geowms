@@ -162,7 +162,7 @@ export class EmployeeAdd extends Component {
             'level_1': aimag_name,
             'level_2': sum_name,
             'level_3': horoo_name,
-            'point_coordinate': point_coordinate,
+            'point': point_coordinate,
             'address_state': address_state,
         }
         if(is_address_map) {
@@ -372,7 +372,7 @@ export class EmployeeAdd extends Component {
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="username" >Нэвтрэх нэр:</label>
+                                                    <label htmlFor="id_username" >Нэвтрэх нэр:</label>
                                                     <Field
                                                         className={'form-control ' + (errors.username ? 'is-invalid' : '')}
                                                         name='username'
@@ -380,12 +380,12 @@ export class EmployeeAdd extends Component {
                                                         type="text"
                                                         placeholder="Нэвтрэх нэр"
                                                     />
-                                                    <ErrorMessage name="username" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="username" component="div" className="invalid-feedback"/>
                                                 </div>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="last_name">Овог:</label>
+                                                    <label htmlFor="id_last_name">Овог:</label>
                                                     <Field
                                                         className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
                                                         name='last_name'
@@ -393,14 +393,14 @@ export class EmployeeAdd extends Component {
                                                         type="text"
                                                         placeholder="Овог"
                                                     />
-                                                    <ErrorMessage name="last_name" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="last_name" component="div" className="invalid-feedback"/>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="first_name">Нэр:</label>
+                                                    <label htmlFor="id_first_name">Нэр:</label>
                                                     <Field
                                                         className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
                                                         name='first_name'
@@ -408,7 +408,7 @@ export class EmployeeAdd extends Component {
                                                         type="text"
                                                         placeholder="Нэр"
                                                     />
-                                                    <ErrorMessage name="first_name" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="first_name" component="div" className="invalid-feedback"/>
                                                 </div>
                                             </div>
                                             <div className="form-group col-md-6">
@@ -429,7 +429,7 @@ export class EmployeeAdd extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="email">Цахим хаяг</label>
+                                                <label htmlFor="id_email">Цахим хаяг</label>
                                                 <Field
                                                     className={'form-control ' + (errors.email ? 'is-invalid' : '')}
                                                     name='email'
@@ -437,7 +437,7 @@ export class EmployeeAdd extends Component {
                                                     type="text"
                                                     placeholder="Цахим хаяг"
                                                 />
-                                                <ErrorMessage name="email" component="div" className="text-danger"/>
+                                                <ErrorMessage name="email" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="gender">Хүйс:</label>
@@ -453,7 +453,7 @@ export class EmployeeAdd extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="register">Регистер:</label>
+                                                <label htmlFor="id_register">Регистер:</label>
                                                 <Field
                                                     className={'form-control ' + (errors.register ? 'is-invalid' : '')}
                                                     name='register'
@@ -461,7 +461,7 @@ export class EmployeeAdd extends Component {
                                                     type="text"
                                                     placeholder="Регистер"
                                                 />
-                                                <ErrorMessage name="register" component="div" className="text-danger"/>
+                                                <ErrorMessage name="register" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="choose_role">Role: </label>
@@ -471,12 +471,12 @@ export class EmployeeAdd extends Component {
                                                         <option key={idx} value={role.role_id}>{role.role_name}</option>
                                                     )}
                                                 </select>
-                                                <ErrorMessage name="choose_role" component="div" className="text-danger"/>
+                                                <ErrorMessage name="choose_role" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="phone_number">Утасны дугаар:</label>
+                                                <label htmlFor="id_phone_number">Утасны дугаар:</label>
                                                 <Field
                                                     className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
                                                     name='phone_number'
@@ -484,7 +484,7 @@ export class EmployeeAdd extends Component {
                                                     type="text"
                                                     placeholder="Утасны дугаар"
                                                 />
-                                                <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                                <ErrorMessage name="phone_number" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-row col-md-3 mt-4 text-center"><br/>
                                                 <label className="" htmlFor='id_is_admin'>Байгууллагын админ</label>
@@ -494,7 +494,7 @@ export class EmployeeAdd extends Component {
                                                     id="id_is_admin"
                                                     type="checkbox"
                                                 />
-                                                <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                                <ErrorMessage name="is_admin" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-row col-md-3 mt-4 text-center"><br/>
                                                 <label htmlFor='id_is_user'>Хэрэглэгч</label>
@@ -509,7 +509,7 @@ export class EmployeeAdd extends Component {
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <label htmlFor='id_state'>Төлөв:</label>
-                                                <Field name="state" as="select" id="state"
+                                                <Field name="state" as="select" id="id_state"
                                                     style={{ fontSize: '0.8rem' }}
                                                     className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
                                                 >
@@ -523,7 +523,7 @@ export class EmployeeAdd extends Component {
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor='id_pro_class'>Мэргэжлийн ангийн бүрэлдэхүүн:</label>
-                                                    <Field name="pro_class" as="select" id="pro_class"
+                                                    <Field name="pro_class" as="select" id="id_pro_class"
                                                         style={{ fontSize: '0.8rem' }}
                                                         className={'custom-select ' + (errors.pro_class ? 'is-invalid' : '')}
                                                     >

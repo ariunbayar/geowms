@@ -43,7 +43,8 @@ from main.utils import (
     get_config,
     get_geom,
     datetime_to_string,
-    get_feature
+    get_feature,
+    lat_long_to_utm
 )
 from main import utils
 
@@ -81,10 +82,14 @@ def _name_display(id, items):
 @require_POST
 @ajax_required
 @llc_required(lambda u: u)
-def llc_request_list(request, content, payload):
+def llc_request_list(request, content, payload, action):
+    action_type = utils.str2bool(action)
     company_name = content.get('company_name')
     qs = RequestFiles.objects.filter(name__exact=company_name)
-    qs = RequestFiles.objects.exclude(state=RequestFiles.STATE_SOLVED)
+    if action_type:
+        qs = qs.exclude(state=RequestFiles.STATE_SOLVED)
+    else:
+        qs = qs.filter(state=RequestFiles.STATE_SOLVED)
 
     start_index = 1
     if qs:
@@ -369,24 +374,36 @@ def save_request(request, content):
     if is_file:
         datasource_exts = ['.gml', '.geojson']
         for name in glob.glob(os.path.join(extract_path, '*')):
+            check_data_type = 0
             for ext in datasource_exts:
-                if ext in name:
-                    ds = DataSource(name)
-                    for layer in ds:
-                        if len(layer) >= 1:
-                            org_data = _get_leve_2_geo_id(layer)
-                            if not org_data:
-                                utils.remove_folder(extract_path)
-                                return JsonResponse({
-                                    'success': False,
-                                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
-                                })
-                        else:
-                            utils.remove_folder(extract_path)
-                            return JsonResponse({
-                                'success': False,
-                                'info': 'Файл хоосон байна !!!'
-                            })
+                if ext not in name:
+                    check_data_type += 1
+
+            if check_data_type == 2:
+                delete_folder = str(file_path).split("/")[1]
+                delete_folder = os.path.join(settings.MEDIA_ROOT, main_path, delete_folder)
+                utils.remove_folder(delete_folder)
+                return JsonResponse({
+                    'success': False,
+                    'info': 'GML, GEOJSON өргөтгөлтэй файл оруулах боломжтой !!!'
+                })
+
+            ds = DataSource(name)
+            for layer in ds:
+                if len(layer) >= 1:
+                    org_data = _get_leve_2_geo_id(layer)
+                    if not org_data:
+                        utils.remove_folder(extract_path)
+                        return JsonResponse({
+                            'success': False,
+                            'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
+                        })
+                else:
+                    utils.remove_folder(extract_path)
+                    return JsonResponse({
+                        'success': False,
+                        'info': 'Файл хоосон байна !!!'
+                        })
 
         request_file_data['name'] = company_name
         request_file_data['tools'] = json_dumps(get_tools)
@@ -454,7 +471,8 @@ def get_all_geo_json(request, content):
 def get_request_data(request, content, id):
 
     features = []
-    field = {}
+    field = dict()
+    files = list()
     qs = RequestForm.objects.filter(file_id=id).first()
     request_file = RequestFiles.objects.filter(pk=id).first()
     requested_employee = request_file.requested_employee
@@ -465,7 +483,6 @@ def get_request_data(request, content, id):
         'type': 'application/vnd.rar'
     }
 
-    field = dict()
     aimag_name = ''
     aimag_geom = []
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
@@ -504,6 +521,7 @@ def get_request_data(request, content, id):
         file_name = file_name.split('/')
         file_data['name'] = file_name[2]
         file_data['size'] = file_qs.size or ''
+        files.append(file_data)
 
     if qs:
         file_name = str(qs.file.file_path).split('/')[1] if qs.file.file_path else ''
@@ -512,7 +530,7 @@ def get_request_data(request, content, id):
         field['object_type'] = qs.object_type
         field['object_quantum'] = qs.object_quantum
         field['investment_status'] = qs.investment_status
-        field['file_path'] = file_data
+        field['file_path'] = files
         field['selected_tools'] = json_load(qs.file.tools)
         field['file_name'] = file_name
         field['state'] = qs.file.get_state_display()
@@ -553,34 +571,62 @@ def _get_employees(geo_id):
     return emp_fields
 
 
-def _make_connection(from_email):
-    connection = get_connection(
-        username=from_email,
-        password=get_config('EMAIL_HOST_PASSWORD'),
-        port=get_config('EMAIL_PORT'),
-        host=get_config('EMAIL_HOST'),
-        use_tls=utils.str2bool(get_config('EMAIL_USE_TLS')),
-        use_ssl=False,
-        fail_silently=False,
-    )
-    return connection
+def _get_shapes_geoms(shape_geometry):
+    geo_datas = []
+    geom_type = ''
+    shape_geoms = ShapeGeom.objects.filter(shape_id=shape_geometry.id)
+    geo_datas, geom_type = get_feature(shape_geoms)
+
+    return geo_datas, geom_type
 
 
-def _send_to_information_email (email):
+@require_GET
+@ajax_required
+def get_file_shapes(request, id):
+    list_of_datas = []
 
-    host_name = get_config('EMAIL_HOST_NAME')
-    subject = 'Хүсэлт'
-    text = 'Дараах холбоос дээр дарж хүсэлтийг шалгана уу!'
-    if host_name == 'localhost:8000':
-        msg = '{text} http://{host_name}/gov/llc-request/'.format(text=text, host_name=host_name)
-    else:
-        msg = '{text} https://{host_name}/gov/llc-request/'.format(text=text, host_name=host_name)
+    llc_data = LLCRequest.objects.filter(id=id).first()
+    shape_geometries = RequestFilesShape.objects.filter(files_id=llc_data.file_id)
+    for shape_geometry in shape_geometries:
+        geoms, geom_type = _get_shapes_geoms(shape_geometry)
 
-    from_email = get_config('EMAIL_HOST_USER')
-    to_email = [email]
-    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
+        theme_name = ''
+        feature_name = ''
+        package_name = ''
+        theme_id = shape_geometry.theme_id
+        feature_id = shape_geometry.feature_id
+        package_id = shape_geometry.package_id
 
-    return True
+        if theme_id:
+            theme = LThemes.objects.filter(theme_id=theme_id).first()
+            theme_name = theme.theme_name
+
+        if package_id:
+            package = LPackages.objects.filter(package_id=package_id).first()
+            package_name = package.package_name
+
+        if feature_id:
+            feature = LFeatures.objects.filter(feature_id=feature_id).first()
+            feature_name = feature.feature_name
+
+        list_of_datas.append({
+            'id': shape_geometry.id,
+            'geom_type': geom_type,
+            'theme': {'id': theme_id, 'name': theme_name},
+            'feature': {'id': feature_id, 'name': feature_name},
+            'package': {'id': package_id, 'name': package_name},
+            'icon_state': True,
+            'features': geoms,
+            'order_no': shape_geometry.order_no,
+            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else '',
+            "state": utils.get_value_from_types(RequestFilesShape.STATE_CHOICES, shape_geometry.state),
+            "kind": utils.get_value_from_types(RequestFilesShape.KIND_CHOICES, shape_geometry.kind),
+            "description": shape_geometry.description,
+        })
+
+    return JsonResponse({
+        'list_of_datas': list_of_datas,
+    })
 
 
 @require_POST
@@ -591,9 +637,8 @@ def send_request(request, payload, content, id):
     qs = RequestFiles.objects.filter(pk=id).first()
     org_obj = qs.geo_id
     employee = Employee.objects.filter(org__geo_id=org_obj, user_id=user_id).first()
-    email = employee.user.email
+    user = employee.user
     if employee:
-        request_files = LLCRequest.objects.filter(file_id=id).first()
         request_data = {}
         request_data['state'] = LLCRequest.STATE_NEW
         request_data['kind'] = LLCRequest.KIND_PENDING
@@ -603,7 +648,10 @@ def send_request(request, payload, content, id):
             defaults=request_data
         )
 
-        success_mail = _send_to_information_email(email)
+        subject = 'Аж ахуйн нэгжийн хүсэлт'
+        text = 'Дараах холбоос дээр дарж шийдвэрлэнэ уу!'
+        href = '/gov/llc-request/'
+        success_mail = utils.send_approve_email(user, subject, text, href)
         if success_mail:
             qs.state = RequestFiles.STATE_SENT
             qs.kind = RequestFiles.KIND_PENDING
@@ -640,12 +688,17 @@ def remove_request(request, content, id):
     form = RequestForm.objects.filter(file=initial_query.id)
     lvl2_request = LLCRequest.objects.filter(file=initial_query)
 
-    if initial_query:
-        for shape in shapes:
-            geom = ShapeGeom.objects.filter(shape=shape)
-            if geom:
-                geom.delete()
-            shape.delete()
+    if initial_query.state == RequestFiles.STATE_SENT or initial_query.kind == RequestFiles.KIND_DISMISS:
+        return JsonResponse({
+                'success': False,
+                'info': 'Устгах боломжгүй файл байна.'
+        })
+
+    for shape in shapes:
+        geom = ShapeGeom.objects.filter(shape=shape)
+        if geom:
+            geom.delete()
+        shape.delete()
 
         if form:
             form.delete()
@@ -656,26 +709,22 @@ def remove_request(request, content, id):
             change_requests.delete()
             lvl2_request.delete()
 
-        initial_query.delete()
-        _delete_prev_files(initial_query)
-
-        return JsonResponse({
-            'success': True,
-            'info': "Амжилттай устгалаа"
-        })
+    initial_query.delete()
+    _delete_prev_files(initial_query)
 
     return JsonResponse({
-        'success': False,
-        'info': "Устгахад алдаа гарлаа"
+            'success': True,
+            'info': 'Амжилттай устгалаа'
     })
 
 
 def _delete_prev_files(file):
     main_folder = 'llc-request-files'
     file_path = file.file_path
-    delete_folder = str(file_path).split("/")[1]
-    delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
-    utils.remove_folder(delete_folder)
+    if file_path:
+        delete_folder = str(file_path).split("/")[1]
+        delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
+        utils.remove_folder(delete_folder)
 
 
 @require_GET
@@ -697,11 +746,18 @@ def get_search_field(request, content):
 @require_GET
 @ajax_required
 @llc_required(lambda u: u)
+
 def get_count(request, content):
     company_name = content.get('company_name')
-    states = [RequestFiles.STATE_NEW, RequestFiles.STATE_SENT]
-    request_count = RequestFiles.objects.filter(state__in=states, name__exact=company_name).count()
+    count = dict()
+    request_qs = RequestFiles.objects.filter(name__exact=company_name)
+    request_count = request_qs.exclude(state=RequestFiles.STATE_SOLVED).count()
+    solved_count = request_qs.filter(state=RequestFiles.STATE_SOLVED).count()
+
+    count['request_count'] = request_count
+    count['solved_count'] = solved_count
+
     return JsonResponse({
         'success': True,
-        'request_count': request_count,
+        'counts': count,
     })

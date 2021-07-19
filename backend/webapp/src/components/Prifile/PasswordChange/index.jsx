@@ -72,11 +72,15 @@ export default class PasswordChange extends Component {
                                 <div className="form-group">
                                     <div className="position-relative has-icon-right">
                                         <label htmlFor="new_password">Шинэ нууц үг</label>
-                                        <input type="password" className="form-control form-control-rounded"
+                                        <input
+                                            type="password"
+                                            className="form-control form-control-rounded"
+                                            id='new_password'
                                             disabled={this.state.is_save_success === true}
                                             placeholder="Шинэ нууц үгээ оруулна уу"
                                             value={this.state.new_password}
-                                            onChange={(e) => this.handleChange('new_password', e.target.value)}></input>
+                                            onChange={(e) => this.handleChange('new_password', e.target.value)}
+                                        />
                                         <div className="form-control-position">
                                             <i className="icon-lock"></i>
                                         </div>
@@ -85,11 +89,15 @@ export default class PasswordChange extends Component {
                                 <div className="form-group">
                                     <div className="position-relative has-icon-right">
                                         <label htmlFor="renew_password">Шинэ нууц үг ( давтах )</label>
-                                        <input type="password" className="form-control form-control-rounded"
+                                        <input
+                                            type="password"
+                                            className="form-control form-control-rounded"
+                                            id='renew_password'
                                             disabled={this.state.is_save_success === true}
                                             placeholder="Шинэ нууц үгээ дахин оруулна уу"
                                             value={this.state.renew_password}
-                                            onChange={(e) => this.handleChange('renew_password', e.target.value)}></input>
+                                            onChange={(e) => this.handleChange('renew_password', e.target.value)}
+                                        />
                                         <div className="form-control-position">
                                             <i className="icon-lock"></i>
                                         </div>

@@ -33,7 +33,7 @@
             {% for bundle in bundles %}
             <div class="col-md-2 text-center sub">
                 <a href="{% url "bundle:detail" bundle.pk %}">
-                    <img class="icon mb-3" src="{{ MEDIA_URL }}{{ bundle.icon }}">
+                    <img class="icon mb-3" src="{{ MEDIA_URL }}{{ bundle.icon }}" width="80" height="80">
                     <h6 class="gp-text-primary text-uppercase">{{ bundle.name }}</h6>
                 </a>
             </div>

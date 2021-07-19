@@ -153,7 +153,7 @@ export class LLCList extends Component {
                                 className="form-control form-control-xs"
                                 onChange={(e) => this.handleSearch(e, 'state')}
                             >
-                                <option value="">--- Төлвөөр хайх ---</option>
+                                <option value="">--- Төлөвөөр хайх ---</option>
                                 {
                                     choices?.state
                                     ?

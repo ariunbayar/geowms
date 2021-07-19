@@ -6,4 +6,5 @@ import App from './components/App'
 global.MODAL = null
 global.NOTIF = null
 
-render(<App/>, document.getElementById('webapp'))
+const user = JSON.parse(document.getElementById('user-data').innerHTML)
+render(<App user={user}/>, document.getElementById('webapp'))

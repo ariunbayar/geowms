@@ -399,6 +399,7 @@ def set_email(request, payload):
         errors['email'] = 'Email хаяг алдаатай байна.'
     if User.objects.filter(email=email).first():
         errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+
     if errors:
         rsp = {
             'success': False,

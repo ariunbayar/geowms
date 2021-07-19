@@ -12,7 +12,7 @@ import json
 import psycopg2
 import socket
 import shutil
-from django.shortcuts import get_object_or_404
+import uuid
 
 from collections import namedtuple
 from datetime import timedelta, datetime
@@ -29,6 +29,7 @@ from django.db import connections
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
 from django.core.cache import cache
+from django.shortcuts import get_object_or_404
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
@@ -47,6 +48,7 @@ import main.geoserver as geoserver
 
 
 LAYERPREFIX = 'gp_layer_'
+RE_REGISTER = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -275,13 +277,21 @@ def _make_connection(from_email):
     return connection
 
 
-def _make_html(text, host_name, token):
+def get_protocol(host_name):
+
     protocol = 'https'
     not_secure_ips = ['192.168.10.92']
     if settings.DEBUG or host_name in not_secure_ips:
         protocol = 'http'
 
+    return protocol
+
+
+def _make_html(text, host_name, href):
+
+    protocol = get_protocol(host_name)
     host = "{protocol}://{host_name}".format(protocol=protocol, host_name=host_name)
+    href = host + href
 
     html = """
             <!DOCTYPE html>
@@ -289,37 +299,38 @@ def _make_html(text, host_name, token):
                 <head></head>
                 <body>
                     <p>{text}</p>
-                    <a style="color: 'blue'" href="{host}/gov/secure/approve/{token}/">Энд дарна уу</a>
+                    <a className="text-primary" href="{href}">Энд дарна уу</a>
                 </body>
             </html>
-        """.format(text=text, host=host, token=token)
+        """.format(text=text, href=href)
 
     return html
 
 
-def send_approve_email(user, subject=None, text=None):
+def send_approve_email(user, subject=None, text=None, href=None):
 
     if not user.email:
         return False
 
-    token = TokenGeneratorUserValidationEmail().get()
-
-    UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
-    UserValidationEmail.objects.create(
-        user=user,
-        token=token,
-        valid_before=timezone.now() + timedelta(days=90)
-    )
     host_name = get_config('EMAIL_HOST_NAME')
     if not subject:
         subject = 'Геопортал хэрэглэгч баталгаажуулах'
     if not text:
         text = 'Дараах холбоос дээр дарж баталгаажуулна уу!'
+    if not href:
+        token = TokenGeneratorUserValidationEmail().get()
 
-    html_message = _make_html(text, host_name, token)
+        UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
+        UserValidationEmail.objects.create(
+            user=user,
+            token=token,
+            valid_before=timezone.now() + timedelta(days=90)
+        )
+        href = '/gov/secure/approve/{token}/'.format(token=token)
+
+    html_message = _make_html(text, host_name, href)
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
-
     send_mail(subject, text, from_email, to_email, connection=_make_connection(from_email), html_message=html_message)
 
     return True
@@ -558,7 +569,7 @@ def get_geom(geo_id, geom_type=None, srid=4326):
 
 
 def is_register(register):
-    re_register = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
+    re_register = RE_REGISTER
     return re.search(re_register, register.upper()) is not None
 
 
@@ -644,8 +655,7 @@ def _geom_contains_feature_geoms(geo_json, feature_ids, perm_kind=None):
             AND feature_id in ({feature_ids})
         """.format(feature_ids=', '.join(['{}'.format(f) for f in feature_ids]))
         cursor.execute(sql, [str(geo_json), str(geo_json), str(geo_json)])
-        is_included = [dict((cursor.description[i][0], value) \
-            for i, value in enumerate(row)) for row in cursor.fetchall()]
+        is_included = [dict((cursor.description[i][0], value) for i, value in enumerate(row)) for row in cursor.fetchall()]
 
     return is_included
 
@@ -693,7 +703,7 @@ def get_emp_property_roles(employee, fid):
             if prop.get('property_id') not in property_ids:
                 property_ids.append(prop.get('property_id'))
         for property_id in property_ids:
-            property_roles = {'PERM_VIEW': True, 'PERM_CREATE':True, 'PERM_REMOVE':True, 'PERM_UPDATE':True, 'PERM_APPROVE':True, 'PERM_REVOKE':True}
+            property_roles = {'PERM_VIEW': True, 'PERM_CREATE': True, 'PERM_REMOVE': True, 'PERM_UPDATE': True, 'PERM_APPROVE': True, 'PERM_REVOKE': True}
             for prop in property_perms:
                 if property_id == prop['property_id']:
                     if prop.get('perm_kind') == EmpPermInspire.PERM_VIEW:
@@ -851,7 +861,7 @@ def geoJsonConvertGeom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
     return geom
@@ -1049,13 +1059,11 @@ def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
 
 
 def save_img_to_folder(image, folder_name, file_name, ext):
-    import PIL.Image as Image
-    import io, uuid
     uniq = uuid.uuid4().hex[:8]
     file_full_name = file_name + '_' + uniq + ext
     bytes = bytearray(image)
     image = Image.open(io.BytesIO(bytes))
-    image = image.resize((720,720), Image.ANTIALIAS)
+    image = image.resize((720, 720), Image.ANTIALIAS)
     image = image.save(os.path.join(settings.MEDIA_ROOT, folder_name, file_full_name))
     return folder_name + '/' + file_full_name
 
@@ -1100,7 +1108,8 @@ def image_to_byte_array(image_path):
     image.save(img_byte_arr, format=image.format)
     img_byte_arr = img_byte_arr.getvalue()
     return img_byte_arr
-# ------------------------------------------------------------------------------------------------
+
+
 # feature code oor feature iin qs awah
 def get_feature_from_code(feature_code):
     Lfeature = apps.get_model('backend_inspire', 'LFeatures')
@@ -1260,7 +1269,7 @@ def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, p
 
 
 def _get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[]):
-    datas = list ()
+    datas = list()
     for prop in properties_qs:
         data = dict()
         if property_codes:
@@ -1637,10 +1646,10 @@ def get_colName_type(view_name, data):
             ST_Extent(geo_data)
         from
             {view_name} group by geo_data limit 1
-            '''.format(
-                view_name=view_name,
-                data=data
-                )
+    '''.format(
+        view_name=view_name.lower(),
+        data=data
+    )
 
     sql = '''
         SELECT
@@ -1716,17 +1725,18 @@ def check_gp_design():
     else:
         srs = 4326
     if check_layer.status_code == 404:
-        layer_create = geoserver.create_layer(
-                        ws_name,
-                        ds_name,
-                        layer_name,
-                        layer_title,
-                        table_name,
-                        srs,
-                        geom_att,
-                        extends,
-                        False
+        geoserver.create_layer(
+            ws_name,
+            ds_name,
+            layer_name,
+            layer_title,
+            table_name,
+            srs,
+            geom_att,
+            extends,
+            False
         )
+
 
 # Тухай Folder -т байгаа файлуудыг буцаадаг
 def get_all_file_paths(directory):
@@ -1743,7 +1753,7 @@ def get_all_file_paths(directory):
 
 def check_pg_connection(host, db, port, user, password, schema):
     try:
-        schema =schema or 'public'
+        schema = schema or 'public'
         connection = psycopg2.connect(
             user=user,
             password=password,
@@ -1756,7 +1766,7 @@ def check_pg_connection(host, db, port, user, password, schema):
         cursor = connection.cursor()
         connection.autocommit = True
         return cursor
-    except Exception as error:
+    except Exception:
         return []
 
 
@@ -1775,7 +1785,7 @@ def get_pg_cursor(conn_details):
 
 
 def get_pg_conf(conn_id):
-    another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
+    another_db = get_object_or_404(AnotherDatabase, pk=conn_id) # TODO get object 404 hereglku
     connection = json_load(another_db.connection)
     form_datas = {
         'id': conn_id,
@@ -1909,7 +1919,7 @@ def make_view_name(feature):
         feature_code = feature.feature_code
         feature_code = feature_code.split("-")
         view_name = slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
-    return view_name
+    return view_name.lower()
 
 
 def get_feature_from_layer_code(layer_code):
@@ -1975,3 +1985,34 @@ def test_json_dumps(dct):
 # datatable хэрэглээгүй тохиолдолд хүснэгтийн эхлэлийн тоог өгнө
 def get_start_index(per_page, page):
     return (per_page * (page - 1)) + 1
+
+
+# dict-ээс өөрт хэрэггүй field-үүдээ устгана
+def key_remove_of_dict(values, keys):
+    new_values = dict(values)
+    for key in keys:
+        if key in values:
+            del new_values[key]
+
+    return new_values
+
+
+# TODO хэрэглэгч байгааг шалгаж болно
+def has_user(id=None, username=None, email=None):
+    User = apps.get_model('geoportal_app', 'User')
+    is_valid = False
+
+    if username:
+        user = User.objects.filter(username=username).first()
+        if user:
+            is_valid = True
+    elif id:
+        user = User.objects.filter(id=id).first()
+        if user:
+            is_valid = True
+    elif email:
+        user = User.objects.filter(email=email).first()
+        if user:
+            is_valid = True
+
+    return is_valid

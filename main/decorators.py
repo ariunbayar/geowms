@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from django.db.models import Q
 import main.geoserver as geoserver
 
 from main import utils
@@ -54,7 +55,9 @@ def gov_required(f):
 
         if request.user.is_authenticated:
             Org = apps.get_model('backend_org', 'Org')
-            org = get_object_or_404(Org, employee__user=request.user)
+            Employee = apps.get_model('backend_org', 'Employee')
+            employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
+            org = get_object_or_404(Org, employee=employee)
             request.org = org
             return f(request, *args, **kwargs)
 
@@ -85,7 +88,7 @@ def api_inspire_perm(perm_kind):
                 return JsonResponse(rsp)
 
             get_object_or_404(LFeatures, feature_id=feature_id)
-            employee = get_object_or_404(Employee, user=request.user)
+            employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
             emp_perm = EmpPerm.objects.filter(employee=employee).first()
             qs = EmpPermInspire.objects
             qs = qs.filter(feature_id=feature_id)
@@ -196,11 +199,12 @@ def llc_required(f):
                 )
                 rsp = requests.get(token_url, headers=HEADERS, verify=False)
                 content = {}
-
+                content['llc_detail'] = []
                 if rsp.status_code == 200:
                     content['llc_detail'] = rsp.json()
-                    content['company_name'] = content['llc_detail'][0]['company_name']
-                    content['register_number'] = content['llc_detail'][0]['company_register_number']
+                    if content['llc_detail']:
+                        content['company_name'] = content['llc_detail'][0]['company_name']
+                        content['register_number'] = content['llc_detail'][0]['company_register_number']
                     args = [content, *args]
                     return f(request, *args, **kwargs)
             else:

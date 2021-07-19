@@ -60,7 +60,7 @@ export class App extends Component {
     }
 
     render() {
-        const { employee, allowed_geom } = this.props.org
+        const { employee, allowed_geom, has_position } = this.props.org
         const { base_layer_list, org_role, is_loading } = this.state
 
         return (
@@ -114,7 +114,7 @@ export class App extends Component {
                                         <Route path="/gov/zip-code/" component={ZipCode} />
                                         <Route path="/gov/org-request/" component={OrgRequest} />
                                         <Route path="/gov/history/" component={ChangeRequest} />
-                                        <Route exact path="/gov/perm/all/" render={(props) => <InsPerms {...props} org_roles={org_role}/>} />
+                                        <Route exact path="/gov/perm/all/" render={(props) => <InsPerms {...props} org_roles={org_role} role_perm={org_role}/>} />
                                         <Route exact path="/gov/perm/org/" component={Gov} />
                                         <Route path="/gov/perm/employee/" render={(props) => <Employee {...props} org_roles={org_role} employee={employee} />}/>
                                         <Route exact path="/gov/help/" component={Help} />
@@ -135,7 +135,7 @@ export class App extends Component {
 function TabBars(props) {
 
     const employee = props.employee
-    const { approve, revoke } = props
+    const { approve, revoke, has_position} = props
 
     const [request_count, setRequestCount] = useState(0)
     const [revoke_count, setRevokeCount] = useState(0)
@@ -205,7 +205,7 @@ function TabBars(props) {
                         employee.is_admin
                         &&
                             <>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Дүрийн тохиргоо"></MenuItem>
                             <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/position/" text="Албан тушаал"></MenuItem>
                             </>
                     }
@@ -238,7 +238,9 @@ function TabBars(props) {
                 >
                 </MenuItem>
             }
-            <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/llc-request/" text="ААН-Хүсэлт" count={llc_count}></MenuItem>
+            {
+                has_position && <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/llc-request/" text="ААН-Хүсэлт" count={llc_count}></MenuItem>
+            }
             <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                 <ul className="sidebar-submenu">
                     <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>

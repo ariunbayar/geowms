@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { validations } from "./validations"
-import { Formik, Form, Field, ErrorMessage} from 'formik'
-import {service} from '../service'
-import ModalAlert from "../../../backend/webapp/src/components/ModalAlert"
+import { Formik, Form, Field, ErrorMessage } from 'formik'
+import { service } from '../service'
+import Loader from "@utils/Loader"
 
 export default class Password extends Component {
     constructor(props) {
@@ -11,56 +11,81 @@ export default class Password extends Component {
             old_password: '',
             new_password: '',
             re_new_password: '',
-            handleSubmitIsLoad: false,
-            modal_alert_status: "closed",
-            timer: null,
-            msg: '',
-            error: '',
+            is_loading: false,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.modalClose=this.modalClose.bind(this)
     }
 
     handleSubmit(values) {
-        this.setState({handleSubmitIsLoad:true})
+        this.setState({ is_loading: true })
         if(values.new_password == values.re_new_password) {
             service
                 .updatePassword(values.new_password, values.old_password, values.re_new_password)
                 .then(({ success, error, msg }) => {
-                if (success) {
-                    this.setState({ msg, modal_alert_status: "open" })
-                    this.modalCloseTime()
-                } else {
-                    this.setState({ error, modal_alert_status: "open" })
-                }
-            })
+                    if (success) {
+                        const modal = {
+                            modal_status: "open",
+                            modal_icon: "fa fa-check-circle",
+                            modal_bg: '',
+                            icon_color: 'success',
+                            title: msg,
+                            has_button: false,
+                            actionNameBack: '',
+                            actionNameDelete: '',
+                            modalAction: null,
+                            modalClose: () => this.modalClose()
+                        }
+                        global.MODAL(modal)
+                        this.setState({ is_loading: false })
+                    } else {
+                        const modal = {
+                            modal_status: "open",
+                            modal_icon: "fa fa-times-circle",
+                            modal_bg: '',
+                            icon_color: 'danger',
+                            title: error,
+                            has_button: false,
+                            actionNameBack: '',
+                            actionNameDelete: '',
+                            modalAction: null,
+                            modalClose: null
+                        }
+                        global.MODAL(modal)
+                        this.setState({ is_loading: false })
+                    }
+                })
         } else {
-            this.setState({ error: "Таарахгүй байна", modal_alert_status: "open" })
+            const modal = {
+                modal_status: "open",
+                modal_icon: "fa fa-times-circle",
+                modal_bg: '',
+                icon_color: 'danger',
+                title: "Таарахгүй байна",
+                has_button: false,
+                actionNameBack: '',
+                actionNameDelete: '',
+                modalAction: null,
+                modalClose: null
+            }
+            global.MODAL(modal)
+            this.setState({ is_loading: false })
         }
     }
 
-    modalClose(){
-        this.setState({ handleSubmitIsLoad: false, modal_alert_status: "closed" })
-        if (this.state.msg) {
-            window.location.href = "/logout"
-        }
-        if(this.state.error) {
-            this.setState({ error: '' })
-        }
-    }
-
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({ handleSubmitIsLoad: false, modal_alert_status: "closed" })
-            window.location.href = "/logout"
-        }, 2000)
+    modalClose() {
+        window.location.href = "/logout"
     }
 
     render() {
-        const { msg, error } = this.state
+        const { is_loading } = this.state
         return (
             <div className="card">
                 <div className="card-body">
+                <Loader
+                    is_loading={is_loading}
+                    text={'Уншиж байна'}
+                />
                 <Formik
                     enableReinitialize
                     initialValues={this.state}
@@ -79,11 +104,11 @@ export default class Password extends Component {
                                     <Field
                                         name="old_password"
                                         type="password"
-                                        className="form-control"
+                                        className={"form-control " + (errors.old_password ? "is-invalid" : "")}
                                         id="password"
                                         placeholder="Одоогийн нууц үг оруулах"
                                     />
-                                    <ErrorMessage name="old_password" component="span"/>
+                                    <ErrorMessage name="old_password" component="div" className="invalid-feedback"/>
                                 </div>
                             </div>
                             <div className="form-row">
@@ -92,11 +117,11 @@ export default class Password extends Component {
                                     <Field
                                         name="new_password"
                                         type="password"
-                                        className="form-control"
+                                        className={"form-control " + (errors.new_password ? "is-invalid" : "")}
                                         id="new_password"
                                         placeholder="Шинэ нууц үг оруулах"
                                     />
-                                    <ErrorMessage name="new_password" component="span"/>
+                                    <ErrorMessage name="new_password" component="div" className="invalid-feedback"/>
                                 </div>
                             </div>
                             <div className="form-row">
@@ -105,35 +130,18 @@ export default class Password extends Component {
                                     <Field
                                         name="re_new_password"
                                         type="password"
-                                        className="form-control"
+                                        className={"form-control " + (errors.re_new_password ? "is-invalid" : "")}
                                         id="re_new_password"
                                         placeholder="Шинэ нууц үг дахин оруулах"
                                     />
-                                    <ErrorMessage name="re_new_password" component="span"/>
+                                    <ErrorMessage name="re_new_password" component="div" className="invalid-feedback"/>
                                 </div>
                             </div>
                             <div className="form-group">
-                                    {this.state.handleSubmitIsLoad ?
-                                        <>
-                                            <button className="btn gp-btn-primary">
-                                                <a className="spinner-border text-light" role="status">
-                                                    <span className="sr-only">Loading...</span>
-                                                </a>
-                                                <span> Шалгаж байна. </span>
-                                            </button>
-                                            <ModalAlert
-                                                modalAction={() => this.modalClose()}
-                                                status={this.state.modal_alert_status}
-                                                title={msg || error}
-                                                model_type_icon = {error !== '' ? "danger" : "success"}
-                                            />
-                                        </>
-                                        :
-                                        <button type="submit" className="btn gp-btn-primary">
-                                            Хадгалах
-                                        </button>
-                                    }
-                                </div>
+                                <button type="submit" className="btn gp-btn-primary">
+                                    Хадгалах
+                                </button>
+                            </div>
                         </Form>
                     )}}
                     </Formik>
