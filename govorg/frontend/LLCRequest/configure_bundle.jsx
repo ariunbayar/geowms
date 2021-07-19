@@ -102,22 +102,6 @@ export class ConfigureBundle extends Component {
         return true
     }
 
-    handleMakeFeatureErrors() {
-        const { themes, geom_state_count, geom_type } = this.state
-        const { selected_values, selected_packages, selected_features } = this.props
-        const { theme, feature } = selected_values
-
-        var feature_data = selected_values.features[geom_state_count]
-        var feat_data_type = utils.checkMultiGeomTypeName(feature_data.geometry.type)
-        const is_valid_type = this.checkValidType(feat_data_type, geom_type)
-
-        var add_errors = []
-        if (!is_valid_type && feature?.id) {
-            add_errors.push("Төрөл таарахгүй байна!")
-        }
-        this.handleMakeErrors('feature', add_errors)
-    }
-
     render() {
         const { themes, geom_state_count, geom_type } = this.state
         const { selected_values, selected_packages, selected_features } = this.props
