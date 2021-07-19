@@ -547,8 +547,8 @@ export default class InspireMap extends Component {
             map_wms_list.map(( wms) => {
                 const tiles = wms.layers.map((layer) => layer.wms_or_cache_ur ? layer.tile : layer.wms_tile)
                 if (tiles){
-                    tiles.map((hoho) => {
-                        this.map.addLayer(hoho)
+                    tiles.map((elem) => {
+                        this.map.addLayer(elem)
                     })
                 }
             })
