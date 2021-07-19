@@ -1,14 +1,14 @@
 import React, { Component, Fragment } from "react"
 import { Formik, Form, Field} from 'formik'
 import * as Yup from 'yup'
+import FileUpload from '@utils/Tools/FileUpload'
 
 import {service} from './service'
 
 
-const validationSchema = Yup.object().shape({
-    qgis_local_base_url: Yup.string(),
+/* const validationSchema = Yup.object().shape({
 })
-
+ */
 
 export default class ConfigSystem extends Component {
 
@@ -18,20 +18,21 @@ export default class ConfigSystem extends Component {
         this.state = {
             is_editing: false,
             initial_values: {
-                qgis_local_base_url:'',
             },
             values: {},
+            files: [],
         }
-
         this.handleEdit = this.handleEdit.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
+        this.getFile = this.getFile.bind(this)
     }
 
     componentDidMount() {
-        service.config.qgis.get().then((values) => {
+        service.config.qgis_plugin.get().then((values) => {
             this.setState({
                 initial_values: values,
                 values,
+                files,
             })
         })
     }
@@ -50,7 +51,7 @@ export default class ConfigSystem extends Component {
 
         setStatus('saving')
 
-        service.config.qgis
+        service.config.qgis_plugin
             .save(values)
             .then(({ success }) => {
 
@@ -67,9 +68,21 @@ export default class ConfigSystem extends Component {
                 setStatus('save_error')
             })
             .finally(() => {
-                this.setState({ is_editing: false })
+                this.setState({
+                    is_editing: false,
+                    hide_file: false })
             })
 
+    }
+
+    // setInfo(type) {
+    //     if (type == 'qgis pulgin') {
+    //         const text = '.qgis pulgin нэртэй файл оруулах'
+    //         this.setState({ text, type })
+    //     }
+    // }
+    getFile(e) {
+        console.log("e", e.target.value)
     }
 
     render() {
@@ -77,13 +90,14 @@ export default class ConfigSystem extends Component {
         const {
             is_editing,
             initial_values,
-        } = this.state
-
+            hide_file,
+        } = this.props
+        var { files } = this.state
         return (
             <div className="card">
 
                 <div className="card-header">
-                    QGIS сервис
+                    QGIS Plugin
                     <div className="card-action">
                         <a href="#" onClick={ this.handleEdit }>
                             <i className="fa fa-edit"></i>
@@ -113,20 +127,19 @@ export default class ConfigSystem extends Component {
                         }) => {
                             return (
                                 <Form>
-                                    <fieldset disabled={ !is_editing }>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-12">
-                                                <label htmlFor="id_qgis_local_base_url">Base url</label>
-                                                <Field
-                                                    name="qgis_local_base_url"
-                                                    id="id_qgis_local_base_url"
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder="http://x.x.x.x"
-                                                />
-                                            </div>
-                                        </div>
                                         { is_editing &&
+                                        <Fragment>
+                                        <div className="form-group">
+                                            <label htmlFor="">Qgis Plugin файл оруулах</label>
+                                            <FileUpload
+                                            files={files}
+                                            className="mt-2 d-flex justify-content-between"
+                                            default_text="Файл оруулна уу"
+                                            getFile={this.getFile}
+                                            info_text='Файл оруулсан байх ёстой'
+                                            accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
+                                        />
+                                        </div>
                                             <button
                                                 type="submit"
                                                 className="btn gp-btn-primary"
@@ -140,8 +153,8 @@ export default class ConfigSystem extends Component {
                                                 }
                                                 {status != 'saving' && 'Хадгалах' }
                                             </button>
+                                        </Fragment>
                                         }
-                                    </fieldset>
                                     { !is_editing && status == 'save_success' &&
                                         <div className="alert alert-icon-success alert-dismissible" role="alert">
                                             <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
