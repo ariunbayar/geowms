@@ -251,7 +251,7 @@ class UserSubmit:
                 if check['success']:
                     QMessageBox.about(self.iface.mainWindow(), 'Мэдэгдэл', layer_name[:-2] + '. Амжилттай хадгаллаа. <a href="https://nsdi.gov.mn/gov/history/">Энд дарж</a> хүсэлтээ баталгаажуулна уу.')
                 else:
-                    QMessageBox.about(self.iface.mainWindow(), 'Мэдэгдэл', layer_name[:-2] + ', Амжилтгүй хадгаллаа')
+                    QMessageBox.about(self.iface.mainWindow(), 'Мэдэгдэл', layer_name[:-2] + ',' + check['msg'])
         except Exception:
             QMessageBox.about(self.iface.mainWindow(), 'Мэдэгдэл', layer_name[:-2] + ', Холболт ажилтгүй боллоо')
 
