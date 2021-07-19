@@ -1859,11 +1859,11 @@ def create_table_to_cursor(cursor, table_name, fields, schema):
 
 def check_nsdi_address(request):
     nsdi_check = False
-    # host_name = socket.gethostname()
-    # host_addr = socket.gethostbyname(host_name + ".local")
-    # host = request.META.get('HTTP_HOST')
-    # if host_addr == '192.168.10.15' and host == 'nsdi.gov.mn':
-    #     nsdi_check = True
+    host_name = socket.gethostname()
+    host_addr = socket.gethostbyname(host_name + ".local")
+    host = request.META.get('HTTP_HOST')
+    if host_addr == '192.168.10.15' and host == 'nsdi.gov.mn':
+        nsdi_check = True
     return nsdi_check
 
 

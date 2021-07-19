@@ -105,6 +105,7 @@ export default class SelectField extends Component {
                             OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode)
                     }
                 </select>
+                {/* TODO Алдааны message өгөхөд ашиглана */}
                 {
                     errors &&
                         errors.map((row) =>
