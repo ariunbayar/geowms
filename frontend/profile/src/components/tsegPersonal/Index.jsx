@@ -33,7 +33,7 @@ export class Bar extends Component {
                                 <div className="card-body">
                                     <div className="col-md-12 py-0 my-0">
                                         <NavLink
-                                            to="/api/tseg-personal/tseg-info/tseg-ustsan/"
+                                            to="/api/tseg-personal/tseg-ustsan/"
                                             className="list-group-item col-md-12 ml-2 text-center"
                                             activeClassName="text-white gp-bg-primary"
                                             onClick={() => this.setButton(false)}
@@ -46,12 +46,11 @@ export class Bar extends Component {
                         <div>
                         <Switch>
                             <Route
-                                path="/api/tseg-personal/tseg-info/tseg-ustsan/"
+                                path="/api/tseg-personal/tseg-ustsan/"
                                 component={
                                     (props) => <DanForm {...props} setButton={this.setButton}/>
                                 }
                             />
-                            <Route exact path="/api/tseg-personal/"/>
                         </Switch>
                         </div>
                     </div>

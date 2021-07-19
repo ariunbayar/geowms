@@ -2,15 +2,17 @@ import React, { Component } from 'react'
 import { service } from './service'
 import Modal from "@utils/Modal/Modal"
 
+
 export default class EmailUpdate extends Component {
     constructor(props){
         super(props)
-
         this.state = {
             email: '',
             error: '',
             modal_status: this.props.modal_status || 'closed',
+            user_list: [],
         }
+
 
         this.handleChange = this.handleChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -20,7 +22,6 @@ export default class EmailUpdate extends Component {
 
 
     handleChange = (e) => {
-        const { email } = this.state
         this.setState({email: e.target.value});
       }
 
@@ -47,7 +48,7 @@ export default class EmailUpdate extends Component {
                         `${errors}`,
                         '',
                         false,
-                        this.handleModalClose
+                        null
                         )
                 }
             })
@@ -82,22 +83,30 @@ export default class EmailUpdate extends Component {
     }
 
 
+    componentDidMount() {
+        service
+            .userInfo()
+            .then(({user_list}) => {
+                this.setState({user_list})
+            })
+    }
+
+
     render() {
-        const { email } = this.state
+        const { email } = this.state.user_list
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="card-header">
-                        <p className ="font-weight-bold">ШИНЭ И-МАЙЛ ХАЯГАА ОРУУЛНА УУ.</p>
+                    <div className="card-header-right">
+                        <p className ="font-weight-bold ">ШИНЭ И-МАЙЛ ХАЯГАА ОРУУЛНА УУ.</p>
                     </div>
-                    <div className="form-group">
+                    <div className="form-group mb-3">
                         <input
                             error={this.state.error}
                             type="email"
-                            name="email"
+                            name= "email"
                             className="form-control"
-                            placeholder="Шинэ майл хаяг оруулна уу"
-                            value ={email.value}
+                            placeholder= {email}
                             onChange={this.handleChange}>
                         </input>
                     </div>

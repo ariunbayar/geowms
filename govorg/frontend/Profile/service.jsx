@@ -9,5 +9,5 @@ function updatePassword(new_password, old_password) {
         ...getPostOptions(),
           body: JSON.stringify({ new_password, old_password }),
     }
-    return fetch(`/profile/api/update-password/`, requestOptions).then(handleResponse)
+    return fetch(`/api/update-password/`, requestOptions).then(handleResponse)
 }

@@ -42,7 +42,7 @@ export class App extends Component {
                         <Switch>
                             <Route exact path="/profile/" component={Info} activeClassName="selected"/>
                             <Route path="/profile/update-mail/" component={EmailUpdate} />
-                            <Route exact path="/api/tseg-personal/"
+                            <Route path="/api/tseg-personal/"
                                 component={(props) => <Bar {...props} is_display={this.state.is_display} activeClassName="selected"/>}
                             />
                         </Switch>

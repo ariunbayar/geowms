@@ -11,6 +11,7 @@ export class Info extends Component {
         }
     }
 
+
   componentDidMount()   {
         service
             .userInfo()
@@ -19,8 +20,9 @@ export class Info extends Component {
             })
   }
 
+
   render() {
-    const{last_name, first_name, email,  username, is_sso } = this.state.user_list
+    const{last_name, first_name, email,  username } = this.state.user_list
     return (
         <div className="card">
             <div className="col-sm-12">
