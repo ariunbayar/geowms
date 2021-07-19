@@ -293,6 +293,9 @@ def create_change_request(request_datas, feature_id, employee):
         for data in datas['data_list']:
             new_geo_id = None
             old_geo_id = data['att'].get('localid') or None
+            if old_geo_id == 'NULL':
+                old_geo_id = None
+
             package = LFeatures.objects.filter(feature_id=feature_id).first()
             theme = LPackages.objects.filter(package_id=package.package_id).first()
 
