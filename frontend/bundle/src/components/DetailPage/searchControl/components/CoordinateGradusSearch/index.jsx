@@ -20,22 +20,24 @@ class index extends Component {
 
     handleSubmitCoordinateGradus(event) {
         event.preventDefault()
-        const {BA, BB, BC, LA, LB, LC} = this.state
+        const { BA, BB, BC, LA, LB, LC } = this.state
         if (BA > 40 && BB > 0 && BC > 0 && LA > 40 && LB > 0 && LC > 0)
         {
-            var LL=(LB/60+LA)
-            var X=((LC/3600)+(LB/60)+LA-LL) + LL
-            var BBB=(BB/60+BA)
-            var Bbut=(BC/3600)+(BB/60)+BA-BBB
-            var niitB=Bbut+BBB
+            var LL = (LB / 60 + LA)
+            var X = ((LC / 3600) + (LB / 60) + LA - LL) + LL
+            var BBB = (BB / 60 + BA)
+            var Bbut = (BC / 3600) + (BB / 60) + BA - BBB
+            var niitB = Bbut + BBB
             var array = [X, niitB]
             utils.setCenter(array, this.state.bairlal_two_zoom)
-
+        }
+        else {
+            global.NOTIF("warning", "Оруулсан өгөгдөл таарахгүй байна", 'exclamation')
         }
     }
 
     setStateMapFloat(key, value) {
-        this.setState({ [key]: value })
+        this.setState({ [key]: parseFloat(value) })
     }
 
     render() {
@@ -49,35 +51,35 @@ class index extends Component {
                         <label className="font-weight-bold" htmlFor="formGroupInput"></label>
                         <input type="text" className="form-control" placeholder="Градус X"
                             name="BA"
-                            onChange={(e) => this.setStateMapFloat('BA', parseFloat(e.target.value))}
+                            onChange={(e) => this.setStateMapFloat('BA', e.target.value)}
                             value={BA}
                         />
                         <input type="text" className="form-control" placeholder="Минут X"
                             name="BB"
-                            onChange={(e) => this.setStateMapFloat('BB', parseFloat(e.target.value))}
+                            onChange={(e) => this.setStateMapFloat('BB', e.target.value)}
                             value={BB}
                         />
                         <input type="text" className="form-control" placeholder="Секунд X"
                             name="BC"
-                            onChange={(e) => this.setStateMapFloat('BC', parseFloat(e.target.value))}
+                            onChange={(e) => this.setStateMapFloat('BC', e.target.value)}
                             value={BC}
                         />
                     </div>
                     <label className="font-weight-bold" htmlFor="formGroupInput">Уртраг</label>
                     <div className="input-group mb-3">
-                        <input type="number" className="form-control" placeholder="Градус Y"
+                        <input type="text" className="form-control" placeholder="Градус Y"
                             name="LA"
-                            onChange={(e) => this.setStateMapFloat('LA', parseFloat(e.target.value))}
+                            onChange={(e) => this.setStateMapFloat('LA', e.target.value)}
                             value={LA}
                         />
-                        <input type="number" className="form-control" placeholder="Минут Y"
+                        <input type="text" className="form-control" placeholder="Минут Y"
                             name="LB"
-                            onChange={(e) => this.setStateMapFloat('LB', parseFloat(e.target.value))}
+                            onChange={(e) => this.setStateMapFloat('LB', e.target.value)}
                             value={LB}
                         />
-                        <input type="number" className="form-control" placeholder="Секунд Y"
+                        <input type="text" className="form-control" placeholder="Секунд Y"
                             name="LC"
-                            onChange={(e) => this.setStateMapFloat('LC', parseFloat(e.target.value))}
+                            onChange={(e) => this.setStateMapFloat('LC', e.target.value)}
                             value={LC}
                         />
                     </div>

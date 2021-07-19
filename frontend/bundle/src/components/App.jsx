@@ -1,14 +1,24 @@
 import React, {Component} from 'react'
 
-import {DetailPage} from './DetailPage'
+import { DisplayNotif } from '@utils/Notification'
+import DisplayModal from "@utils/Modal/DisplayModal"
 
+import { DetailPage } from './DetailPage'
 
 export class App extends Component {
+
+    setNotAndModal(fn, key) {
+        global[key] = fn
+    }
 
     render() {
 
         return (
-            <DetailPage bundle={this.props.bundle}/>
+            <>
+                <DisplayModal getModalFunc={(fn) => this.setNotAndModal(fn, 'MODAL')}/>
+                <DisplayNotif getNotifFunc={(fn) => this.setNotAndModal(fn, 'NOTIF')}/>
+                <DetailPage bundle={this.props.bundle}/>
+            </>
         )
 
     }
