@@ -23,6 +23,7 @@ export default class BundleAdminRights extends Component {
     }
 
     render() {
+        console.log(this.props.formOptionsRole);
         return (
             <>
                 {this.props.formOptions.map(({id, name, layers, is_active, layer_visible}, idx) =>

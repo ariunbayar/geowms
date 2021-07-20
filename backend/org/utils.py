@@ -11,7 +11,6 @@ from backend.inspire.models import LDataTypes
 from backend.inspire.models import LDataTypeConfigs
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import GovRoleInspire
-from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRole
 
 from .models import Employee
@@ -170,6 +169,130 @@ def org_validation(org_name, org_id):
             errors['org_name'] = 'Ийм нэр бүртгэлтэй байна.'
 
     return errors
+
+
+def _get_feature_property_gov(feature_id, govRole):
+    data_type_list = []
+    data_types_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    perm_all = 1
+    perm_view = 0
+    perm_create = 0
+    perm_remove = 0
+    perm_update = 0
+    perm_approve = 0
+    perm_revoke = 0
+    for data_type_idx in data_types_ids:
+        data_type = LDataTypes.objects.filter(data_type_id=data_type_idx.data_type_id).first()
+        if data_type:
+            data_type_obj = {
+                'id': data_type.data_type_id,
+                'code': data_type.data_type_code,
+                'name': data_type.data_type_name,
+                'definition': data_type.data_type_definition,
+                'properties': [],
+            }
+            property_ids = LDataTypeConfigs.objects.filter(data_type_id=data_type.data_type_id).values_list('property_id', flat=True)
+            properties = LProperties.objects.filter(property_id__in=property_ids).values('property_id', "property_code", "property_name")
+            for prop in properties:
+                perm_all = perm_all + 1
+                property_obj = {
+                    'id': prop['property_id'],
+                    'code': prop['property_code'],
+                    'name': prop['property_name'],
+                    'perm_all': 6,
+                    'perm_view': 0,
+                    'perm_create': 0,
+                    'perm_remove': 0,
+                    'perm_update': 0,
+                    'perm_approve': 0,
+                    'perm_revoke': 0,
+                }
+                for gov_role_inspire in GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, data_type_id=data_type.data_type_id):
+                    if (prop['property_id'] == gov_role_inspire.property_id) and feature_id == gov_role_inspire.feature_id:
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_VIEW:
+                            perm_view = perm_view + 1
+                            property_obj['perm_view'] = property_obj['perm_view'] + 1
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_CREATE:
+                            perm_create = perm_create + 1
+                            property_obj['perm_create'] = property_obj['perm_create'] + 1
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_REMOVE:
+                            perm_remove = perm_remove + 1
+                            property_obj['perm_remove'] = property_obj['perm_remove'] + 1
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_UPDATE:
+                            perm_update = perm_update + 1
+                            property_obj['perm_update'] = property_obj['perm_update'] + 1
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_APPROVE:
+                            perm_approve = perm_approve + 1
+                            property_obj['perm_approve'] = property_obj['perm_approve'] + 1
+                        if gov_role_inspire.perm_kind == GovRoleInspire.PERM_REVOKE:
+                            perm_revoke = perm_revoke + 1
+                            property_obj['perm_revoke'] = property_obj['perm_revoke'] + 1
+                data_type_obj['properties'].append(property_obj)
+            data_type_list.append(data_type_obj)
+
+    perm_view = perm_view + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_VIEW).count()
+    perm_create = perm_create + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_CREATE).count()
+    perm_remove = perm_remove + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_REMOVE).count()
+    perm_update = perm_update + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_UPDATE).count()
+    perm_approve = perm_approve + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_APPROVE).count()
+    perm_revoke = perm_revoke + GovRoleInspire.objects.filter(gov_role=govRole, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovRoleInspire.PERM_REVOKE).count()
+    return data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke
+
+
+def _get_package_features_gove(package_id, govRole):
+    feat_values = []
+    p_perm_all = 0
+    p_perm_view = 0
+    p_perm_create = 0
+    p_perm_remove = 0
+    p_perm_update = 0
+    p_perm_approve = 0
+    p_perm_revoke = 0
+    for feat in LFeatures.objects.filter(package_id=package_id):
+        data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke = _get_feature_property_gov(feat.feature_id, govRole)
+        if not perm_all == 1:
+            p_perm_all = p_perm_all + 1
+            feat_values.append({
+                'id': feat.feature_id,
+                'code': feat.feature_code,
+                'name': feat.feature_name,
+                'data_types': data_type_list,
+                'perm_all': perm_all,
+                'perm_view': perm_view,
+                'perm_create': perm_create,
+                'perm_remove': perm_remove,
+                'perm_update': perm_update,
+                'perm_approve': perm_approve,
+                'perm_revoke': perm_revoke,
+            })
+            if perm_all == perm_view and perm_all != 0:
+                p_perm_view = p_perm_view + 1
+            elif 0 < perm_view and perm_all != 0 and perm_view < perm_all:
+                p_perm_view = p_perm_view + 0.5
+            if perm_all == perm_create and perm_all != 0:
+                p_perm_create = p_perm_create + 1
+            elif 0 < perm_create and perm_all != 0 and perm_create < perm_all:
+                p_perm_create = p_perm_create + 0.5
+            if perm_all == perm_remove and perm_all != 0:
+                p_perm_remove = p_perm_remove + 1
+            elif 0 < perm_remove and perm_all != 0 and perm_remove < perm_all:
+                p_perm_remove = p_perm_remove + 0.5
+            if perm_all == perm_update and perm_all != 0:
+                p_perm_update = p_perm_update + 1
+            elif 0 < perm_update and perm_all != 0 and perm_update < perm_all:
+                p_perm_update = p_perm_update + 0.5
+            if perm_all == perm_approve and perm_all != 0:
+                p_perm_approve = p_perm_approve + 1
+            elif 0 < perm_approve and perm_all != 0 and perm_approve < perm_all:
+                p_perm_approve = p_perm_approve + 0.5
+            if perm_all == perm_revoke and perm_all != 0:
+                p_perm_revoke = p_perm_revoke + 1
+            elif 0 < perm_revoke and perm_all != 0 and perm_revoke < perm_all:
+                p_perm_revoke = p_perm_revoke + 0.5
+            if perm_all == 0:
+                p_perm_all = p_perm_all - 1
+
+    return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke
 
 
 def get_theme_packages_gov(theme_id, govRole):
@@ -591,14 +714,6 @@ def get_name(user_id, item):
 def get_email(user_id, item):
     user = User.objects.filter(pk=user_id).first()
     return user.email
-
-
-def get_role_name(item):
-    role_name = ''
-    role = EmpPerm.objects.filter(employee=item['id']).first()
-    if role and role.emp_role:
-        role_name = role.emp_role.name
-    return role_name
 
 
 def get_position_name(postition_id, item):

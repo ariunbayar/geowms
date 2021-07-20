@@ -13,7 +13,6 @@ export class Жагсаалт extends Component {
             талбарууд: [
                 {'field': 'first_name', "title": 'Нэр', 'has_action': true},
                 {'field': 'email', "title": 'Цахим шуудан',},
-                {'field': 'roles', "title": 'roles'},
                 {'field': 'is_active', "title": 'Идэвхтэй эсэх', 'has_action': true},
                 {'field': 'is_sso', "title": 'ДАН системээр баталгаажсан эсэх', 'has_action': true}
             ],
