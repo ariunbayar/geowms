@@ -7,6 +7,7 @@ import Modal from "@utils/Modal/Modal"
 import FieldForm from './field_form'
 import SelectOption from './components/selectOptions'
 import {GPIcon} from "@utils/Tools"
+import { listenOnce } from 'ol/events';
 
 
 export default class  ExportCreate extends Component {
@@ -43,7 +44,57 @@ export default class  ExportCreate extends Component {
             pk_field_type: "",
             pk_field_count: "",
             pk_field_max_range: "",
+            checked_choices: [],
+            checked_datas: [],
+            check_ids: [],
+            data_list: [
+                {
+                    'id': 1,
+                    'name': 'Дата хооронд',
+                    'eng_name': 'between',
+                    'keys': [1, 2]
+                },
+                {
+                    'id': 2,
+                    'name': 'Эхлэх эхний утгаар',
+                    'eng_name': 'since one of data',
+                    'keys': [1]
+                },
+                {
+                    'id': 3,
+                    'name': 'Төгсөх сүүлийн утгаар',
+                    'eng_name': 'until one of data',
+                    'keys': [2]
+                },
+                {
+                    'id': 4,
+                    'name': 'Оруулах өгөгдлийн тоо хэмжээгээр',
+                    'eng_name': 'limit',
+                    'keys': [3]
+                },
+            ],
+            choice_datas: [
+                {
+                    'name': 'Дата-ны эхлэх утга',
+                    'eng_name': 'pk_start_index',
+                    'value': '',
+                    'key': 1
+                },
+                {
+                    'name': 'Дата-ны эцсийн утга',
+                    'eng_name': 'pk_field_max_range',
+                    'key': 2,
+                    'value': '',
+                },
+                {
+                    'name': 'Оруулах өгөгдлийн тоо хэмжээ',
+                    'eng_name': 'pk_field_count',
+                    'key': 3,
+                    'value': '',
+                },
+            ],
         }
+
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
         this.getFeatProperties = this.getFeatProperties.bind(this)
@@ -57,6 +108,7 @@ export default class  ExportCreate extends Component {
         this.setSelectedField = this.setSelectedField.bind(this)
         this.dataTypeValidation = this.dataTypeValidation.bind(this)
         this.getFilterType = this.getFilterType.bind(this)
+        this.setSelectedOptions = this.setSelectedOptions.bind(this)
     }
 
     componentDidMount(){
@@ -123,6 +175,14 @@ export default class  ExportCreate extends Component {
         if (name == 'pk_field_name') {
             data_list['pk_field_name'] = selection.column_name
             data_list['pk_field_type'] = selection.data_type
+        }
+
+        if (name == 'choice_datas') {
+            var data = e.target.value
+            var table_data = e.target.selectedIndex
+            var optionElement = e.target.childNodes[table_data]
+            var selected_data_name =  optionElement.getAttribute('id')
+            data_list[selected_data_name] = data
         }
 
         else{
@@ -353,11 +413,33 @@ export default class  ExportCreate extends Component {
         })
     }
 
+    setSelectedOptions(lists, e) {
+        var { choice_datas, data_list, checked_datas } = this.state
+        var value = ''
+        var checked_datas = []
+        lists.forEach(element => {
+            value = obj => obj.id == element
+            var index_of = data_list.findIndex(value)
+            var data_keys = data_list[index_of].keys
+            data_keys.forEach(data_key => {
+                value = obj => obj.key == data_key
+                var index_of_checked = checked_datas.findIndex(value)
+                if (index_of_checked < 0)  {
+                    var index_of_checked = choice_datas.findIndex(value)
+                    checked_datas.push(choice_datas[index_of_checked])
+                }
+            });
+        });
+
+        this.setState({checked_datas})
+
+    }
+
     getFilterType() {
+        const { data_list, check_ids } = this.state
         var modal = {}
         modal['modal_status'] = 'open'
-        modal['text'] = SelectOption
-
+        modal['text'] = () => <SelectOption data_list={data_list} setSelectedOptions={this.setSelectedOptions}/>
         global.MODAL(modal)
     }
 
@@ -367,11 +449,10 @@ export default class  ExportCreate extends Component {
             themes, theme_name, package_name,
             feature_name, selected_features,
             selected_packages, data_type_list,
-            id_list, table_name, is_loading,
+            table_name, is_loading,
             ano_table_names, ano_table_fields,
-            matched_feilds, geo_data_field, check_data_type,
-            check_error, pk_field_name, pk_start_index,
-            pk_field_type, pk_field_count,pk_field_max_range
+            matched_feilds, geo_data_field,
+            check_error, checked_datas, pk_field_name
         } = this.state
         return (
             <div className="card p-2">
@@ -465,76 +546,51 @@ export default class  ExportCreate extends Component {
                                         шүүлтүүр нэмэх
                                     </a>
                                 </div>
-                                {/* <div className='row d-flex mr-3'>
-                                    <span
-                                        className="col-md-6 m-1 border rounded mr-auto"
-                                        name='inspire_property'
-                                    >
-                                        Давтагдашгүй талбар
-                                    </span>&nbsp;
-                                    <SelectField
-                                        state_name='pk_field_name'
-                                        data_list={ano_table_fields}
-                                        option_name = "data_type"
-                                        option_key = "column_name"
-                                        option_text = 'column_name'
-                                        default_value={pk_field_name}
-                                        className={"d-flex col-md-5 m-1 p-0 align-items-middle"}
-                                        handleSelectField={this.handleChange}
-                                    />
-                                </div>
-                                <div className='row d-flex mr-3'>
-                                    <span
-                                        className="col-md-6 m-1 border rounded mr-auto"
-                                        name='inspire_property'
-                                    >
-                                        Дата-ны эхний утга
-                                    </span>&nbsp;
-                                    <input
-                                        name='pk_field_type'
-                                        type="text"
-                                        id='pk_field_type'
-                                        placeholder="ӨСӨХ ЭРЭМБЭЭР"
-                                        value={pk_start_index}
-                                        className={`form-control col-md-5 m-1 `}
-                                        onChange={(e) => {this.setState({pk_start_index: e.target.value})}}
-                                    >
-                                    </input>
-                                </div>
-                                <div className='row d-flex mr-3'>
-                                    <span
-                                        className="col-md-6 m-1 border rounded mr-auto"
-                                        name='inspire_property'
-                                    >
-                                        Дата-ны эцсийн утга
-                                    </span>&nbsp;
-                                    <input
-                                        name='pk_field_type'
-                                        type="text"
-                                        id='pk_field_type'
-                                        value={pk_field_max_range}
-                                        className={`form-control col-md-5 m-1 `}
-                                        onChange={(e) => {this.setState({pk_field_max_range: e.target.value})}}
-                                    >
-                                    </input>
-                                </div>
-                                <div className='row d-flex mr-3'>
-                                    <span
-                                        className="col-md-6 m-1 border rounded mr-auto"
-                                        name='inspire_property'
-                                    >
-                                        Оруулах өгөгдлийн тоо хэмжээ
-                                    </span>&nbsp;
-                                    <input
-                                        name='pk_field_type'
-                                        type="number"
-                                        id='pk_field_type'
-                                        value={pk_field_count}
-                                        className={`form-control col-md-5 m-1 `}
-                                        onChange={(e) => {this.setState({pk_field_count: e.target.value})}}
-                                    >
-                                    </input>
-                                </div> */}
+                                {
+                                    checked_datas && checked_datas.length >0 ?
+                                    <Fragment>
+                                        <div className='row d-flex mr-3'>
+                                            <span
+                                                className="col-md-6 m-1 border rounded mr-auto"
+                                                name='inspire_property'
+                                            >
+                                                Давтагдашгүй талбар
+                                            </span>&nbsp;
+                                            <SelectField
+                                                state_name='pk_field_name'
+                                                data_list={ano_table_fields}
+                                                option_name = "data_type"
+                                                option_key = "column_name"
+                                                option_text = 'column_name'
+                                                default_value={pk_field_name}
+                                                className={"d-flex col-md-5 m-1 p-0 align-items-middle"}
+                                                handleSelectField={this.handleChange}
+                                            />
+                                        </div>
+                                        {
+                                            checked_datas.map((data, idx) =>
+                                            <div className='row d-flex mr-3'>
+                                                <span
+                                                    className="col-md-6 m-1 border rounded mr-auto"
+                                                    name='inspire_property'
+                                                >
+                                                    {data.name}
+                                                </span>&nbsp;
+                                                <input
+                                                    name='choice_datas'
+                                                    type="text"
+                                                    id={data.eng_name}
+                                                    value={data.value}
+                                                    className={`form-control col-md-5 m-1 `}
+                                                    handleChange={(e) => { this.handleChange('choice_datas', e) }}
+                                                >
+                                                </input>
+                                            </div>
+                                            )
+                                        }
+                                    </Fragment>
+                                    : null
+                                }
                             </div>
                         </div>
                         <hr />
