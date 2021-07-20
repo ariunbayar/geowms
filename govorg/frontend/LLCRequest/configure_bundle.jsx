@@ -7,6 +7,7 @@ import { LLCMap } from '../../../llc/frontend/LLCMap'
 
 import { service } from './service'
 
+
 export class ConfigureBundle extends Component {
 
     constructor(props) {
@@ -105,7 +106,6 @@ export class ConfigureBundle extends Component {
         const { themes, geom_state_count, geom_type } = this.state
         const { selected_values, selected_packages, selected_features } = this.props
         const { theme, feature } = selected_values
-
 
         var feature_data = selected_values.features[geom_state_count]
         var feat_data_type = utils.checkMultiGeomTypeName(feature_data.geometry.type)

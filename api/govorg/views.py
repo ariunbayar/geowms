@@ -1,5 +1,4 @@
 from frontend.page.views import service
-from django.db.models import base
 import requests
 import json
 
@@ -11,8 +10,7 @@ from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
 from api.utils import filter_layers, replace_src_url, filter_layers_wfs, get_cql_filter
-from backend.dedsanbutets.models import ViewNames
-from backend.govorg.models import GovOrgWMSLayer, GovOrg as System
+from backend.govorg.models import GovOrg as System
 from backend.inspire.models import (
     LCodeLists,
     LFeatureConfigs,
@@ -28,6 +26,7 @@ from backend.org.models import Employee, Org
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
+from main.inspire import GEoIdGenerator
 from django.core.cache import cache
 from main.decorators import get_conf_geoserver_base_url
 
@@ -190,7 +189,7 @@ def json_proxy(request, base_url, token, code):
 
 def _geojson_convert_3d_geojson(geojson):
     with connections['default'].cursor() as cursor:
-        sql = """ SELECT ST_AsGeoJSON(ST_Transform(ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326),4326)) as geo_json """
+        sql = """ SELECT ST_AsGeoJSON(ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326)) as geo_json """
         cursor.execute(sql, [str(geojson)])
         geo_json = {
             cursor.description[i][0]: value
@@ -284,76 +283,111 @@ def _get_property_data(values, employee, feature_id, geo_id):
     return datas
 
 
+def create_change_request(request_datas, feature_id, employee):
+    objs = []
+    info = ''
+
+    for datas in request_datas:
+        check_data = False
+
+        for data in datas['data_list']:
+            new_geo_id = None
+            old_geo_id = data['att'].get('localid') or None
+            if old_geo_id == 'NULL':
+                old_geo_id = None
+
+            package = LFeatures.objects.filter(feature_id=feature_id).first()
+            theme = LPackages.objects.filter(package_id=package.package_id).first()
+
+            geo_json = _geojson_convert_3d_geojson(data['geom'])
+            form_json = _get_property_data(data['att'], employee, feature_id, old_geo_id)
+
+            success, info = utils.has_employee_perm(employee, feature_id, True, datas['perm_kind'], geo_json)
+
+            if not success:
+                check_data = True
+                break
+
+            form_json = utils.json_dumps(form_json)
+
+            if datas['perm_kind'] == EmpPermInspire.PERM_REMOVE:
+                form_json = None
+
+            elif datas['perm_kind'] == EmpPermInspire.PERM_CREATE:
+                new_geo_id = GEoIdGenerator(feature_id, package.feature_code).get()
+
+            objs.append(ChangeRequest(
+                old_geo_id=old_geo_id,
+                new_geo_id=new_geo_id,
+                theme_id=theme.theme_id,
+                package_id=package.package_id,
+                feature_id=feature_id,
+                employee=employee,
+                org=employee.org,
+                state=ChangeRequest.STATE_CONTROL,
+                kind=datas['request_type'],
+                form_json=form_json,
+                geo_json=geo_json,
+            ))
+
+        if check_data:
+            return False, info, objs
+
+    return True, info, objs
+
+
 @require_POST
 @csrf_exempt
 def qgis_submit(request, token, fid):
+    employee = get_object_or_404(Employee, token=token)
+
+    request_list = []
+    request_list_data = {}
+
     update = request.POST.get('update')
     delete = request.POST.get('delete')
-    employee = get_object_or_404(Employee, token=token)
-    org = get_object_or_404(Org, pk=employee.org_id)
+    create = request.POST.get('create')
+
     update_lists = json.loads(update)
     delete_lists = json.loads(delete)
-    objs = []
-    msg = []
-    form_json = []
-    for update_item in update_lists:
-        feature_id = fid
-        if update_item['att']['localid']:
-            geo_id = update_item['att']['localid']
-        else:
-            geo_id = update_item['att']['geo_id']
-        package = LFeatures.objects.filter(feature_id=feature_id).first()
-        theme = LPackages.objects.filter(package_id=package.package_id).first()
-        geo_json = _geojson_convert_3d_geojson(update_item['geom'])
-        success, info = utils.has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geo_json)
-        form_json = _get_property_data(update_item['att'], employee, feature_id, geo_id)
-        if success:
-            objs.append(ChangeRequest(
-                old_geo_id=geo_id,
-                new_geo_id=None,
-                theme_id=theme.theme_id,
-                package_id=package.package_id,
-                feature_id=feature_id,
-                employee=employee,
-                org=org,
-                state=ChangeRequest.STATE_CONTROL,
-                kind=ChangeRequest.KIND_UPDATE,
-                form_json=utils.json_dumps(form_json),
-                geo_json=geo_json,
-            ))
-            msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'update'})
-        else:
-            msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'update'})
+    create_lists = json.loads(create)
 
-    for delete_item in delete_lists:
-        feature_id = delete_item['att']['feature_id']
-        if delete_item['att']['inspire_id']:
-            geo_id = delete_item['att']['inspire_id']
-        else:
-            geo_id = delete_item['att']['geo_id']
-        package = LFeatures.objects.filter(feature_id=feature_id).first()
-        theme = LPackages.objects.filter(package_id=package.package_id).first()
-        geo_json = _geojson_convert_3d_geojson(delete_item['geom'])
-        success, info = utils.has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_REMOVE, geo_json)
-        if success:
-            objs.append(ChangeRequest(
-                old_geo_id=geo_id,
-                new_geo_id=None,
-                theme_id=theme.theme_id,
-                package_id=package.package_id,
-                feature_id=feature_id,
-                employee=employee,
-                org=org,
-                state=ChangeRequest.STATE_CONTROL,
-                kind=ChangeRequest.KIND_DELETE,
-                form_json=None,
-                geo_json=geo_json,
-            ))
-            msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'delete'})
-        else:
-            msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'delete'})
-    hoho = ChangeRequest.objects.bulk_create(objs)
-    return JsonResponse({'success': True, 'msg': msg})
+    if update_lists:
+
+        request_list_data = {
+            'data_list': update_lists,
+            'perm_kind': EmpPermInspire.PERM_UPDATE,
+            'request_type': ChangeRequest.KIND_UPDATE
+        }
+
+        request_list.append(request_list_data)
+
+    if create_lists:
+
+        request_list_data = {
+            'data_list': create_lists,
+            'perm_kind': EmpPermInspire.PERM_CREATE,
+            'request_type': ChangeRequest.KIND_CREATE
+        }
+
+        request_list.append(request_list_data)
+
+    if delete_lists:
+
+        request_list_data = {
+            'data_list': delete_lists,
+            'perm_kind': EmpPermInspire.PERM_REMOVE,
+            'request_type': ChangeRequest.KIND_DELETE
+        }
+
+        request_list.append(request_list_data)
+
+    success, info, objs = create_change_request(request_list, fid, employee)
+    if not success:
+        return JsonResponse({'success': False, 'msg': info})
+
+    ChangeRequest.objects.bulk_create(objs)
+    return JsonResponse({'success': True, 'msg': info})
 
 
 def _get_layer_name(employee, fid):

@@ -20,15 +20,13 @@ HEADERS = {
 
 @llc_required(lambda u: u)
 def llc_frontend(request, content):
+    content = {"company_name": content.get('company_name').upper() or ''}
     return render(request, 'llc/index.html', content)
 
 
 #llc-ийг шууд дуудаж үзэх
 def llc_frontend_test(request):
-    content = {
-        'dsfs': ''
-    }
-    return render(request, 'llc/dan_user.html', content)
+    return render(request, 'llc/dan_user.html')
 
 
 @require_GET
@@ -58,3 +56,4 @@ def get_tool_datas(request, content):
     return JsonResponse({
         'tool_datas': tool_datas
     })
+

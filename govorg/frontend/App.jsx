@@ -21,7 +21,6 @@ const Employee = React.lazy(() => import('./Role/Employee'));
 const MapRegion = React.lazy(() => import('./Role/Region'));
 const TuuhenOv = React.lazy(() => import('./Bundles/TuuhenOv'));
 const Forms = React.lazy(() => import('./Bundles/Form'));
-const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
 const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
@@ -66,7 +65,6 @@ export class App extends Component {
         return (
             <BrowserRouter>
                 <SuspenseLoader is_loading={is_loading} color={'#000'} text="Эрхүүдийг уншиж байна."/>
-                <DisplayModal getModalFunc={this.getModalFunc}/>
                 <DisplayNotif getNotifFunc={this.getNotifFunc}/>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
                     <div className="brand-logo">
@@ -79,6 +77,7 @@ export class App extends Component {
                 </div>
                 <div className="clearfix">
                     <div className="content-wrapper">
+                        <ProfileMenu user={this.props.org.employee}/>
                         <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
                             {
                                 Object.keys(org_role).length > 0 && base_layer_list.length > 0
@@ -111,7 +110,6 @@ export class App extends Component {
                                         />
                                         <Route path="/gov/perm/addresses/" render={(props) => <Addresses {...props} employee={employee}/> } />
                                         <Route path="/gov/perm/erguuleg/" render={(props) => <Addresses {...props} employee={employee}/> } />
-                                        <Route path="/gov/zip-code/" component={ZipCode} />
                                         <Route path="/gov/org-request/" component={OrgRequest} />
                                         <Route path="/gov/history/" component={ChangeRequest} />
                                         <Route exact path="/gov/perm/all/" render={(props) => <InsPerms {...props} org_roles={org_role} role_perm={org_role}/>} />
@@ -127,9 +125,38 @@ export class App extends Component {
                         </Suspense>
                     </div>
                 </div>
+                <DisplayModal getModalFunc={this.getModalFunc}/>
             </BrowserRouter>
         )
     }
+}
+
+function ProfileMenu(props) {
+    const user = props.user
+    return (
+        <div className="position-absolute t-0 r-0 mt-2 mr-3">
+            <div className="btn-group" style={{ zIndex: 1001 }}>
+                <a className="dropdown-toggle dropdown-toggle-nocaret border-0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+                    <span className="user-profile"><img src="/static/assets/image/user.png" className="img-circle" alt="user avatar"></img></span>
+                </a>
+                <div className="dropdown-menu dropdown-menu-right">
+                    <a className="dropdown-item user-details">
+                        <div className="media">
+                            <div className="avatar"><img className="align-self-start mr-3" src="/static/assets/image/user.png" alt="user avatar"></img></div>
+                            <div className="media-body">
+                                <h6 className="mt-2 user-title">{user.username}</h6>
+                                <p className="user-subtitle">{user.email}</p>
+                            </div>
+                        </div>
+                    </a>
+                    <div className="dropdown-divider"></div>
+                    <NavLink className="dropdown-item" activeClassName="active" to="/gov/profile/"><i className="icon-lock mr-2"></i>ПРОФАЙЛ</NavLink>
+                    <div className="dropdown-divider"></div>
+                    <a className="dropdown-item text-dark" href="/logout/"><i className="icon-power mr-2"></i>ГАРАХ</a>
+                </div>
+            </div>
+        </div>
+    )
 }
 
 function TabBars(props) {
@@ -258,7 +285,6 @@ function TabBars(props) {
                         </ul>
                     </MenuItem>
                     }
-                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
                     {
                         emp_role?.themes && Object.keys(emp_role.themes).length > 0
                         ?

@@ -673,12 +673,12 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
 
     if not qs:
         success = False
-        info = "Албан хаагчийн эрх олгогдоогүй байна."
+        info = "Албан хаагчийн эрх олгогдоогүй байна. Системийн админд хандана уу !!!."
     if geo_json:
         is_included = _is_geom_included(geo_json, employee.org.geo_id)
         if not is_included:
             success = False
-            info = "Байгууллагын эрх олгогдоогүй байна."
+            info = "Байгууллагын эрх олгогдоогүй байна. Системийн админд хандана уу !!!."
         overlap_feature_id = FeatureOverlaps.objects.filter(feature_id=fid).values_list('overlap_feature_id', flat=True)
         overlap_feature_id = [i for i in overlap_feature_id]
         overlap_feature_id.append(fid)

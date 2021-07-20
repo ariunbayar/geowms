@@ -6,7 +6,7 @@ import Modal from '@utils/Modal/Modal'
 
 import RequestModal from  './RequestModal'
 import { service } from "./service";
-import { makeStateColor, makeKindColor } from '../helpers/functions'
+import { makeStateColor, makeKindColor } from '@helpUtils/functions'
 
 export class FileAndDesc extends Component {
     constructor(props){
@@ -94,6 +94,13 @@ export class Detail extends Component {
                         }
                     },
                     {
+                        "title": 'Устгах',
+                        "text": '',
+                        "icon": 'fa fa-trash-o text-danger',
+
+                        "action": (values) => this.handleRemoveAction(values),
+                    },
+                    {
                         "title": '',
                         'component': FileAndDesc,
                         'props': {
@@ -112,6 +119,8 @@ export class Detail extends Component {
         this.infoModal = this.infoModal.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
+        this.handleRemoveAction = this.handleRemoveAction.bind(this)
     }
 
     componentDidMount(){
@@ -172,6 +181,68 @@ export class Detail extends Component {
             false,
             values.description,
         )
+    }
+
+    handleRemoveAction(values){
+        this.setState({ values })
+        this.handleModalOpen(values )
+    }
+
+    handleModalOpen(values){
+        this.setState({values})
+        var state = 'ИЛГЭЭСЭН'
+        var kind = 'БУЦААГДСАН'
+        var modal = {}
+
+        modal['modal_status'] = 'open'
+        modal['title'] = 'Устгах хүсэлт'
+        modal['icon_color'] = 'warning'
+        modal['modal_icon'] = 'fa fa-exclamation-circle'
+
+        if(kind != values.kind && state != values.state) {
+            modal['text'] = 'Та хүсэлтийг устгахдаа итгэлтай байна уу '
+            modal['has_button'] = true
+            modal['actionNameBack'] = 'Буцах'
+            modal['actionNameDelete'] = 'Устгах'
+            modal['modalAction'] = this.handleRemove
+        }
+
+        else {
+
+            var info = state
+            if (values.kind == kind ) info = kind
+
+            modal['text'] = `Энэхүү хүсэлт ${info} байгаа тул устгах боломжгүй`
+        }
+
+        global.MODAL(modal)
+    }
+
+    handleRemove() {
+        const { id } = this.state.values
+        service.removeRequest(id).then(({success, info}) => {
+            console.log()
+            if(success) {
+                const modal = {
+                    modal_status: 'open',
+                    modal_icon: 'fa fa-check-circle',
+                    icon_color: "success",
+                    title: info,
+                }
+                global.MODAL(modal)
+                this.refreshData()
+            }
+            else {
+                const modal = {
+                    modal_status: 'open',
+                    modal_icon: 'fa fa-times-circle',
+                    icon_color: "danger",
+                    title: info,
+                }
+                global.MODAL(modal)
+            }
+
+        })
     }
 
     render() {
@@ -247,6 +318,8 @@ export class Detail extends Component {
                         title={this.state.title}
                         has_button={this.state.has_button}
                         text={this.state.text}
+                        actionNameBack={ this.state.actionNameBack }
+                        actionNameDelete={ this.state.actionNameDelete }
                         description={this.state.description}
                     />
                 </div>

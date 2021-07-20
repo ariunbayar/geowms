@@ -76,8 +76,12 @@ urlpatterns = [
         path('check/', qpay_views.check, name='check'),
     ], 'qpay'))),
 
-    path('profile/api/', include(([
+    path('profile/', include(([
         path('', profile_views.history, name='history'),
+    ], 'profile'))),
+
+    path('profile/api/', include(([
+        path('information/', profile_views.user_info_all),
         path('all/', profile_views.all, name='all'),
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
@@ -86,7 +90,7 @@ urlpatterns = [
         path('set-email/', profile_views.set_email, name='set-email'),
         path('info/', profile_views.user_info),
         path('update-password/', profile_views.user_update_password),
-    ], 'profile'))),
+    ], 'profile/api/'))),
 
     re_path('^payment/.*', payment_views.index, name='payment'),
     re_path('^open-layer/.*', open_layer_views.index, name='open-layer'),

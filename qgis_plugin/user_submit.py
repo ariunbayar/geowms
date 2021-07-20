@@ -226,6 +226,22 @@ class UserSubmit:
 
         return deletes
 
+    def get_create_items(self, layer, projection, xform, changed_geom, fieldnames):
+        create = []
+        for feature in layer.getFeatures():
+            attrs = feature.attributes()
+            if not attrs[0]:
+                attributes = {}
+                geom = feature.geometry()
+                for j in range(len(layer.fields())):
+                    attributes[str(fieldnames[j])] = str(feature[str(fieldnames[j])])
+                create.append({
+                    "geom": geom.asJson(),
+                    "att": attributes,
+                    "projection": projection if projection else ''
+                })
+        return create
+
 
     def submit(self, data, layer_name):
         try:
@@ -235,7 +251,7 @@ class UserSubmit:
                 if check['success']:
                     QMessageBox.about(self.iface.mainWindow(), 'Мэдэгдэл', layer_name[:-2] + '. Амжилттай хадгаллаа. <a href="https://nsdi.gov.mn/gov/history/">Энд дарж</a> хүсэлтээ баталгаажуулна уу.')
                 else:
-                    QMessageBox.about(self.iface.mainWindow(), 'Мэдэгдэл', layer_name[:-2] + ', Амжилтгүй хадгаллаа')
+                    QMessageBox.about(self.iface.mainWindow(), 'Мэдэгдэл', layer_name[:-2] + ',' + check['msg'])
         except Exception:
             QMessageBox.about(self.iface.mainWindow(), 'Мэдэгдэл', layer_name[:-2] + ', Холболт ажилтгүй боллоо')
 
@@ -247,6 +263,7 @@ class UserSubmit:
         layer_name = ''
         updates = []
         deletes = []
+        creates = []
         for layer in active_layers:
             data_source_uri = layer.dataProvider().dataSourceUri(expandAuthConfig=False)
             match_result = re.search("(?P<url>https?://[^\s]+)", data_source_uri)
@@ -263,6 +280,9 @@ class UserSubmit:
                         updates = self.get_update_items(layer, projection, xform, changed_geom, fieldnames)
                         deletes = self.get_delete_items(layer, projection, xform, changed_geom, fieldnames)
 
-        data = {'update': json.dumps(updates), 'delete': json.dumps(deletes)}
+                    creates = self.get_create_items(layer, projection, xform, changed_geom, fieldnames)
+
+
+        data = {'update': json.dumps(updates), 'delete': json.dumps(deletes), 'create': json.dumps(creates)}
         self.submit(data, layer_name)
 

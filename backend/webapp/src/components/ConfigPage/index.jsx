@@ -29,9 +29,8 @@ export default class ConfigPage extends Component {
                 </div>
                 <div className="row">
                     <div className="col-lg-4">
-                        <ConfigPayment/>
-                        <ConfigSystem/>
                         <ConfigQgis/>
+                        <ConfigSystem/>
                         <ConfigGeoserver/>
                     </div>
                     <div className="col-lg-4">
@@ -41,6 +40,7 @@ export default class ConfigPage extends Component {
                     <div className="col-lg-4">
                         {/* <ConfigValueTypes/> */}
                         <ConfigEmail/>
+                        <ConfigPayment/>
                     </div>
                 </div>
             </div>

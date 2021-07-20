@@ -1,4 +1,4 @@
-import {handleResponse, getPostOptions, getGetOptions} from '../../service'
+import { handleResponse, getGetOptions, getPostOptions } from "@helpUtils/handleRequest"
 
 const prefix = '/back/tuuhen_ov/tseg-personal'
 
