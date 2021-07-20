@@ -226,15 +226,15 @@ def _get_tseg_detail(payment):
                             info['sum'] =  code.code_list_name
                     else:
                         info['aimag'] = code.code_list_name
-            else:
-                mgeo_qs = _filter_Model([{'geo_id': point_info['geo_id']}], Model=MGeoDatas)
-                mgeo = mgeo_qs.first()
-                geo_json = utils.json_load(mgeo.geo_data.json)
-                coordinates = _get_geom_from_geo_json(geo_json)
-                aimag, sum = utils.get_aimag_sum_from_point(coordinates[0], coordinates[1])
-                info['aimag'] = aimag
-                info['sum'] = sum
             info[key] = value
+        if 'aimag' not in info:
+            mgeo_qs = _filter_Model([{'geo_id': point_info['geo_id']}], Model=MGeoDatas)
+            mgeo = mgeo_qs.first()
+            geo_json = utils.json_load(mgeo.geo_data.json)
+            coordinates = _get_geom_from_geo_json(geo_json)
+            aimag, sum = utils.get_aimag_sum_from_point(coordinates[0], coordinates[1])
+            info['aimag'] = aimag
+            info['sum'] = sum
         info['amount'] = point.amount
         points.append(info)
 
