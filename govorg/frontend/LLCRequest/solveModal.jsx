@@ -63,7 +63,25 @@ export class DetailModalBody extends Component {
     }
 
     handleErrors(errors) {
-        this.setState({ current_count: errors['list_idx'] })
+        if (errors['list_idx']) {
+            this.setState({ current_count: errors['list_idx'] })
+        }
+        else{
+            const modal = {
+                modal_status: "open",
+                modal_icon: "fa fa-exclamation-circle",
+                modal_bg: '',
+                icon_color: 'warning',
+                title: 'Төрөл таарахгүй байна!',
+                text: errors,
+                has_button: false,
+                actionNameBack: '',
+                actionNameDelete: '',
+                modalAction: null,
+                modalClose: null,
+            }
+            global.MODAL(modal)
+        }
     }
 
     render() {
