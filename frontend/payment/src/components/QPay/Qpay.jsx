@@ -86,9 +86,9 @@ export class QPay extends Component {
                         }, 5000)
                     }
                 })
-                // .catch(() =>
-                    // global.NOTIF('danger', 'Алдаа гарсан байна', 'times')
-                // )
+                .catch(() =>
+                    global.NOTIF('danger', 'Алдаа гарсан байна', 'times')
+                )
         }
     }
 
