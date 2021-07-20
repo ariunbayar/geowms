@@ -23,24 +23,32 @@ export class Details extends Component {
             is_loading: true,
             payment_id: this.props.match.params.id,
         }
+        this.getDetails = this.getDetails.bind(this)
     }
 
     componentDidMount() {
+        this.getDetails()
+    }
+
+    getDetails() {
         const id = this.state.payment_id
-        service.getDetails(id).then(({ success, items, points, polygon, layers, info }) => {
-            if(success) {
-                items.map(( items ) =>
-                    this.setState({items})
-                )
-                this.setState({ points, polygon, layers, is_loading: false })
-            }
-            else {
-                this.setState({ is_loading: false })
-                global.NOTIF('warning', info, 'exclamation')
-            }
-        }).catch(error => {
-            global.NOTIF('danger', 'Алдаа гарсан байна', 'times')
-        })
+        service
+            .getDetails(id)
+            .then(({ success, items, points, polygon, layers, info }) => {
+                if(success) {
+                    items.map(( items ) =>
+                        this.setState({items})
+                    )
+                    this.setState({ points, polygon, layers, is_loading: false })
+                }
+                else {
+                    this.setState({ is_loading: false })
+                    global.NOTIF('warning', info, 'exclamation')
+                }
+            })
+            .catch(error => {
+                global.NOTIF('danger', 'Алдаа гарсан байна', 'times')
+            })
     }
 
     render() {
@@ -99,6 +107,8 @@ export class Details extends Component {
                                 <QpayGen
                                     items={items}
                                     payment_id={payment_id}
+                                    history={this.props.history.push}
+                                    getDetails={this.getDetails}
                                 />
                             </div>
                         }
