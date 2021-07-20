@@ -52,7 +52,7 @@ export class QPay extends Component {
                 else
                 {
                     if(error_message){
-                        this.props.addNotif('danger', error_message, 'times')
+                        global.NOTIF('danger', error_message, 'times')
                     }
 
                     if(qPay_QRimage){
@@ -63,7 +63,7 @@ export class QPay extends Component {
 
                 }
                 if (error) {
-                    this.props.addNotif('danger', error_message, 'times')
+                    global.NOTIF('danger', error_message, 'times')
                 }
             })
 
@@ -83,7 +83,7 @@ export class QPay extends Component {
                     }, 5000)
                 }
             })
-            .catch(() => this.props.addNotif('danger', 'Алдаа гарсан байна', 'times'))
+            .catch(() => global.NOTIF('danger', 'Алдаа гарсан байна', 'times'))
         }
     }
 

@@ -167,14 +167,13 @@ export default class Modal extends Component {
                                         ?
                                             <small className=''>{this.props.text}</small>
                                         :
-                                            <this.props.text
-                                                {...this.props}
-                                            />
+                                            this.props.text
                                     )
                                 }
                             </div>
                             {
-                                this.props.has_button ?
+                                this.props.has_button
+                                ?
                                     <div className="modal-footer border-0">
                                         <button type="button" onClick={() => this.handleClose()} className="btn btn-primary waves-effect waves-light">
                                             <i className="fa fa-times pr-1"></i>
@@ -189,7 +188,15 @@ export default class Modal extends Component {
                                         </button>
                                     </div>
                                 :
-                                <div className="modal-body mt-3"></div>
+                                    this.props.text
+                                    ?
+                                        typeof(this.props.text) == 'string'
+                                        ?
+                                            <div className="modal-body mt-3"></div>
+                                        :
+                                            null
+                                    :
+                                        <div className="modal-body mt-3"></div>
                             }
                         </div>
                     </div>

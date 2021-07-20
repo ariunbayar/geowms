@@ -1,7 +1,7 @@
 import React, {Component} from "react";
-import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
+
 import HistoryForm from './historyForm'
-import { rotate } from "ol/transform"
 import { Details } from './details'
 
 export  class History extends Component {

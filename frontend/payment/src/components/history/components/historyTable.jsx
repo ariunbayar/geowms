@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {Link} from "react-router-dom"
-import {service} from '../service'
+import {service} from '../../service'
 export class HistoryTable extends Component {
 
     constructor(props) {
