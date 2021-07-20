@@ -117,7 +117,7 @@ export default class  ExportCreate extends Component {
     }
 
     handleGetDetial( packages, features ){
-        const {table_id, id} = this.state
+        const {table_id, id, choice_datas, check_ids, data_list, checked_datas } = this.state
         this.setState({ is_loading: true })
         service.pg_config.tableDetail(id, table_id, true).then(({success, form_datas}) => {
             if(success){
@@ -125,11 +125,26 @@ export default class  ExportCreate extends Component {
                 form_datas['selected_features'] = this.getArray(features, form_datas.package_name)
                 form_datas['matched_feilds'] = form_datas.id_list
                 form_datas['pk_field_name'] = form_datas.pk_field_name
-                form_datas['pk_start_index'] = form_datas.pk_start_index
                 form_datas['pk_field_type'] = form_datas.pk_field_type
-                form_datas['pk_field_count'] = form_datas.pk_field_count
-                form_datas['pk_field_max_range'] = form_datas.pk_field_max_range
-                this.setState({ ...form_datas, is_loading: false })
+                if (form_datas.pk_start_index && form_datas.pk_field_max_range) {
+                    check_ids.push(data_list[0].id)
+                }
+                if (form_datas.pk_start_index) {
+                    choice_datas[0]['value'] = form_datas.pk_start_index
+                    check_ids.push(data_list[1].id)
+                    checked_datas.push(choice_datas[0])
+                }
+                if (form_datas.pk_field_max_range) {
+                    choice_datas[1]['value'] = form_datas.pk_field_max_range
+                    check_ids.push(data_list[2].id)
+                    checked_datas.push(choice_datas[1])
+                }
+                if (form_datas.pk_field_count) {
+                    choice_datas[2]['value'] = form_datas.pk_field_count
+                    check_ids.push(data_list[3].id)
+                    checked_datas.push(choice_datas[2])
+                }
+                this.setState({ ...form_datas, is_loading: false, checked_datas, check_ids })
             }
         })
     }
@@ -215,7 +230,6 @@ export default class  ExportCreate extends Component {
             }
 
             if (! selected_value) {
-                // data_list['selected_features'] = []
                 data_list['feature_name'] = ''
             }
         }
@@ -255,16 +269,15 @@ export default class  ExportCreate extends Component {
         const {
             id, table_id, table_name, matched_feilds,
             feature_name, geo_data_field, pk_field_name,
-            pk_start_index, pk_field_type, pk_field_count,
-            pk_field_max_range
+            pk_field_type, choice_datas
         } = this.state
             this.setState({ is_loading: true })
             var pk_field_config = {
                 "pk_field_name": pk_field_name,
-                "pk_start_index": pk_start_index,
+                "pk_start_index": choice_datas[0].value,
                 "pk_field_type": pk_field_type,
-                "pk_field_count": pk_field_count,
-                "pk_field_max_range": pk_field_max_range,
+                "pk_field_count": choice_datas[2].value,
+                "pk_field_max_range": choice_datas[1].value,
             }
 
             var values = {
@@ -431,7 +444,7 @@ export default class  ExportCreate extends Component {
             });
         });
 
-        this.setState({checked_datas})
+        this.setState({checked_datas, check_ids: lists})
 
     }
 
@@ -439,7 +452,7 @@ export default class  ExportCreate extends Component {
         const { data_list, check_ids } = this.state
         var modal = {}
         modal['modal_status'] = 'open'
-        modal['text'] = () => <SelectOption data_list={data_list} setSelectedOptions={this.setSelectedOptions}/>
+        modal['text'] = () => <SelectOption data_list={data_list} setSelectedOptions={this.setSelectedOptions} check_ids={check_ids}/>
         global.MODAL(modal)
     }
 

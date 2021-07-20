@@ -10,6 +10,11 @@ export default class SelectOption extends Component {
         this.handleCheckData = this.handleCheckData.bind(this)
     }
 
+    componentDidMount() {
+        let check_ids = this.props.check_ids
+        this.setState({check_ids})
+    }
+
     handleCheckData(e){
         let check_ids = this.state.check_ids
         const value = parseInt(e.target.value)
