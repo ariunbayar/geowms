@@ -416,3 +416,26 @@ def set_email(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+def _get_user_info_display(user):
+
+    return {
+        'username': user.username,
+        'last_name': user.last_name,
+        'first_name': user.first_name,
+        'email': user.email,
+        'is_sso': user.is_sso,
+    }
+
+
+@require_GET
+@ajax_required
+@login_required
+def user_info_all(request):
+    rsp = {
+        'success': True,
+        'user_list': _get_user_info_display(request.user),
+    }
+
+    return JsonResponse(rsp)
