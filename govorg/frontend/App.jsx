@@ -65,6 +65,7 @@ export class App extends Component {
 
         return (
             <BrowserRouter>
+                <DisplayNotif getNotifFunc={this.getNotifFunc}/>
                 <SuspenseLoader is_loading={is_loading} color={'#000'} text="Эрхүүдийг уншиж байна."/>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
                     <div className="brand-logo">
@@ -125,8 +126,7 @@ export class App extends Component {
                         </Suspense>
                     </div>
                 </div>
-            <DisplayModal getModalFunc={this.getModalFunc}/>
-            <DisplayNotif getNotifFunc={this.getNotifFunc}/>
+                <DisplayModal getModalFunc={this.getModalFunc}/>
             </BrowserRouter>
         )
     }
