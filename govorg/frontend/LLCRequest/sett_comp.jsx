@@ -146,7 +146,6 @@ export class LLCSettings extends Component {
             file_geom_type = details.geometry.type
         )
         file_geom_type = utils.checkMultiGeomTypeName(file_geom_type)
-
         if(geom_type !== file_geom_type) {
             const modal = {
                 modal_status: "open",
@@ -177,20 +176,6 @@ export class LLCSettings extends Component {
     Save(value, idx) {
         var list_of_datas = this.state.list_of_datas
         service.Save(value).then(({ success }) => {
-            const modal = {
-                modal_status: "open",
-                modal_icon: "fa fa-check-circle",
-                modal_bg: '',
-                icon_color: 'success',
-                title: 'Амжилттай хадгаллаа',
-                text: '',
-                has_button: false,
-                actionNameBack: '',
-                actionNameDelete: '',
-                modalAction: null,
-                modalClose: null
-            }
-            global.MODAL(modal)
             list_of_datas[idx].icon_state = true
             this.setState({ list_of_datas })
         })
