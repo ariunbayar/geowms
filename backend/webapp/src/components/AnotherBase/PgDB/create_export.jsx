@@ -539,10 +539,10 @@ export default class  ExportCreate extends Component {
                                 </div>
                                 <div className="row d-flex mr-4 justify-content-center">
                                     <a
-                                        className="text-primary text-uppercase"
+                                        className="text-primary"
                                         onClick={this.getFilterType}
                                     >
-                                        <GPIcon icon={"fa fa-plus-circle mx-1 text-success mt-2"}/>
+                                        <GPIcon icon={"fa fa-plus-circle mx-1 text-primary mt-2"}/>
                                         шүүлтүүр нэмэх
                                     </a>
                                 </div>
