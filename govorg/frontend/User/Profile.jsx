@@ -32,41 +32,41 @@ export default class Profile extends Component {
                     <div className="col-6 my-4">
                         <div className="row">
                             <div className="col-md-12">
-                            <h4 className="font-weight-bold">ХЭРЭГЛЭГЧИЙН МЭДЭЭЛЭЛ</h4>
+                            <h4 className="font-weight-bold form-group">ХЭРЭГЛЭГЧИЙН МЭДЭЭЛЭЛ</h4>
                                 <div className="form-row">
-                                    <div className="form-group row col">
+                                    <div className="col">
                                         <label className="font-weight-bold col-6">Хэрэглэгчийн нэр:</label>
                                         <span className="control-label col-6" id="price">{username}</span>
                                     </div>
                                 </div>
                                 <div className="form-row">
-                                    <div className="form-group row col">
+                                    <div className="col">
                                         <label className="font-weight-bold col-6">Овог:</label>
                                         <span className="control-label col-6" id="price">{last_name}</span>
                                     </div>
                                 </div>
                                 <div className="form-row">
-                                <div className="form-group row col">
+                                <div className="col">
                                         <label className="font-weight-bold col-6">Нэр:</label>
                                         <span className="control-label col-6" id="price">{first_name}</span>
                                     </div>
                                 </div>  
                                 <div className="form-row">
-                                    <div className="form-group row col">
+                                    <div className="col">
                                         <label className="font-weight-bold col-6">Цахим хаяг:</label>
                                         <span className="control-label col-6" id="price">{email}</span>
                                     </div>
                                 </div>
                                 <div className="form-row">
-                                    <div className="form-group row col">
+                                    <div className="col">
                                         <label className="ont-weight-bold col-6">Хүйс:</label>
                                         <span className="control-label col-6" id="price">{gender}</span>
                                     </div>
                                 </div>
                                 <div className="form-row">
-                                    <div className="form-group row col">
+                                    <div className="col">
                                         <label className="font-weight-bold col-6">Регистер:</label>
-                                        <span className="control-label col-6" id="price">{register}</span>
+                                        <span className="control-label col" id="price">{register}</span>
                                     </div>
                                 </div>
                                 <button onClick={() => this.props.history.push(`/gov/profile/password/`)} className="btn gp-btn-primary">Нууц үг солих</button>
