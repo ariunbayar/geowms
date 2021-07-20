@@ -9,7 +9,7 @@ function userInfo() {
     const rsp = {
         ...getGetOptions(),
     }
-    return fetch(`/profile/api/information/`, rsp).then(handleResponse)
+    return fetch(`/profile/api/info/`, rsp).then(handleResponse)
 }
 
 function updateEmail(email) {

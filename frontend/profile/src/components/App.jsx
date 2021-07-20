@@ -1,6 +1,6 @@
 
 import React, {Component} from 'react'
-import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
+import {BrowserRouter, Switch, Route, NavLink, Redirect} from "react-router-dom";
 
 import {Info} from './information/info'
 import {Bar} from './tsegPersonal/Index'
@@ -18,6 +18,7 @@ export class App extends Component {
     render() {
         return (
           <BrowserRouter>
+            <Redirect to='/profile/info/' />
             <div className="container my-3 p-3 mb-5">
                 <div className="row">
                     <div className="col-md-2">

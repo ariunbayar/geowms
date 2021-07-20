@@ -81,7 +81,6 @@ urlpatterns = [
     ], 'profile'))),
 
     path('profile/api/', include(([
-        path('information/', profile_views.user_info_all),
         path('all/', profile_views.all, name='all'),
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),

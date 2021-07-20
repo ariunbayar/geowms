@@ -6,20 +6,20 @@ export class Info extends Component {
         super(props)
 
         this.state = {
-            user_list: [],
+            user_detail: [],
         }
     }
 
     componentDidMount() {
         service
             .userInfo()
-            .then(({ user_list }) => {
-                this.setState({ user_list })
+            .then(({ user_detail }) => {
+                this.setState({ user_detail })
             })
     }
 
     render() {
-        const { last_name, first_name, email,  username } = this.state.user_list
+        const { last_name, first_name, email,  username } = this.state.user_detail
         return (
             <div className="card">
                 <div className="card-header d-flex align-items-center">

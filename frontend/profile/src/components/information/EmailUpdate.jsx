@@ -9,7 +9,7 @@ export default class EmailUpdate extends Component {
         this.state = {
             email: '',
             modal_status: this.props.modal_status || 'closed',
-            user_list: [],
+            user_detail: [],
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -77,13 +77,13 @@ export default class EmailUpdate extends Component {
         // TODO энэ хэсгийг info.jsx файлаасаа email ээ авдаг болгох
         service
             .userInfo()
-            .then(({ user_list }) => {
-                this.setState({ user_list })
+            .then(({ user_detail }) => {
+                this.setState({ user_detail })
             })
     }
 
     render() {
-        const { email } = this.state.user_list
+        const { email } = this.state.user_detail
         return (
             <div className="card">
                 <div className="card-body">
