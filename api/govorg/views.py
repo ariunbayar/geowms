@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
-from api.utils import filter_layers, replace_src_url, filter_layers_wfs
+from api.utils import filter_layers, replace_src_url, filter_layers_wfs, get_cql_filter
 from backend.govorg.models import GovOrg as System
 from backend.inspire.models import (
     LCodeLists,
@@ -400,16 +400,10 @@ def _get_layer_name(employee, fid):
     return allowed_layers
 
 
-def _get_cql_filter(geo_id):
-    cql_data = utils.get_2d_data(geo_id)
-    cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data=cql_data)
-    return cql_filter if cql_data else ''
-
-
 def _get_request_content(base_url, request, geo_id, headers):
     queryargs = request.GET
     if geo_id != utils.get_1stOrder_geo_id() and (request.GET.get('REQUEST') == 'GetMap' or request.GET.get('REQUEST') == 'GetFeature'):
-        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, get_cql_filter(geo_id), 20000)
         if request.GET.get('REQUEST') == 'GetMap':
             queryargs = {
                 **request.GET,

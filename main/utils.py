@@ -1403,9 +1403,9 @@ def get_mdata_value(feature_code, geo_id, is_display=False):
     return send_value
 
 
-def get_2d_data(geo_id):
-    mgeo_qs = MGeoDatas.objects.filter(geo_id=geo_id).first()
-    hex = mgeo_qs.geo_data.wkt
+def get_2d_data(geo_id, srid=4326):
+    geo_data = get_geom(geo_id, srid=srid)
+    hex = geo_data.wkt
     hex = hex.replace(' Z', '')
     hex = hex.replace(' 0', '')
     data = hex
@@ -2016,3 +2016,35 @@ def has_user(id=None, username=None, email=None):
             is_valid = True
 
     return is_valid
+
+
+# theme code ийг өгөөд тухайн theme ийн бүх feature_id ийг буцаана
+def get_feature_ids_of_theme(theme_code):
+
+    LThemes = apps.get_model('backend_inspire', 'LThemes')
+    LPackages = apps.get_model('backend_inspire', 'LPackages')
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+
+    feature_ids = list()
+
+    theme_qs = LThemes.objects
+    theme_qs = theme_qs.filter(theme_code=theme_code)
+    theme = theme_qs.first()
+
+    if theme:
+        pack_qs = LPackages.objects
+        pack_qs = pack_qs.filter(theme_id=theme.theme_id)
+        for pack in pack_qs:
+            feature_qs = LFeatures.objects
+            feature_qs = feature_qs.filter(package_id=pack.package_id)
+            if feature_qs:
+                feature_ids_new = list(feature_qs.values_list('feature_id', flat=True))
+                feature_ids = feature_ids + feature_ids_new
+
+    return feature_ids
+
+
+# file ruu text bichih
+def write_to_file(text, file_name='test.txt'):
+    with open(file_name, 'w') as f:
+        f.write(text)

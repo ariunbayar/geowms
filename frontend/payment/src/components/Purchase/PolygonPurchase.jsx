@@ -219,12 +219,12 @@ export class PolygonPurchase extends Component {
                                 onMouseOver={() => this.alertOver()}
                                 onClick={() => this.handlePayment()}
                             >
-                                <h4 className="text-succes p-3">{alert_msg}</h4>
+                                <h4 className="text-succes p-3 text-white">{alert_msg}</h4>
                             </button>
                         </div>
                         <div className="col-md-6">
                             <button type="button" data-toggle="modal" style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleUserEmailCheck()}>
-                                <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
+                                <h4 className="text-succes p-3 text-white">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
                         <Modal

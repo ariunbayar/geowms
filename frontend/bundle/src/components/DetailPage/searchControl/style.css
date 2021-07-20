@@ -1,7 +1,6 @@
 .search-bundle {
     width: 100%;
     margin-bottom: auto;
-    margin-top: 12px;
     height: 50px;
     background-color: #fff;
     padding: 10px;
@@ -34,6 +33,9 @@
     font-size: 14px;
     color: black;
     transition: width 0.4s linear
+}
+.search-bundle.is-invalid {
+    border: 1px solid red;
 }
 
 .search-bundle-icon {

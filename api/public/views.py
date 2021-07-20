@@ -13,7 +13,14 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET
 
-from api.utils import filter_layers, replace_src_url, filter_layers_wfs
+from api.utils import (
+    filter_layers,
+    replace_src_url,
+    filter_layers_wfs,
+    get_cql_filter,
+    calc_radius,
+    get_buffer_of_point,
+)
 from backend.bundle.models import Bundle
 from backend.wms.models import WMS
 from backend.inspire.models import LProperties
@@ -36,6 +43,102 @@ def _get_service_url(request, bundle_id, wms, url_type):
     url = reverse('api:service:wms_proxy', args=[bundle_id, wms.pk, url_type])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
+
+
+def _access_filter_keys():
+    return [
+        'within', 'buffer', 'scale'
+    ]
+
+
+def _check_access_query_keys(query, access_keys):
+    remove_keys = list()
+    for key in query.keys():
+        if key not in access_keys:
+            remove_keys.append(key)
+
+    for remove_key in remove_keys:
+        del query[remove_key]
+
+    return query
+
+
+def _make_body(filters):
+    body = dict()
+    for filter in filters:
+        for key, values in filter.items():
+            body[key] = ",".join(values)
+    return body
+
+
+def _get_srid(querys):
+    srid = 4326
+
+    srs = querys.get("SRS")
+    if not srs:
+        return srid
+
+    srid = srs.split(":")[1]
+    return srid
+
+
+def _public_filter(querys):
+    filters = list()
+    filter_query = querys.get('FILTER')
+    if not filter_query:
+        return filters
+
+    srid = int(_get_srid(querys))
+
+    filter_query = utils.json_load(filter_query)
+    filter_query = _check_access_query_keys(filter_query, _access_filter_keys())
+
+    cql_filters = list()
+    filter_cql_filter_key = 'CQL_FILTER'
+    filter = {
+        filter_cql_filter_key: cql_filters
+    }
+
+    def _append_to_list(item, filter_key=filter_cql_filter_key):
+        cql_filters.append(item)
+        filter[filter_key] = cql_filters
+        filters.append(filter)
+
+    # within үеийн хайлт
+    within = "within"
+    if within in filter_query:
+        geo_id = filter_query[within]
+        first_au_level_geo_id = utils.geo_cache('first_au_level_geo_id', '', utils.get_1stOrder_geo_id(), 1800)
+        if geo_id == first_au_level_geo_id:
+            return filters
+
+        within = utils.geo_cache('search', geo_id, get_cql_filter(geo_id, srid=4326), 1800)
+        _append_to_list(within)
+
+    # buffer үеийн хайлт
+    coordinates = 'buffer'
+    if coordinates in filter_query:
+        coordinates = filter_query[coordinates]
+        coordinates = utils.json_load(coordinates)
+
+        radius = calc_radius(filter_query['scale'])
+        buffer_circle = get_buffer_of_point(coordinates, radius)
+
+        buffer = get_cql_filter('', srid=4326, cql_data=buffer_circle)
+        _append_to_list(buffer)
+
+    return filters  # return list
+
+
+def _change_query_args(queryargs, body):
+    queryargs._mutable = True
+
+    queryargs.pop('FILTER')
+    for key, value in body.items():
+        queryargs.appendlist(key, value)
+
+    queryargs._mutable = False
+    return queryargs
 
 
 @require_GET
@@ -68,7 +171,26 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
     #     property_codes.append(prop_qs.first().property_code)
 
     # queryargs['propertyName'] = ",".join(property_codes).lower()
-    rsp = requests.get(requests_url, queryargs, headers=headers, timeout=100, verify=False)
+
+    request_args = {
+        "headers": headers,
+        "timeout": 100,
+        "verify": False,
+    }
+
+    filters = _public_filter(queryargs)
+    if filters:
+        request_args['timeout'] = 300
+
+        body = _make_body(filters)
+        queryargs = _change_query_args(queryargs, body)
+        queryargs = queryargs.dict()
+
+        rsp = requests.post(requests_url, queryargs, **request_args)
+
+    else:
+        rsp = requests.get(requests_url, queryargs, **request_args)
+
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
