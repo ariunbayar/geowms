@@ -356,10 +356,7 @@ export default class  ExportCreate extends Component {
     getFilterType() {
         var modal = {}
         modal['modal_status'] = 'open'
-        modal['title'] = 'Шүүлтүүрийн төрөл'
-        modal['icon_color'] = 'success'
-        modal['modal_icon'] = 'fa fa-exclamation-circle'
-        modal['text'] = 'Шүүлтүүрийн төрлийг сонгоно уу !!!'
+        modal['text'] = SelectOption
 
         global.MODAL(modal)
     }
