@@ -109,13 +109,13 @@ function Profile(props) {
           <span className="user-profile"><img src="/static/assets/image/user.png" className="img-circle" alt="user avatar"></img></span>
         </a>
         <div className="dropdown-menu dropdown-menu-right">
-        <a className="dropdown-item user-details">
-          <div className="media">
-              <div className="avatar"><img className="align-self-start mr-3" src="/static/assets/image/user.png" alt="user avatar"></img></div>
-              <div className="media-body">
-                  <h6 className="mt-2 user-title">{user.username}</h6>
-                  <p className="user-subtitle">{user.email}</p>
-              </div>
+          <a className="dropdown-item user-details">
+            <div className="media">
+                <div className="avatar"><img className="align-self-start mr-3" src="/static/assets/image/user.png" alt="user avatar"></img></div>
+                <div className="media-body">
+                    <h6 className="mt-2 user-title">{user.username}</h6>
+                    <p className="user-subtitle">{user.email}</p>
+                </div>
             </div>
           </a>
           <div className="dropdown-divider"></div>

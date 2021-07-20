@@ -151,9 +151,9 @@ function ProfileMenu(props) {
                             </div>
                         </div>
                     </a>
-                <div className="dropdown-divider"></div>
-                <NavLink className="dropdown-item" activeClassName="active" to="/gov/profile/"><i className="icon-lock mr-2"></i>ПРОФАЙЛ</NavLink>
-                <div className="dropdown-divider"></div>
+                    <div className="dropdown-divider"></div>
+                    <NavLink className="dropdown-item" activeClassName="active" to="/gov/profile/"><i className="icon-lock mr-2"></i>ПРОФАЙЛ</NavLink>
+                    <div className="dropdown-divider"></div>
                     <a className="dropdown-item text-dark" href="/logout/"><i className="icon-power mr-2"></i>ГАРАХ</a>
                 </div>
             </div>
