@@ -40,7 +40,7 @@ export class Info extends Component {
                             <span className="input-group-text">{last_name}</span>
                         </div>
                         <div className="col-sm-6 mt-4">
-                            <button className="btn btn-primary" onClick={() => this.props.history.push(`/profile/update-mail/`)}>Цахим хаяг шинэчлэх</button>
+                            <button className="btn btn-primary" onClick={() => this.props.history.push(`/profile/info/update-mail/`)}>Цахим хаяг шинэчлэх</button>
                         </div>
                         <div className="col-sm-6">
                             <label className="col-form-label font-weight-bold">Нэр: </label>

@@ -23,12 +23,12 @@ export class App extends Component {
                     <div className="col-md-2">
                         <div className="my-0 pt-2">
                             <div className="list-group border">
-                                <NavLink className="menu" to={'/profile/'}>
+                                <NavLink className="menu" to={'/profile/info/'}>
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
                                         Хувийн мэдээлэл
                                     </div>
                                 </NavLink>
-                                <NavLink className="menu" to={"/a/tseg-personal/"}
+                                <NavLink className="menu" to={"/profile/tseg-personal/"}
                                     onClick={() => this.setState({ is_display: true })}
                                 >
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
@@ -40,9 +40,10 @@ export class App extends Component {
                     </div>
                     <div className="col-md-10 p-0">
                         <Switch>
-                            <Route exact path="/profile/" component={Info} activeClassName="selected"/>
-                            <Route path="/profile/update-mail/" component={EmailUpdate} />
-                            <Route path="/a/tseg-personal/"
+                            <Route exact path="/profile/"/>
+                            <Route exact path="/profile/info/" component={Info} activeClassName="selected"/>
+                            <Route path="/profile/info/update-mail/" component={EmailUpdate} />
+                            <Route path="/profile/tseg-personal/"
                                 component={(props) => <Bar {...props} is_display={this.state.is_display} activeClassName="selected"/>}
                             />
                         </Switch>

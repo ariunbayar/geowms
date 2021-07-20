@@ -41,7 +41,7 @@ export default class EmailUpdate extends Component {
                     this.modalChange(
                         'fa fa-times-circle',
                         "danger",
-                        `${errors}`,
+                        `${errors['email']}`,
                         '',
                         false,
                         null
@@ -70,14 +70,15 @@ export default class EmailUpdate extends Component {
     }
 
     handleModalClose(){
-        window.location.href = "/profile"  // TODO react ashiglana
+        window.location.href = "/profile/info/"  // TODO react ashiglana
     }
 
     componentDidMount() {
+        // TODO энэ хэсгийг info.jsx файлаасаа email ээ авдаг болгох
         service
             .userInfo()
-            .then(({user_list}) => {
-                this.setState({user_list})
+            .then(({ user_list }) => {
+                this.setState({ user_list })
             })
     }
 
@@ -87,18 +88,19 @@ export default class EmailUpdate extends Component {
             <div className="card">
                 <div className="card-body">
                     <div className="card-header-right">
-                        <p className ="font-weight-bold">ШИНЭ И-МЭЙЛ ХАЯГАА ОРУУЛНА УУ.</p>
+                        <label htmlFor="email" className ="font-weight-bold">ШИНЭ И-МЭЙЛ ХАЯГАА ОРУУЛНА УУ.</label>
                     </div>
                     <div className="form-group mb-3">
                         <input
+                            id="email"
                             type="email"
                             name="email"
                             className="form-control"
-                            placeholder= {email}
+                            placeholder={email}
                             onChange={this.handleChange}>
                         </input>
                     </div>
-                    <button type="submit" className="btn btn-primary" onClick={this.handleSubmit}>Хадгалах</button>
+                    <button className="btn btn-primary" onClick={this.handleSubmit}>Хадгалах</button>
                 </div>
                 <Modal
                     modal_status={this.state.modal_status}
