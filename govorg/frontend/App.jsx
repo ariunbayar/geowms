@@ -21,7 +21,6 @@ const Employee = React.lazy(() => import('./Role/Employee'));
 const MapRegion = React.lazy(() => import('./Role/Region'));
 const TuuhenOv = React.lazy(() => import('./Bundles/TuuhenOv'));
 const Forms = React.lazy(() => import('./Bundles/Form'));
-const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
 const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
@@ -111,7 +110,6 @@ export class App extends Component {
                                         />
                                         <Route path="/gov/perm/addresses/" render={(props) => <Addresses {...props} employee={employee}/> } />
                                         <Route path="/gov/perm/erguuleg/" render={(props) => <Addresses {...props} employee={employee}/> } />
-                                        <Route path="/gov/zip-code/" component={ZipCode} />
                                         <Route path="/gov/org-request/" component={OrgRequest} />
                                         <Route path="/gov/history/" component={ChangeRequest} />
                                         <Route exact path="/gov/perm/all/" render={(props) => <InsPerms {...props} org_roles={org_role} role_perm={org_role}/>} />
@@ -287,7 +285,6 @@ function TabBars(props) {
                         </ul>
                     </MenuItem>
                     }
-                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
                     {
                         emp_role?.themes && Object.keys(emp_role.themes).length > 0
                         ?

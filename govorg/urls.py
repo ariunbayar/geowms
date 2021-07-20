@@ -7,7 +7,6 @@ from govorg.backend.role.region import views as role_region_views
 from govorg.backend.system import views as system_views
 from govorg.backend.org_request import views as org_request_views
 from govorg.backend.govorg_inspire import views as govorg_inspire_views
-from govorg.backend.zipcode import views as zipcode_views
 from govorg.backend.forms import views as forms_views
 from govorg.backend.meta_data import views as meta_data_views
 from govorg.backend.revoke_request import views as revoke_request_views
@@ -92,16 +91,6 @@ urlpatterns = [
             path('getCount/', org_request_views.get_count, name='getCount'),
             path('get_choices/', org_request_views.get_choices, name='get-choices'),
         ], 'org-request'))),
-
-        path('zip-code/', include(([
-            path('aimag/', zipcode_views.aimag, name='aimag'),
-            path('sum/', zipcode_views.sum, name='sum'),
-            path('bag-horoo/', zipcode_views.bagaHoroo, name='bag-horoo'),
-            path('zip/', zipcode_views.zip, name='zip'),
-            path('zip-update/', zipcode_views.zipUpdate, name='zip-update'),
-            path('wms-layer/', zipcode_views.wmsLayer, name='wms-layer'),
-            path('search/', zipcode_views.search, name='search'),
-        ], 'zip-code'))),
 
         path('tseg-personal/', include(([
             path('', forms_views.tsegPersonal, name='tseg-personal'),
