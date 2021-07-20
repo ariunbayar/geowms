@@ -36,37 +36,37 @@ export default class Profile extends Component {
                                 <div className="form-row">
                                     <div className="col">
                                         <label className="font-weight-bold col-6">Хэрэглэгчийн нэр:</label>
-                                        <span className="control-label col-6" id="price">{username}</span>
+                                        <span className="control-label col-6">{username}</span>
                                     </div>
                                 </div>
                                 <div className="form-row">
                                     <div className="col">
                                         <label className="font-weight-bold col-6">Овог:</label>
-                                        <span className="control-label col-6" id="price">{last_name}</span>
+                                        <span className="control-label col-6">{last_name}</span>
                                     </div>
                                 </div>
                                 <div className="form-row">
-                                <div className="col">
+                                    <div className="col">
                                         <label className="font-weight-bold col-6">Нэр:</label>
-                                        <span className="control-label col-6" id="price">{first_name}</span>
+                                        <span className="control-label col-6">{first_name}</span>
                                     </div>
                                 </div>  
                                 <div className="form-row">
                                     <div className="col">
                                         <label className="font-weight-bold col-6">Цахим хаяг:</label>
-                                        <span className="control-label col-6" id="price">{email}</span>
+                                        <span className="control-label col-6">{email}</span>
                                     </div>
                                 </div>
                                 <div className="form-row">
                                     <div className="col">
-                                        <label className="ont-weight-bold col-6">Хүйс:</label>
-                                        <span className="control-label col-6" id="price">{gender}</span>
+                                        <label className="font-weight-bold col-6">Хүйс:</label>
+                                        <span className="control-label col-6">{gender}</span>
                                     </div>
                                 </div>
                                 <div className="form-row">
                                     <div className="col">
                                         <label className="font-weight-bold col-6">Регистер:</label>
-                                        <span className="control-label col" id="price">{register}</span>
+                                        <span className="control-label col">{register}</span>
                                     </div>
                                 </div>
                                 <button onClick={() => this.props.history.push(`/gov/profile/password/`)} className="btn gp-btn-primary">Нууц үг солих</button>
