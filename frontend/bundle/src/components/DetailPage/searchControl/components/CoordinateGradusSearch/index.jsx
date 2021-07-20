@@ -13,8 +13,9 @@ class index extends Component {
             LA:'',
             LB:'',
             LC:'',
-            bairlal_two_zoom: 7.3376399772248575,
+            bairlal_two_zoom: "7.3376399772248575",
         }
+        this.funcs = this.props.funcs
         this.handleSubmitCoordinateGradus = this.handleSubmitCoordinateGradus.bind(this)
     }
 
@@ -30,6 +31,9 @@ class index extends Component {
             var niitB = Bbut + BBB
             var array = [X, niitB]
             utils.setCenter(array, this.state.bairlal_two_zoom)
+            const coordinates = utils.fromLonLatToMapCoord(array)
+            this.funcs.marker.setCoordinates(coordinates)
+            this.funcs.setVisibleMarket(true)
         }
         else {
             global.NOTIF("warning", "Оруулсан өгөгдөл таарахгүй байна", 'exclamation')
@@ -52,17 +56,17 @@ class index extends Component {
                         <input type="text" className="form-control" placeholder="Градус X"
                             name="BA"
                             onChange={(e) => this.setStateMapFloat('BA', e.target.value)}
-                            value={BA}
+                            value={BA || ""}
                         />
                         <input type="text" className="form-control" placeholder="Минут X"
                             name="BB"
                             onChange={(e) => this.setStateMapFloat('BB', e.target.value)}
-                            value={BB}
+                            value={BB || ""}
                         />
                         <input type="text" className="form-control" placeholder="Секунд X"
                             name="BC"
                             onChange={(e) => this.setStateMapFloat('BC', e.target.value)}
-                            value={BC}
+                            value={BC || ""}
                         />
                     </div>
                     <label className="font-weight-bold" htmlFor="formGroupInput">Уртраг</label>
@@ -70,17 +74,17 @@ class index extends Component {
                         <input type="text" className="form-control" placeholder="Градус Y"
                             name="LA"
                             onChange={(e) => this.setStateMapFloat('LA', e.target.value)}
-                            value={LA}
+                            value={LA || ""}
                         />
                         <input type="text" className="form-control" placeholder="Минут Y"
                             name="LB"
                             onChange={(e) => this.setStateMapFloat('LB', e.target.value)}
-                            value={LB}
+                            value={LB || ""}
                         />
                         <input type="text" className="form-control" placeholder="Секунд Y"
                             name="LC"
                             onChange={(e) => this.setStateMapFloat('LC', e.target.value)}
-                            value={LC}
+                            value={LC || ""}
                         />
                     </div>
                     <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>

@@ -177,7 +177,9 @@ export class SearchBarComponent extends Component {
             {
                 'title': "Өргөрөг уртраг",
                 'component': (
-                    <CoordinateGradusSearch />
+                    <CoordinateGradusSearch
+                        funcs={this.props.funcs}
+                    />
                 ),
                 'order': 4,
             },

@@ -17,7 +17,6 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import Draw, { createBox } from 'ol/interaction/Draw';
 
 import { securedImageWMS, clearLocalData } from "@utils/Map/Helpers"
-import { default as ModalAlert } from "@utils/Modal/Modal"
 import SideBar from "@utils/SideBar"
 import * as utils from "@helpUtils/ol"
 
@@ -64,8 +63,6 @@ export default class BundleMap extends Component {
             x: null,
             format: new GeoJSON(),
             base_layer_controls: [],
-
-            modal_status: 'closed',
         }
 
         this.controls = {
@@ -105,7 +102,6 @@ export default class BundleMap extends Component {
         this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
         this.getPopUpInfo = this.getPopUpInfo.bind(this)
         this.setVisibleMarket = this.setVisibleMarket.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
         this.setFeatureOnMap = this.setFeatureOnMap.bind(this)
         this.resetSearch = this.resetSearch.bind(this)
     }
@@ -1022,14 +1018,21 @@ export default class BundleMap extends Component {
 
         }
         else {
-            this.handleModalOpen()
+            const modal = {
+                modal_status: "open",
+                modal_icon: "fa fa-exclamation-circle",
+                modal_bg: "",
+                icon_color: "warning",
+                title: "Худалдан авалтын мэдээлэл",
+                text: "Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү!",
+                has_button: true,
+                actionNameBack: "Хаах",
+                actionNameDelete: "Нэвтрэх",
+                modalAction: () => window.location.href = "/loginUser/",
+                modalClose: null
+            }
+            global.MODAL(modal)
         }
-    }
-
-    handleModalOpen() {
-        this.setState({ modal_status: 'open' }, () => {
-            this.setState({ modal_status: 'initial' })
-        })
     }
 
     setFeatureOnMap(feature, refreshLayerFn, is_feature=false) {
@@ -1076,7 +1079,8 @@ export default class BundleMap extends Component {
             const funcs = {
                 setVisibleMarket: this.setVisibleMarket,
                 "is_not_visible_layers": this.is_not_visible_layers,
-                resetSearch: this.resetSearch
+                resetSearch: this.resetSearch,
+                "marker": this.marker.point,
             }
 
             return (
@@ -1152,15 +1156,6 @@ export default class BundleMap extends Component {
                         </div>
                     </div>
                 </div>
-                <ModalAlert
-                    modal_status={this.state.modal_status}
-                    modal_icon="fa fa-exclamation-circle"
-                    icon_color="warning"
-                    title="Худалдан авалтын мэдээлэл"
-                    text='Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү!'
-                    has_button={false}
-                    modalAction={null}
-                />
             </div>
         )
     }
