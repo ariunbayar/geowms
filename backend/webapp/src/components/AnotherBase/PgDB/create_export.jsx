@@ -168,7 +168,7 @@ export default class  ExportCreate extends Component {
     }
 
     handleChange(name, selection) {
-        const { packages, features } = this.state
+        const { packages, features, choice_datas } = this.state
         var selected_value = ''
         var data_list = {}
         var seleted_datas = []
@@ -177,12 +177,12 @@ export default class  ExportCreate extends Component {
             data_list['pk_field_type'] = selection.data_type
         }
 
-        if (name == 'choice_datas') {
-            var data = e.target.value
-            var table_data = e.target.selectedIndex
-            var optionElement = e.target.childNodes[table_data]
-            var selected_data_name =  optionElement.getAttribute('id')
-            data_list[selected_data_name] = data
+        else if  (name == 'choice_datas') {
+            var value = obj => obj.eng_name == selection.target.id
+            var index_of = choice_datas.findIndex(value)
+            if (index_of != -1) {
+                choice_datas[index_of]['value'] = selection.target.value
+            }
         }
 
         else{
@@ -537,15 +537,6 @@ export default class  ExportCreate extends Component {
                                         {geo_data_field}
                                     </span>
                                 </div>
-                                <div className="row d-flex mr-4 justify-content-center">
-                                    <a
-                                        className="text-primary"
-                                        onClick={this.getFilterType}
-                                    >
-                                        <GPIcon icon={"fa fa-plus-circle mx-1 text-primary mt-2"}/>
-                                        шүүлтүүр нэмэх
-                                    </a>
-                                </div>
                                 {
                                     checked_datas && checked_datas.length >0 ?
                                     <Fragment>
@@ -569,7 +560,7 @@ export default class  ExportCreate extends Component {
                                         </div>
                                         {
                                             checked_datas.map((data, idx) =>
-                                            <div className='row d-flex mr-3'>
+                                            <div className='row d-flex mr-3' key={idx}>
                                                 <span
                                                     className="col-md-6 m-1 border rounded mr-auto"
                                                     name='inspire_property'
@@ -581,8 +572,8 @@ export default class  ExportCreate extends Component {
                                                     type="text"
                                                     id={data.eng_name}
                                                     value={data.value}
-                                                    className={`form-control col-md-5 m-1 `}
-                                                    handleChange={(e) => { this.handleChange('choice_datas', e) }}
+                                                    className={`form-control col-md-5 m-1`}
+                                                    onChange={(e) => { this.handleChange('choice_datas', e) }}
                                                 >
                                                 </input>
                                             </div>
@@ -591,6 +582,15 @@ export default class  ExportCreate extends Component {
                                     </Fragment>
                                     : null
                                 }
+                                <div className="row d-flex mr-4 justify-content-center">
+                                    <a
+                                        className="text-primary"
+                                        onClick={this.getFilterType}
+                                    >
+                                        <GPIcon icon={"fa fa-plus-circle mx-1 text-primary mt-2"}/>
+                                        шүүлтүүр нэмэх
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <hr />
