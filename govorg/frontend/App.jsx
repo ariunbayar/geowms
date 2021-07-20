@@ -65,8 +65,8 @@ export class App extends Component {
 
         return (
             <BrowserRouter>
-                <DisplayNotif getNotifFunc={this.getNotifFunc}/>
                 <SuspenseLoader is_loading={is_loading} color={'#000'} text="Эрхүүдийг уншиж байна."/>
+                <DisplayNotif getNotifFunc={this.getNotifFunc}/>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
                     <div className="brand-logo">
                         <a href="/">
