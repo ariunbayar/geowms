@@ -19,7 +19,7 @@ function getFilesDetal(id) {
     const opts = {
         ...getGetOptions(),
     }
-    return fetch(`/llc/backend/${id}/get-file-shapes/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${id}/get-file-shapes/`, opts).then(handleResponse)
 }
 
 function requestReject(id, description) {

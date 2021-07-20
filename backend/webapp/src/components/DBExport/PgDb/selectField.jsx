@@ -9,7 +9,7 @@ export default class SelectField extends Component {
     }
 
     render() {
-        const {title_name, data_list, defualt_value} = this.props
+        const { title_name, data_list, defualt_value } = this.props
         return (
             <div className="form-group col-md-3">
                 <label className=''>
@@ -34,7 +34,6 @@ export default class SelectField extends Component {
                         )
                     }
                 </select>
-
             </div>
         );
     }
