@@ -1,16 +1,15 @@
 import React, { Component } from "react"
-import { service } from "../service"
 import { NavLink } from "react-router-dom"
-import { Notif } from '@utils/Notification/index'
+
 import Loader from '@utils/Loader'
 
+import { service } from "../service"
 
 export class Details extends Component {
 
     constructor(props) {
         super(props)
 
-        this.too = 0
         this.state = {
             items: {},
             points: [],
@@ -19,13 +18,12 @@ export class Details extends Component {
             is_loading: true,
             payment_id: this.props.match.params.id,
         }
-        this.addNotif = this.addNotif.bind(this)
     }
 
-    componentDidMount(){
+    componentDidMount() {
         const id = this.state.payment_id
-        service.getDetails(id).then(({success, items, points, polygon, layers, info}) => {
-            if(success){
+        service.getDetails(id).then(({ success, items, points, polygon, layers, info }) => {
+            if(success) {
                 items.map(( items ) =>
                     this.setState({items})
                 )
@@ -33,21 +31,11 @@ export class Details extends Component {
             }
             else {
                 this.setState({ is_loading: false })
-                this.addNotif('warning', info, 'exclamation')
+                global.NOTIF('warning', info, 'exclamation')
             }
         }).catch(error => {
-            this.addNotif('danger', 'Алдаа гарсан байна', 'times')
+            global.NOTIF('danger', 'Алдаа гарсан байна', 'times')
         })
-    }
-
-    addNotif(style, msg, icon){
-        this.too ++
-        this.setState({ show: true, style: style, msg: msg, icon: icon })
-        const time = setInterval(() => {
-            this.too --
-            this.setState({ show: true })
-            clearInterval(time)
-        }, 2000);
     }
 
     render() {
@@ -61,7 +49,6 @@ export class Details extends Component {
                         </NavLink>
                         <br></br>
 
-                        <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                         <Loader is_loading={is_loading} />
 
                         <div id="container">
@@ -271,12 +258,13 @@ export class Details extends Component {
                                     }}>Хэвлэх</button>
                                 </div>
                                 {
-                                    !items.is_success ?
-                                    <div className="col-md-6 py-0 my-3">
-                                        <h5 className="mb-3">QR Code </h5>
-                                        <img src="/static/assets/image/lavlakh.png"></img>
-                                    </div>
-                                    : null
+                                    !items.is_success
+                                    ?
+                                        <div className="btn gp-btn-primary">
+                                            QR Кодыг үүсгэх
+                                        </div>
+                                    :
+                                        null
                                 }
                             </div>
                         }

@@ -5,7 +5,6 @@ import { Pagination } from "../../../../pagination/pagination"
 
 import { service } from '../service'
 
-
 export default class HistoryForm extends Component {
 
     constructor(props) {
