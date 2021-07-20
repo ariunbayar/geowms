@@ -89,6 +89,20 @@ def _wms_layers(wms_layers, bundle, request, views):
     return wms_list
 
 
+def _check_open_datas(open_datas):
+    has_datas = True
+    open_datas = utils.json_load(open_datas)
+    len_datas = len(open_datas)
+    if len_datas == 1:
+        if not open_datas[0]:
+            has_datas = False
+
+    elif len_datas < 1:
+        has_datas = False
+
+    return has_datas
+
+
 def index(request):
 
     if not request.user.is_authenticated:
@@ -113,7 +127,7 @@ def index(request):
             view_qs = view_qs.filter(feature_id__in=feature_ids)
 
             for view in view_qs:
-                if utils.json_load(view.open_datas):
+                if _check_open_datas(view.open_datas):
                     layer_code = utils.LAYERPREFIX + view.view_name
                     wms_layer_qs = WMSLayer.objects.filter(code=layer_code)
                     if wms_layer_qs:
