@@ -6,7 +6,6 @@ import * as utils from "@helpUtils/ol"
 
 import { service } from '../../../service'
 
-
 const FEATUREID = 'circle_buffer'
 const KNOWKEY = 'name'
 class index extends Component {

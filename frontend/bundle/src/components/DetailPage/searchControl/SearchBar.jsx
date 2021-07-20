@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 
-import Modal from "@utils/Modal/Modal"
 import * as utils from "@helpUtils/ol"
 import * as fnUtils from "@helpUtils/functions"
 
@@ -26,7 +25,6 @@ export class SearchBarComponent extends Component {
 
         this.state = {
             bundle_id: props.bundle_id,
-            modal_status: 'closed',
             aimag: [],
             selected_tab: '',
             is_point: props.is_point,
@@ -34,7 +32,6 @@ export class SearchBarComponent extends Component {
 
         this.resetButton = this.resetButton.bind(this)
         this.getGeom = this.getGeom.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
         this.resetSearchLayerFeatures = this.resetSearchLayerFeatures.bind(this)
     }
 
@@ -55,25 +52,28 @@ export class SearchBarComponent extends Component {
 
     async getGeom(geo_id, refreshLayerFn) {
 
-        const { success, data } = await service.getGeom(geo_id)
-        if (data) {
-            this.props.setFeatureOnMap(data, refreshLayerFn)
-        }
-        else {
-            this.modalChange(
-                'fa fa-exclamation-circle',
-                '',
-                'warning',
-                'GEOM өгөгдөл байхгүй байна',
-                '',
-                false,
-                '',
-                '',
-                null,
-                null
-            )
-        }
-        return data
+        service
+            .getGeom(geo_id)
+            .then(({ success, data }) => {
+                if (data) {
+                    this.props.setFeatureOnMap(data, refreshLayerFn)
+                }
+                else {
+                    this.modalChange(
+                        'fa fa-exclamation-circle',
+                        '',
+                        'warning',
+                        'GEOM өгөгдөл байхгүй байна',
+                        '',
+                        false,
+                        '',
+                        '',
+                        null,
+                        null
+                    )
+                }
+            })
+
     }
 
     setCenterOfMap() {
@@ -97,28 +97,20 @@ export class SearchBarComponent extends Component {
         this.setCenterOfMap()
     }
 
-    handleModalOpen() {
-        this.setState({ modal_status: 'open' }, () => {
-            this.setState({ modal_status: 'initial' })
-        })
-    }
-
     modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
-        this.setState(
-            {
-                modal_icon,
-                modal_bg,
-                icon_color,
-                title,
-                text,
-                has_button,
-                actionNameBack,
-                actionNameDelete,
-                modalAction,
-                modalClose,
-            },
-            () => this.handleModalOpen()
-        )
+        const modal = {
+            modal_icon: modal_icon,
+            modal_bg: modal_bg,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+            actionNameBack: actionNameBack,
+            actionNameDelete: actionNameDelete,
+            modalAction: modalAction,
+            modalClose: modalClose
+        }
+        global.MODAL(modal)
     }
 
     selectTab(selected_tab) {
@@ -126,6 +118,13 @@ export class SearchBarComponent extends Component {
         if (old_selected_tab == selected_tab) {
             selected_tab = ''
         }
+
+        // хайсан зүйлсээ reset хийж байгаа хэсэг
+        utils.clearFeatures(this.props.vector_layer)
+        this.resetSearchLayerFeatures()
+        this.resetButton()
+        this.props.funcs.setVisibleMarker(false)
+
         this.setState({ selected_tab })
     }
 
@@ -230,19 +229,6 @@ export class SearchBarComponent extends Component {
                         )
                     })
                 }
-                <Modal
-                    modal_status={ this.state.modal_status }
-                    modal_icon={ this.state.modal_icon }
-                    modal_bg={ this.state.modal_bg }
-                    icon_color={ this.state.icon_color }
-                    title={ this.state.title }
-                    text={ this.state.text }
-                    has_button={ this.state.has_button }
-                    actionNameBack={ this.state.actionNameBack }
-                    actionNameDelete={ this.state.actionNameDelete }
-                    modalAction={ this.state.modalAction }
-                    modalClose={ this.state.modalClose }
-                />
             </div>
         )
     }

@@ -30,6 +30,7 @@ export {
     transformCoordinate,
     fromLonLatToMapCoord,
     setCenter,
+    clearFeatures,
 }
 
 // tuhain feature ийн id аваад source аас нь арилгах
@@ -83,4 +84,10 @@ function setCenter(coord, zoom, map=window.map) {
     const map_projection = view.getProjection()
     const map_coord = transformCoordinate(coord, vars.data_projection, map_projection)
     view.animate({ zoom: zoom }, { center: view.setCenter(map_coord) });
+}
+
+// тухайн layer ийн бүх feature ийг арилгах
+function clearFeatures(layer) {
+    const source = layer.getSource()
+    source.clear()
 }

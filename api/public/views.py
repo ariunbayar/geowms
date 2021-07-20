@@ -121,7 +121,7 @@ def _public_filter(querys):
         coordinates = filter_query[coordinates]
         coordinates = utils.json_load(coordinates)
 
-        radius = calc_radius(filter_query['radius'])
+        radius = calc_radius(filter_query['scale'])
         buffer_circle = get_buffer_of_point(coordinates, radius)
 
         buffer = get_cql_filter('', srid=4326, cql_data=buffer_circle)

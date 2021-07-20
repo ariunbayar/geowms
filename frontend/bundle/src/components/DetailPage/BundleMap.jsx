@@ -101,7 +101,7 @@ export default class BundleMap extends Component {
         this.transformToLatLong = this.transformToLatLong.bind(this)
         this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
         this.getPopUpInfo = this.getPopUpInfo.bind(this)
-        this.setVisibleMarket = this.setVisibleMarket.bind(this)
+        this.setVisibleMarker = this.setVisibleMarker.bind(this)
         this.setFeatureOnMap = this.setFeatureOnMap.bind(this)
         this.resetSearch = this.resetSearch.bind(this)
     }
@@ -409,7 +409,7 @@ export default class BundleMap extends Component {
         const closer = this.element_closer
         overlay.setPosition(undefined);
         closer.blur();
-        this.setVisibleMarket(false)
+        this.setVisibleMarker(false)
         // this.state.vector_layer.setSource(null)
     }
 
@@ -684,7 +684,7 @@ export default class BundleMap extends Component {
         let is_not_inspire = true
         this.controls.popup.getData(true)
 
-        this.setVisibleMarket(true)
+        this.setVisibleMarker(true)
 
         wms_array.map(({layers}) => {
             if(layers) {
@@ -849,7 +849,7 @@ export default class BundleMap extends Component {
         }
     }
 
-    setVisibleMarket(is_true) {
+    setVisibleMarker(is_true) {
         this.marker_layer.setVisible(is_true)
     }
 
@@ -1077,7 +1077,7 @@ export default class BundleMap extends Component {
         const Search_comp = () => {
 
             const funcs = {
-                setVisibleMarket: this.setVisibleMarket,
+                setVisibleMarker: this.setVisibleMarker,
                 "is_not_visible_layers": this.is_not_visible_layers,
                 resetSearch: this.resetSearch,
                 "marker": this.marker.point,

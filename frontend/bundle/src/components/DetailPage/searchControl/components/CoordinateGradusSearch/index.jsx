@@ -30,10 +30,12 @@ class index extends Component {
             var Bbut = (BC / 3600) + (BB / 60) + BA - BBB
             var niitB = Bbut + BBB
             var array = [X, niitB]
+
             utils.setCenter(array, this.state.bairlal_two_zoom)
             const coordinates = utils.fromLonLatToMapCoord(array)
             this.funcs.marker.setCoordinates(coordinates)
-            this.funcs.setVisibleMarket(true)
+            this.funcs.setVisibleMarker(true)
+
         }
         else {
             global.NOTIF("warning", "Оруулсан өгөгдөл таарахгүй байна", 'exclamation')
