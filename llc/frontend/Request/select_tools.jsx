@@ -45,12 +45,13 @@ export default class UsedTools extends Component {
     handleModalOpen(values) {
         this.modalChange(
             'Эрх бүхий багажны жагсаалт',
-            ModelSelectTools,
+            <ModelSelectTools
+                list_of_datas={values}
+                modal_comp_props={{
+                    handleSelectedTool: this.handleSelectedTool
+                }}
+            />,
             null,
-            values,
-            {
-                handleSelectedTool: this.handleSelectedTool
-            },
         )
     }
 
@@ -60,13 +61,11 @@ export default class UsedTools extends Component {
         })
     }
 
-    modalChange(title, text, modalClose, values, modal_comp_props) {
+    modalChange(title, text, modalClose) {
         this.setState({
             title,
             text,
             modalClose,
-            list_of_datas: values,
-            modal_comp_props,
         })
         this.modalOpen()
     }
@@ -75,6 +74,8 @@ export default class UsedTools extends Component {
         const {
             tool_datas, info, state, selected_tools
         } = this.props.values
+
+        console.log(tool_datas);
 
         return (
             <div className="col-md-12">
@@ -146,7 +147,6 @@ export default class UsedTools extends Component {
                     title={this.state.title}
                     modalClose={this.state.modalClose}
                     modal_status={this.state.modal_status}
-                    modal_comp_props={this.state.modal_comp_props}
                 />
             </div>
         )

@@ -15,11 +15,11 @@ export default class Request extends Component {
                 <Route exact path="/llc/llc-request/" component={Detail} />
                 <Route
                     path="/llc/llc-request/хүсэлт-нэмэх/"
-                    component={(props) => <RequestAdd {...props}/>}
+                    render={(props) => <RequestAdd {...props}/>}
                 />
                 <Route
                     path="/llc/llc-request/:id/дэлгэрэнгүй/"
-                    component={(props) => <RequestAdd {...props} values={this.props} info={false}/>}
+                    render={(props) => <RequestAdd {...props} values={this.props} info={false}/>}
                 />
             </Switch>
         )
