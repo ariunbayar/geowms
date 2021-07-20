@@ -383,7 +383,10 @@ class Form extends Component {
                             'fa fa-exclamation-circle',
                             'warning',
                             "Тохиргоог цуцлах",
-                            GetDescription,
+                            <GetDescription
+                                handleOnChange={this.handleOnChange}
+                                description={this.state.description}
+                            />,
                             this.state.has_button,
                             "илгээх",
                             null
@@ -399,7 +402,10 @@ class Form extends Component {
                             'fa fa-exclamation-circle',
                             'warning',
                             "Тохиргоог буцаах",
-                            GetDescription,
+                            <GetDescription
+                                handleOnChange={this.handleOnChange}
+                                description={this.state.description}
+                            />,
                             this.state.has_button,
                             "илгээх",
                             null
@@ -435,8 +441,6 @@ class Form extends Component {
                 modalAction={this.handleModalAction}
                 actionNameDelete={this.state.action_name}
                 modalClose={this.state.modalClose}
-                handleOnChange={this.handleOnChange}
-                description={this.state.description}
             />
             </>
         )
