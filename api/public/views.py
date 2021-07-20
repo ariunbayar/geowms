@@ -300,7 +300,7 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
     date_now = str(localtime(now()).strftime("%Y-%m-%d_%H-%M"))
 
     view = ViewNames.objects.filter(view_name=view_name).first()
-    if not view or not view.open_datas:
+    if not view or not _check_open_datas(view.open_datas):
         raise Http404
 
     open_properties = _get_property_names(view, has_geo_data=True, get_text=False)
@@ -355,6 +355,19 @@ def _get_open_layer_url(request, bundle_id, wms_id, layer_id, url_type):
     return absolute_url
 
 
+def _check_open_datas(open_datas):
+    is_true = True
+    open_datas = utils.json_load(open_datas)
+    len_datas = len(open_datas)
+    if len_datas == 1:
+        if not open_datas[0]:
+            is_true = False
+    elif len_datas < 1:
+        is_true = False
+
+    return is_true
+
+
 @require_GET
 def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
     BASE_HEADERS = {
@@ -396,7 +409,7 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
     layer_code = utils.remove_text_from_str(wms_layer_code)
 
     view = ViewNames.objects.filter(view_name=layer_code).first()
-    if not view or not view.open_datas:
+    if not view or not _check_open_datas(view.open_datas):
         raise Http404
 
     allowed_layers = [layer_code]
