@@ -624,8 +624,13 @@ def _str_to_bool(str):
 
 
 def _rsp_validation(data):
+    # find_data = dict()
     info = ''
     if not data['data']:
+        # if model_name == 'feature_config':
+        #     find_data['name'] = 'data_type_id'
+        #     find_data['find'] = 'data_type'
+        # else:
         info = 'Хоосон байна утга оруулна уу!'
     return info
 

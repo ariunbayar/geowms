@@ -31,6 +31,7 @@ export class List extends Component {
         this.done = this.done.bind(this)
         this.handleFormLeft = this.handleFormLeft.bind(this)
         this.isDelete = this.isDelete.bind(this)
+        this.remove = this.remove.bind(this)
         this.delete = this.delete.bind(this)
         this.deleteAndRemove = this.deleteAndRemove.bind(this)
     }
@@ -98,38 +99,43 @@ export class List extends Component {
         this.setState({ is_delete: !this.state.is_delete })
     }
 
-    deleteAndRemove(model_name, model_id) {
+    remove(model_name, model_id, name, formLorR) {
+        const modal = {
+            modal_status: "open",
+            modal_icon: "fa fa-exclamation-circle",
+            modal_bg: '',
+            icon_color: 'warning',
+            title: 'Устгах',
+            text: `Та "${name}" нэртэй "${model_name}"-г устгахдаа итгэлтэй байна уу?`,
+            has_button: true,
+            actionNameBack: 'Үгүй',
+            actionNameDelete: 'Тийм',
+            modalAction: () => this.deleteAndRemove(model_name, model_id),
+            modalClose: null
+        }
+        global.MODAL(modal)
+        this.setState({ model_name, model_id, name, formLorR })
+    }
+
+    deleteAndRemove(model_name, model_id){
         service.remove(model_name, model_id).then(({ success, info }) => {
             if (success) {
                 const modal = {
                     modal_status: "open",
                     modal_icon: "fa fa-check-circle",
-                    modal_bg: "",
                     icon_color: "success",
                     title: info,
-                    has_button: false,
-                    actionNameBack: "",
-                    actionNameDelete: "",
-                    modalAction: null,
-                    modalClose: null
                 }
                 global.MODAL(modal)
-                // this.setState({ model_name, model_id, name, formLorR })
                 this.setState({ hideRight: false })
                 this.getAll();
             }
             else {
                 const modal = {
                     modal_status: "open",
-                    modal_icon: "fa fa-time-circle",
-                    modal_bg: "",
-                    icon_color: "warning",
+                    modal_icon: "fa fa-times-circle",
+                    icon_color: "danger",
                     title: info,
-                    has_button: false,
-                    actionNameBack: "",
-                    actionNameDelete: "",
-                    modalAction: null,
-                    modalClose: null
                 }
                 global.MODAL(modal)
             }
@@ -209,7 +215,7 @@ export class List extends Component {
                                                             <i
                                                                 className="fa fa-trash text-danger fa-1x"
                                                                 role="button"
-                                                                onClick={() => this.deleteAndRemove('theme', theme.id, theme.name)}
+                                                                onClick={() => this.remove('theme', theme.id, theme.name)}
                                                             >
                                                             </i>
                                                     }
@@ -233,7 +239,7 @@ export class List extends Component {
                                                                             <i
                                                                                 className="fa fa-trash text-danger fa-1x"
                                                                                 role="button"
-                                                                                onClick={() => this.deleteAndRemove('package', packages.id, packages.name)}
+                                                                                onClick={() => this.remove('package', packages.id, packages.name)}
                                                                             >
                                                                             </i>
                                                                     }
@@ -252,7 +258,7 @@ export class List extends Component {
                                                                                     <i
                                                                                         className="fa fa-trash text-danger fa-1x"
                                                                                         role="button"
-                                                                                        onClick={() => this.deleteAndRemove('feature', feature.id, feature.name)}
+                                                                                        onClick={() => this.remove('feature', feature.id, feature.name)}
                                                                                     >
                                                                                     </i>
                                                                                 }

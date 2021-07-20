@@ -37,15 +37,8 @@ export default class Forms extends Component {
                 const modal = {
                     modal_status: "open",
                     modal_icon: "fa fa-check-circle",
-                    modal_bg: '',
                     icon_color: 'success',
                     title: info,
-                    text: '',
-                    has_button: false,
-                    actionNameBack: '',
-                    actionNameDelete: '',
-                    modalAction: null,
-                    modalClose: null
                 }
                 global.MODAL(modal)
                 if (code !== '') this.props.refresh(code)
@@ -54,16 +47,9 @@ export default class Forms extends Component {
             else {
                 const modal = {
                     modal_status: "open",
-                    modal_icon: "fa fa-time-circle",
-                    modal_bg: '',
-                    icon_color: 'warning',
+                    modal_icon: "fa fa-times-circle",
+                    icon_color: 'danger',
                     title: info,
-                    text: '',
-                    has_button: false,
-                    actionNameBack: '',
-                    actionNameDelete: '',
-                    modalAction: null,
-                    modalClose: null
                 }
                 global.MODAL(modal)
             }
@@ -92,7 +78,6 @@ export default class Forms extends Component {
     }
 
     connectedFields(value_obj, idx) {
-
         function getOposite(data) {
             if (data == 'true') return 'false'
             if (data == 'false') return 'true'
@@ -115,7 +100,7 @@ export default class Forms extends Component {
     }
 
     componentDidUpdate(pP) {
-        const {model_id, model_name, edit_name} = this.props
+        const { model_id, model_name, edit_name } = this.props
         if(pP.model_id !== model_id) {
             this.getFields(model_name, model_id, edit_name)
             this.setState({ before_id: pP.model_id, before_name: pP.model_name, before_edit_name: pP.edit_name })
@@ -127,7 +112,7 @@ export default class Forms extends Component {
     }
 
     componentDidMount() {
-        const {model_id, model_name, edit_name} = this.props
+        const { model_id, model_name, edit_name } = this.props
         this.setState({ model_id, model_name, edit_name })
         this.getFields(model_name, model_id, edit_name)
     }
@@ -137,15 +122,14 @@ export default class Forms extends Component {
         service
             .getFields(model_name, model_id, edit_name)
             .then(({ success, fields }) => {
-                if(success)
-                {
+                if(success) {
                     let has_class_idx
                     let is_connected_to_feature_idx
                     fields.map((field, idx) => {
                         if (field.field_name == 'has_class') has_class_idx = idx
                         if (field.field_name == 'is_connect_to_feature') is_connected_to_feature_idx = idx
                     })
-                    this.setState({values: fields, is_loading: false, model_id, model_name, has_class_idx, is_connected_to_feature_idx })
+                    this.setState({ values: fields, is_loading: false, model_id, model_name, has_class_idx, is_connected_to_feature_idx })
                 }
             })
     }
@@ -163,7 +147,7 @@ export default class Forms extends Component {
         }
     }
 
-    backToForm(){
+    backToForm() {
         const { before_id , before_name, before_edit_name } = this.state
         if (before_edit_name !== '') {
             this.props.handleFormLeft(before_name, before_id, before_edit_name)
@@ -186,7 +170,7 @@ export default class Forms extends Component {
         const btn_name = edit_name !== '' ? 'Засах' : 'Хадгалах'
         return (
             <div className='overflow-auto card-body'>
-                {
+                 {
                     jumped
                     &&
                         <div className="mb-2">
@@ -286,7 +270,7 @@ export default class Forms extends Component {
                         }
                         <button
                             type="button"
-                            onClick={this.onSubmit}
+                            onClick={() => this.openModal('exclamation-circle text-warning', btn_name, `Та ${edit_name ? `${prop_edit_name} - нэртэй` : ''} ${prop_name}-г ${btn_name.toLowerCase()}даа итгэлтэй байна уу ?`, this.onSubmit)}
                             className={`btn ${edit_name ? 'col-md-7' : 'btn-block'} gp-btn-primary`}
                         >
                             {btn_name}
@@ -353,7 +337,7 @@ function Input(props) {
             placeholder={props.field_name}
             onChange={handleOnChange}
             value={value || ''}
-            className='form-control'
+            className={'form-control'}
             disabled={props.data && props.field_name.includes("id") && !(props.field_name == props.model_name + "_id") ? 'disabled' : ''}
         />
     )
@@ -379,7 +363,8 @@ function RadioInputs(props) {
                     type="radio"
                     id={`${props.field_name}-true`}
                     name={props.field_name}
-                    checked={value == 'true' ? true : false} value={`true`}
+                    checked={value == 'true' ? true : false}
+                    value={`true`}
                     onChange={handleOnchange}
                 />
                 &nbsp;
