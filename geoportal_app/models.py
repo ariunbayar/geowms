@@ -31,6 +31,7 @@ class User(AbstractUser):
     is_sso = models.BooleanField(default=False)
     is_user = models.BooleanField(default=False)
 
+
 class UserValidationEmail(models.Model):
     user  = models.ForeignKey(User, on_delete=models.CASCADE)
     is_approve = models.BooleanField(default=False)
