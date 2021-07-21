@@ -139,32 +139,32 @@ export class LLCSettings extends Component {
 
     handleSaveModal(value, idx) {
         const { selected_values, geom_type } = this.state
-        const { features } = selected_values
+        // const { features } = selected_values
 
-        var file_geom_type
-        features.map((details, idx) =>
-            file_geom_type = details.geometry.type
-        )
-        file_geom_type = utils.checkMultiGeomTypeName(file_geom_type)
-        if(geom_type !== file_geom_type) {
-            const modal = {
-                modal_status: "open",
-                modal_icon: "fa fa-exclamation-circle",
-                modal_bg: '',
-                icon_color: 'warning',
-                title: 'Геометр төрөл зөрсөн байна!',
-                text: ` Та тохиргоогоо дахин хянана уу!`,
-                has_button: false,
-                actionNameBack: '',
-                actionNameDelete: '',
-                modalAction: null,
-                modalClose: () => this.modalClose(idx)
-            }
-            global.MODAL(modal)
-        }
-        else {
-            this.Save(value, idx)
-        }
+        // var file_geom_type
+        // features.map((details, idx) =>
+        //     file_geom_type = details.geometry.type
+        // )
+        // file_geom_type = utils.checkMultiGeomTypeName(file_geom_type)
+        // if(geom_type !== file_geom_type) {
+        //     const modal = {
+        //         modal_status: "open",
+        //         modal_icon: "fa fa-exclamation-circle",
+        //         modal_bg: '',
+        //         icon_color: 'warning',
+        //         title: 'Геометр төрөл зөрсөн байна!',
+        //         text: ` Та тохиргоогоо дахин хянана уу!`,
+        //         has_button: false,
+        //         actionNameBack: '',
+        //         actionNameDelete: '',
+        //         modalAction: null,
+        //         modalClose: () => this.modalClose(idx)
+        //     }
+        //     global.MODAL(modal)
+        // }
+        // else {
+        this.Save(value, idx)
+        // }
     }
 
     modalClose(idx) {
@@ -175,6 +175,7 @@ export class LLCSettings extends Component {
 
     Save(value, idx) {
         var list_of_datas = this.state.list_of_datas
+        const {id} = this.props.match.params
         service.Save(value).then(({ success }) => {
             if (success) {
                 const modal = {
@@ -193,6 +194,8 @@ export class LLCSettings extends Component {
                 global.MODAL(modal)
             }
             else {
+                list_of_datas[idx].feature_id = null
+                list_of_datas[idx].feature = {}
                 const modal = {
                     modal_status: "open",
                     modal_icon: "fa fa-exclamation-circle",
