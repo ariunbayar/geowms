@@ -23,7 +23,6 @@ export default class BundleAdminRights extends Component {
     }
 
     render() {
-        console.log(this.props.formOptionsRole);
         return (
             <>
                 {this.props.formOptions.map(({id, name, layers, is_active, layer_visible}, idx) =>
@@ -51,7 +50,7 @@ export default class BundleAdminRights extends Component {
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th scope="col"> Давхаргын нэр </th>
+                                    <th scope="col"> Давхаргын нэр </th>
                                         <th scope="col"> Харагдах чек </th>
                                         {this.props.formOptionsRole.map(({id}, idx) =>
                                             (id == 1 ?

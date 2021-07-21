@@ -70,7 +70,6 @@ export default class BundleFormTable extends Component {
 
     render() {
         const { id, name } = this.props.values
-        console.log(this.state.roles);
         return (
             <tr>
                 <td >
@@ -95,7 +94,6 @@ export default class BundleFormTable extends Component {
                             value={id}
                         />
                         }
-
                     </td>
                 )}
             </tr>
