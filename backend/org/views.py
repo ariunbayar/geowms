@@ -7,6 +7,7 @@ import datetime
 from collections import Counter
 
 from django.contrib.auth.decorators import user_passes_test, login_required
+from django.views.decorators.cache import cache_page
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Count, Q
 from django.db import transaction
@@ -344,6 +345,8 @@ def org_add(request, payload, level):
                             updated_by=gov_role_inspire.updated_by,
                         ))
                 GovPermInspire.objects.bulk_create(objs)
+            return JsonResponse({'success': True})
+        else:
             return JsonResponse({'success': True})
     # # Байгууллага шинээр үүсгэх
     else:
@@ -844,6 +847,7 @@ def save_gov_roles(request, payload, level, pk):
 
 @require_GET
 @ajax_required
+@cache_page(60 * 5)
 @user_passes_test(lambda u: u.is_superuser)
 def form_options(request, option):
 

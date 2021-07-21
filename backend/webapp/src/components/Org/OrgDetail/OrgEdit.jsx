@@ -73,6 +73,7 @@ export class OrgEdit extends Component {
                             org_role: org.org_role,
                         },
                         geo_id: org.geo_id,
+                        old_geo_id: org.geo_id,
                     }))
                     this.formOptions()
                 }
@@ -182,7 +183,7 @@ export class OrgEdit extends Component {
 
         const org_level = this.props.level
         const org_id = this.props.id
-        const {geo_id} = this.state
+        const { geo_id, old_geo_id } = this.state
         const datas = {
             org_name: values.org_name,
             id: org_id,
@@ -203,7 +204,9 @@ export class OrgEdit extends Component {
                     },
                     is_loading: false,
                 })
-                this.props.getGeom()
+                if (old_geo_id !== geo_id) {
+                    this.props.getGeom(values.org_level)
+                }
                 setStatus('saved')
                 setSubmitting(false)
                 this.new_level = values.org_level

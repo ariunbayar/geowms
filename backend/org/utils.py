@@ -183,7 +183,7 @@ def get_theme_packages_gov(theme_id, govRole):
     t_perm_revoke = 0
     for package in LPackages.objects.filter(theme_id=theme_id):
         t_perm_all = t_perm_all + 1
-        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke = _get_package_features_gove(package.package_id, govRole)
+        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke = get_package_features_gove(package.package_id, govRole)
         package_data.append(
             {
                 'id': package.package_id,
