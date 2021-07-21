@@ -26,7 +26,7 @@ def all(request):
             if wms:
                 wms_args['layers'] = ','.join([ob.code for ob in wms.wmslayer_set.all()])
 
-            wms_url = wms.url
+                wms_url = wms.url
             if utils.check_nsdi_address(request) and ('geo.nsdi.gov.mn'  in wms_url  or '192.168.10.15' in wms_url):
                 baselayer_url = wms.url
                 if wms.cache_url:
