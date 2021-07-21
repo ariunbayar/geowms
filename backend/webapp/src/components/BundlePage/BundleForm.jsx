@@ -3,6 +3,7 @@ import ImageUploader from 'react-images-upload'
 import {NavLink} from "react-router-dom"
 import { service } from "./service"
 import BackButton from "@utils/Button/BackButton"
+import { disable } from "ol/rotationconstraint"
 
 
 export default class BundleForm extends Component {
@@ -87,15 +88,9 @@ export default class BundleForm extends Component {
             <>
                 <div className="form-group" style={{marginBottom: "8px"}}>
                     <label htmlFor="id_name"> Сангийн нэр: </label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="id_name"
-                        placeholder="сангийн нэр"
-                        onChange={(e) => this.handleChange('name', e)}
-                        value={this.state.name}
-                        style={{marginBottom: "8px"}}
-                    />
+                    <h5>
+                        {this.state.name}
+                    </h5>
                 </div>
                 <div className ="bundle-table-scroll border border-light rounded">
                     {this.props.formOptions.map(({name, layers,is_active}, idx) =>
