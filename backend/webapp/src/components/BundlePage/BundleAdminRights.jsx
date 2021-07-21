@@ -50,7 +50,7 @@ export default class BundleAdminRights extends Component {
                             <table className="table">
                                 <thead>
                                     <tr>
-                                    <th scope="col"> Давхаргын нэр </th>
+                                        <th scope="col"> Давхаргын нэр </th>
                                         <th scope="col"> Харагдах чек </th>
                                         {this.props.formOptionsRole.map(({id}, idx) =>
                                             (id == 1 ?
