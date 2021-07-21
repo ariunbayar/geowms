@@ -1,35 +1,27 @@
 import React, { Component } from "react"
-import {service} from '../service'
-import {QPay} from '../QPay/Qpay'
-import ModalAlert from '@utils/Modal/ModalAlert'
-import Modal from '@utils/Modal/Modal'
-import {Notif} from '@utils/Notification'
+
+import EmailModalForm from './EmailModalForm'
+import { QPay } from '../QPay/Qpay'
+
+import { service } from '../service'
 
 export class Purchase extends Component {
 
     constructor(props) {
         super(props)
 
-        this.too = 0
         this.state = {
             purchase: props.purchase,
-            price: 3000,
             purchase_all: [],
             qpay_modal_is: false,
             point_data: [],
             names: [],
 
-            is_modal_open: false,
-            is_modal_info_open: false,
+            is_work_mn_bank: false,
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
         }
         this.qPayClose = this.qPayClose.bind(this)
-        this.alertOver = this.alertOver.bind(this)
-        this.alertOut = this.alertOut.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.handleModalClose = this.handleModalClose.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
-        this.addNotif = this.addNotif.bind(this)
     }
 
     componentDidMount(){
@@ -48,46 +40,58 @@ export class Purchase extends Component {
                     }
                 }
                 else {
-                    this.addNotif('danger', 'Мэдээлэл олдсонгүй', 'times')
+                    global.NOTIF('danger', 'Мэдээлэл олдсонгүй', 'times')
                 }
-            }).catch(error => this.addNotif('danger', 'Алдаа гарсан', 'times'))
-    }
-
-    addNotif(style, msg, icon){
-        this.too ++
-        this.setState({ show: true, style: style, msg: msg, icon: icon })
-        const time = setInterval(() => {
-            this.too --
-            this.setState({ show: true })
-            clearInterval(time)
-        }, 2000);
+            }).catch(error => global.NOTIF('danger', 'Алдаа гарсан', 'times'))
     }
 
     handlePayment (){
         const purchase_id = this.props.match.params.id
-        const {purchase_all} = this.state
-        service
-            .payment(purchase_all)
-            .then(({ success }) => {
-                if (success) {
-                    this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
-                } else {
-                    this.props.history.push(`/payment/failed/${purchase_id}/`)
-                }
-            })
+        const { purchase_all, is_work_mn_bank } = this.state
+        if (is_work_mn_bank) {
+            service
+                .payment(purchase_all)
+                .then(({ success }) => {
+                    if (success) {
+                        this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
+                    } else {
+                        this.props.history.push(`/payment/failed/${purchase_id}/`)
+                    }
+                })
+        }
     }
 
-    handleModalOpen(){
-        this.setState({ is_modal_open: true })
+    handleModalOpen() {
+        this.handleModal(
+            'fa fa-exclamation-circle',
+            'warning',
+            "Анхааруулга",
+            'QPay-ээр төлбөр төлөхөд шимтгэл авна.',
+            true,
+            () => this.handleQpay(),
+            "Үргэлжлүүлэх",
+        )
     }
 
-    handleModalClose(){
-        this.setState({ is_modal_open: false })
+    handleModal(modal_icon, icon_color, title, text, has_button, modalAction, actionNameDelete, modalClose=null) {
+        const modal = {
+            modal_status: "open",
+            modal_icon: modal_icon,
+            modal_bg: "",
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+            actionNameBack: "Буцах",
+            actionNameDelete: actionNameDelete,
+            modalAction: modalAction,
+            modalClose: modalClose
+        }
+        global.MODAL(modal)
     }
 
     handleQpay(){
         this.setState(prevState => ({
-            is_modal_open: false,
             qpay_modal_is: !prevState.qpay_modal_is,
         }))
     }
@@ -101,20 +105,59 @@ export class Purchase extends Component {
     }
 
     qPayClose(is_success){
-        this.setState({ qpay_modal_is: false, is_modal_info_open: is_success })
+        if (is_success) {
+            this.handleModal(
+                'fa fa-check-circle',
+                'success',
+                "Худалдан авалтын мэдээлэл",
+                'Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.',
+                false,
+                null,
+                "",
+                () => this.handleModalApproveClose()
+            )
+        }
+        this.setState({ qpay_modal_is: false })
     }
 
-    alertOver(){
-        this.setState({ alert_msg: "Засвартай байгаа" })
+    handleUserEmailCheck(){
+        service
+            .userEmailCheck()
+            .then(({ success }) => {
+                if (success) {
+                    this.handleModal(
+                        'fa fa-exclamation-circle',
+                        "warning",
+                        'Анхааруулга',
+                        'QPay-ээр төлбөр төлөхөд шимтгэл авахыг анхаарна уу!',
+                        true,
+                        () => this.handleQpay(),
+                        'Үргэлжлүүлэх',
+                        null
+                    )
+                }
+                else {
+                    this.handleModal(
+                        '',
+                        "",
+                        '',
+                        <EmailModalForm
+                            modalAction={(info) => this.successModal(info)}
+                            modalClose={() => this.handleFormModalClose()}
+                        />,
+                        false
+                    )
+                }
+            })
     }
 
-    alertOut(){
-        this.setState({ alert_msg: "Монгол Банкаар төлбөр төлөх" })
+    setAlert(alert_msg) {
+        this.setState({ alert_msg })
     }
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { purchase_all, point_data, qpay_modal_is, alert_msg, is_modal_info_open, is_modal_open } = this.state
+        const { purchase_all, point_data, qpay_modal_is, alert_msg, is_work_mn_bank } = this.state
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
@@ -157,34 +200,21 @@ export class Purchase extends Component {
                     </table>
                     <div className="row text-center">
                         <div className="col-md-6">
-                            <button style={{width:'80%'}}
+                            <button style={{ width:'80%' }}
                                 className="btn gp-btn-primary text-center btn-lg mt-3"
-                                disabled
-                                onMouseOut={() => this.alertOut()}
-                                onMouseOver={() => this.alertOver()}
+                                disabled={!is_work_mn_bank}
+                                onMouseOut={() => this.setAlert("Монгол Банкаар төлбөр төлөх")}
+                                onMouseOver={() => this.setAlert("Засвартай байгаа")}
                                 onClick={() => this.handlePayment()}
                             >
-                                <h4 className="text-succes p-3">{alert_msg}</h4>
+                                <h4 className="text-succes p-3 text-white">{alert_msg}</h4>
                             </button>
                         </div>
                         <div className="col-md-6">
-                            <button type="button" data-toggle="modal" style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleModalOpen()}>
-                                <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
+                            <button type="button" data-toggle="modal" style={{ width:'80%' }}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleUserEmailCheck()}>
+                                <h4 className="text-succes p-3 text-white">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
-                        { is_modal_open &&
-                            <Modal
-                                has_button={true}
-                                modalAction={() => this.handleQpay()}
-                                modalClose={this.handleModalClose}
-                                text='QPay-ээр төлбөр төлөхөд шимтгэл авна.'
-                                title="Анхааруулга"
-                                actionNameBack={ this.state.actionNameBack }
-                                actionNameDelete="Үргэлжлүүлэх"
-                                model_type_icon="warning"
-                                status={this.state.status}
-                            />
-                        }
                     </div>
                 </div>
             </div>
@@ -196,7 +226,6 @@ export class Purchase extends Component {
                             qpay_open={this.state.qpay_modal_is}
                             handleClose={this.qPayClose}
                             history={this.props.history.push}
-                            addNotif={this.addNotif}
                         />
                         <button type="button" data-toggle="modal" className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
                             <a className="text-succes ">Гарах</a>
@@ -205,17 +234,6 @@ export class Purchase extends Component {
                 </div>
             </div>
             <div className={qpay_modal_is ? 'modal-backdrop fade show' : 'd-none'}></div>
-            {
-             is_modal_info_open &&
-                <ModalAlert
-                    modalAction = {() => this.handleModalApproveClose()}
-                    text='Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.'
-                    title="Худалдан авалтын мэдээлэл"
-                    status={this.state.status}
-                    actionNameDelete="зөвшөөрөх"
-                />
-            }
-            <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
         </div>
         )
     }

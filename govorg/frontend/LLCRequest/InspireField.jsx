@@ -9,24 +9,17 @@ export default class InspireField extends Component {
     }
 
     render() {
-        const {title_name, defualt_value, className} = this.props
+        const { title_name, defualt_value, className } = this.props
         return (
-            <div className={`'form-group '  ${className ? className : 'col-md-4'}`}>
-                <label className='text-center'>
-                    {title_name ? title_name : ''}
-                </label>
-                <i
-                    className={
-                        `form-control ${
-                            !defualt_value
-                            &&
-                            `border border-danger icon-exclamation text-danger`
-                        }`
-                    }
-                    title={`${title_name.toUpperCase()} хоосон байна !!!`}
+            <div className={`form-group ${className ? className : 'col-md-4'}`}>
+                <label htmlFor={`id_${title_name}`}>{title_name ? title_name : ''}</label>
+                <div
+                    className={`form-control ${defualt_value ? '' : 'is-invalid'}`}
+                    id={`id_${title_name}`}
                 >
                     {defualt_value}
-                </i>
+                </div>
+                <span className='invalid-feedback'>{`${defualt_value ? '' : 'Хоосон байна!!!'}`}</span>
             </div>
         );
     }

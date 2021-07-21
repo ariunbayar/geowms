@@ -50,5 +50,4 @@ class ChangeRequest(models.Model):
     group_id = models.TextField(max_length=100, null=True)
     llc_request = models.ForeignKey(LLCRequest, on_delete=models.PROTECT, null=True)
     description = models.CharField(max_length=10000, null=True)
-
     created_at = models.DateTimeField(auto_now_add=True)

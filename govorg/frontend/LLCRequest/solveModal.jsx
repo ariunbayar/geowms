@@ -21,6 +21,7 @@ export class DetailModalBody extends Component {
         }
         this.selectedFeature = this.selectedFeature.bind(this)
         this.changeCurrentData = this.changeCurrentData.bind(this)
+        this.handleErrors = this.handleErrors.bind(this)
     }
 
     changeCurrentData(state) {
@@ -58,6 +59,28 @@ export class DetailModalBody extends Component {
                     this.setState({ form_json: value.form_json, selected_value: value })
                 }
             })
+        }
+    }
+
+    handleErrors(errors) {
+        if (errors['list_idx']) {
+            this.setState({ current_count: errors['list_idx'] })
+        }
+        else{
+            const modal = {
+                modal_status: "open",
+                modal_icon: "fa fa-exclamation-circle",
+                modal_bg: '',
+                icon_color: 'warning',
+                title: 'Төрөл таарахгүй байна!',
+                text: errors,
+                has_button: false,
+                actionNameBack: '',
+                actionNameDelete: '',
+                modalAction: null,
+                modalClose: null,
+            }
+            global.MODAL(modal)
         }
     }
 
@@ -132,6 +155,7 @@ export class DetailModalBody extends Component {
                         {...this.props}
                         {...this.state}
                         modalClose={this.props.modalClose}
+                        handleErrors={this.handleErrors}
                     />
                 </div>
             </>
@@ -298,16 +322,7 @@ class Form extends Component {
                     global.refreshCount()
                 }
                 else {
-                    this.modalChange(
-                        '',
-                        'fa fa-times-circle',
-                        'danger',
-                        'Алдаа гарлаа',
-                        error,
-                        false,
-                        "",
-                        this.handleClose
-                    )
+                    this.props.handleErrors(error)
                 }
                 this.setState({ is_loading: false })
             })
@@ -368,7 +383,10 @@ class Form extends Component {
                             'fa fa-exclamation-circle',
                             'warning',
                             "Тохиргоог цуцлах",
-                            GetDescription,
+                            <GetDescription
+                                handleOnChange={this.handleOnChange}
+                                description={this.state.description}
+                            />,
                             this.state.has_button,
                             "илгээх",
                             null
@@ -384,7 +402,10 @@ class Form extends Component {
                             'fa fa-exclamation-circle',
                             'warning',
                             "Тохиргоог буцаах",
-                            GetDescription,
+                            <GetDescription
+                                handleOnChange={this.handleOnChange}
+                                description={this.state.description}
+                            />,
                             this.state.has_button,
                             "илгээх",
                             null
@@ -420,8 +441,6 @@ class Form extends Component {
                 modalAction={this.handleModalAction}
                 actionNameDelete={this.state.action_name}
                 modalClose={this.state.modalClose}
-                handleOnChange={this.handleOnChange}
-                description={this.state.description}
             />
             </>
         )

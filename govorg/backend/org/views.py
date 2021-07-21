@@ -102,72 +102,73 @@ def _org_role(org):
 
     if gov_perm:
         gov_perm_inspire_qs = gov_perm.govperminspire_set
-        feature_ids = _group_att(gov_perm_inspire_qs, 'feature_id')
+        if gov_perm_inspire_qs.all():
+            feature_ids = _group_att(gov_perm_inspire_qs, 'feature_id')
 
-        features_qs = LFeatures.objects.filter(feature_id__in=feature_ids)
-        package_ids = _group_att(features_qs, 'package_id')
+            features_qs = LFeatures.objects.filter(feature_id__in=feature_ids)
+            package_ids = _group_att(features_qs, 'package_id')
 
-        packages_qs = LPackages.objects.filter(package_id__in=package_ids)
-        theme_ids = _group_att(packages_qs, 'theme_id')
+            packages_qs = LPackages.objects.filter(package_id__in=package_ids)
+            theme_ids = _group_att(packages_qs, 'theme_id')
 
-        gov_perm_inspire_qs = gov_perm_inspire_qs.filter(feature_id__in=feature_ids)
-        property_of_feature = _get_properties_by_feature(gov_perm_inspire_qs, feature_ids)
-        perm_list_all = list(gov_perm_inspire_qs.values('geom', 'property_id', 'feature_id', ins_id=F('id'), kind=F('perm_kind')))
+            gov_perm_inspire_qs = gov_perm_inspire_qs.filter(feature_id__in=feature_ids)
+            property_of_feature = _get_properties_by_feature(gov_perm_inspire_qs, feature_ids)
+            perm_list_all = list(gov_perm_inspire_qs.values('geom', 'property_id', 'feature_id', ins_id=F('id'), kind=F('perm_kind')))
 
-        for feature_id, props in property_of_feature.items():
-            # geom
-            perm_list = get_perm_list(feature_id, None, True, perm_list_all)
-            properties.append(
-                get_property_data_display2(perm_list, None, feature_id, geom=True)
-            )
-            property_perm_count = count_property_of_feature(props)
-            for perm in perm_list:
-                kind_name = get_perm_kind_name(perm['kind'])
-                property_perm_count[kind_name] = property_perm_count[kind_name] + 1
+            for feature_id, props in property_of_feature.items():
+                # geom
+                perm_list = get_perm_list(feature_id, None, True, perm_list_all)
+                properties.append(
+                    get_property_data_display2(perm_list, None, feature_id, geom=True)
+                )
+                property_perm_count = count_property_of_feature(props)
+                for perm in perm_list:
+                    kind_name = get_perm_kind_name(perm['kind'])
+                    property_perm_count[kind_name] = property_perm_count[kind_name] + 1
 
-            property_ids_of_feature[feature_id] = property_perm_count
+                property_ids_of_feature[feature_id] = property_perm_count
 
-            # property давхардал арилгах
-            check_list = []
+                # property давхардал арилгах
+                check_list = []
 
-            def _check_in_list(prop):
-                coming_data_type_id = prop['data_type_id']
-                coming_property_id = prop['prop_obj'].property_id
-                for property_id, data_type_id in check_list:
-                    if coming_data_type_id == data_type_id and coming_property_id == property_id:
-                        return False
-                return True
+                def _check_in_list(prop):
+                    coming_data_type_id = prop['data_type_id']
+                    coming_property_id = prop['prop_obj'].property_id
+                    for property_id, data_type_id in check_list:
+                        if coming_data_type_id == data_type_id and coming_property_id == property_id:
+                            return False
+                    return True
 
-            # properties
-            for prop in props:
-                if _check_in_list(prop):
-                    data_type_id = prop['data_type_id']
-                    perm_list = get_perm_list(feature_id, prop['prop_obj'].property_id, False, perm_list_all)
-                    properties.append(
-                        get_property_data_display2(perm_list, prop['prop_obj'], feature_id, False, data_type_id)
-                    )
-                    check_list.append([prop['prop_obj'].property_id, data_type_id])
+                # properties
+                for prop in props:
+                    if _check_in_list(prop):
+                        data_type_id = prop['data_type_id']
+                        perm_list = get_perm_list(feature_id, prop['prop_obj'].property_id, False, perm_list_all)
+                        properties.append(
+                            get_property_data_display2(perm_list, prop['prop_obj'], feature_id, False, data_type_id)
+                        )
+                        check_list.append([prop['prop_obj'].property_id, data_type_id])
 
-        def _get_package_features_data_display(package_id, feature_ids):
+            def _get_package_features_data_display(package_id, feature_ids):
 
-            qs = LFeatures.objects
-            qs = qs.filter(package_id=package_id)
-            qs = qs.filter(feature_id__in=feature_ids)
-            qs = qs.values_list('feature_id', flat=True)
+                qs = LFeatures.objects
+                qs = qs.filter(package_id=package_id)
+                qs = qs.filter(feature_id__in=feature_ids)
+                qs = qs.values_list('feature_id', flat=True)
 
-            package_feature_ids = list(qs)
-            return  get_package_features_data_display(package_id, package_feature_ids, property_ids_of_feature, gov_perm_inspire_qs)
+                package_feature_ids = list(qs)
+                return  get_package_features_data_display(package_id, package_feature_ids, property_ids_of_feature, gov_perm_inspire_qs)
 
 
-        package_features = []
-        for package_id in package_ids:
-            package_obj = _get_package_features_data_display(package_id, feature_ids)
-            package_features.append(package_obj)
+            package_features = []
+            for package_id in package_ids:
+                package_obj = _get_package_features_data_display(package_id, feature_ids)
+                package_features.append(package_obj)
 
-        themes = [
-            get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)), package_features)
-            for theme_id in theme_ids
-        ]
+            themes = [
+                get_theme_data_display(theme_id, list(LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True)), package_features)
+                for theme_id in theme_ids
+            ]
 
     return {
         'gov_perm_id': gov_perm.id if gov_perm else '',
@@ -262,6 +263,7 @@ def frontend(request):
             'employee': {
                 'is_admin': employee.is_admin,
                 'username': employee.user.username,
+                'email': employee.user.email,
                 'geo_id': org.geo_id or None
             },
             'has_position': has_position,

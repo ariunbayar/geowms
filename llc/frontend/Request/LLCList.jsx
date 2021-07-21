@@ -6,7 +6,7 @@ import Modal from '@utils/Modal/Modal'
 
 import RequestModal from  './RequestModal'
 import { service } from "./service";
-import { makeStateColor, makeKindColor } from '../helpers/functions'
+import { makeStateColor, makeKindColor } from '@helpUtils/functions'
 
 export class FileAndDesc extends Component {
     constructor(props){

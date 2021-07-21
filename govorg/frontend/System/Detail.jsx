@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react'
 
 import BackButton from "@utils/Button/BackButton"
-import utils from "@helpUtils/functions"
+import * as utils from "@helpUtils/functions"
 
 import Attributes from './Attributes'
 

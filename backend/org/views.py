@@ -847,21 +847,22 @@ def save_gov_roles(request, payload, level, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def form_options(request, option):
 
-    admin_levels = utils.get_administrative_levels()
+    admin_levels = utils.geo_cache('admin_levels', '', utils.get_administrative_levels(), 1800)
     roles = backend_org_utils.get_roles_display()
 
+    first_au_level_geo_id = utils.geo_cache('first_au_level_geo_id', '', utils.get_1stOrder_geo_id(), 1800)
     if option == 'second':
         rsp = {
             'success': True,
             'secondOrders': admin_levels,
-            'firstOrder_geom': utils.get_1stOrder_geo_id(),
+            'firstOrder_geom': first_au_level_geo_id,
         }
     else:
         rsp = {
             'success': True,
             'secondOrders': admin_levels,
             'roles': roles,
-            'firstOrder_geom': utils.get_1stOrder_geo_id(),
+            'firstOrder_geom': first_au_level_geo_id,
         }
 
     return JsonResponse(rsp)

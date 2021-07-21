@@ -13,6 +13,7 @@ import psycopg2
 import socket
 import shutil
 import uuid
+import time
 
 from collections import namedtuple
 from datetime import timedelta, datetime
@@ -1140,17 +1141,17 @@ def get_properties(feature_id, get_all=False):
 
     l_feature_c_qs = LFeatureConfigs.objects
     l_feature_c_qs = l_feature_c_qs.filter(feature_id=feature_id)
-    data_type_ids = l_feature_c_qs.values_list('data_type_id', flat=True)
+    data_type_ids = list(l_feature_c_qs.values_list('data_type_id', flat=True))
 
     data_type_c_qs = DataTypeConfigs.objects
     data_type_c_qs = data_type_c_qs.filter(data_type_id__in=data_type_ids)
-    property_ids = data_type_c_qs.values_list('property_id', flat=True)
+    property_ids = list(data_type_c_qs.values_list('property_id', flat=True))
 
     property_qs = LProperties.objects
     property_qs = property_qs.filter(property_id__in=property_ids)
 
     if get_all:
-        feature_config_ids = l_feature_c_qs.values_list('feature_config_id', flat=True)
+        feature_config_ids = list(l_feature_c_qs.values_list('feature_config_id', flat=True))
         return feature_config_ids, data_type_ids, property_ids
     else:
         return property_qs, l_feature_c_qs, data_type_c_qs
@@ -1372,9 +1373,9 @@ def mdatas_for_paginator(initial_qs, searchs):
 
 def get_mdata_value(feature_code, geo_id, is_display=False):
     MDatas = apps.get_model('backend_inspire', 'MDatas')
-    l_feature_qs = get_feature_from_code(feature_code)
+    l_feature = get_feature_from_code(feature_code)
 
-    feature_id = l_feature_qs.feature_id
+    feature_id = l_feature.feature_id
     send_value = dict()
 
     properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
@@ -1388,10 +1389,10 @@ def get_mdata_value(feature_code, geo_id, is_display=False):
             for mdata in mdatas.values():
                 value = dict()
                 values = mdata
-                for field in _mdata_values_field():
-                    if values[field]:
-                        for prop in properties_qs:
-                            if prop.property_id == mdata['property_id']:
+                for prop in properties_qs:
+                    if prop.property_id == mdata['property_id']:
+                        for field in _mdata_values_field():
+                            if values[field]:
                                 value[prop.property_code] = values[field]
                 datas = make_value_dict(value, properties_qs, is_display)
                 for data in datas:
@@ -1403,9 +1404,9 @@ def get_mdata_value(feature_code, geo_id, is_display=False):
     return send_value
 
 
-def get_2d_data(geo_id):
-    mgeo_qs = MGeoDatas.objects.filter(geo_id=geo_id).first()
-    hex = mgeo_qs.geo_data.wkt
+def get_2d_data(geo_id, srid=4326):
+    geo_data = get_geom(geo_id, srid=srid)
+    hex = geo_data.wkt
     hex = hex.replace(' Z', '')
     hex = hex.replace(' 0', '')
     data = hex
@@ -2016,3 +2017,45 @@ def has_user(id=None, username=None, email=None):
             is_valid = True
 
     return is_valid
+
+
+# theme code ийг өгөөд тухайн theme ийн бүх feature_id ийг буцаана
+def get_feature_ids_of_theme(theme_code):
+
+    LThemes = apps.get_model('backend_inspire', 'LThemes')
+    LPackages = apps.get_model('backend_inspire', 'LPackages')
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+
+    feature_ids = list()
+
+    theme_qs = LThemes.objects
+    theme_qs = theme_qs.filter(theme_code=theme_code)
+    theme = theme_qs.first()
+
+    if theme:
+        pack_qs = LPackages.objects
+        pack_qs = pack_qs.filter(theme_id=theme.theme_id)
+        for pack in pack_qs:
+            feature_qs = LFeatures.objects
+            feature_qs = feature_qs.filter(package_id=pack.package_id)
+            if feature_qs:
+                feature_ids_new = list(feature_qs.values_list('feature_id', flat=True))
+                feature_ids = feature_ids + feature_ids_new
+
+    return feature_ids
+
+
+# file ruu text bichih
+def write_to_file(text, file_name='test.txt'):
+    with open(file_name, 'w') as f:
+        f.write(text)
+
+
+# зөвхөн тест үед л хэрэг болно эхлэл хугацааг тавина
+def start_time():
+    return time.time()
+
+
+# эхлэл хугацаанаас төгсөл хугацааг гаргана
+def end_time(start_time, text=""):
+    print(text, time.time() - start_time)

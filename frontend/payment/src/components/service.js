@@ -10,7 +10,6 @@ export const service = {
     setEmail
 }
 
-
 function payment(purchase_all){
     const requestOptions = {...getPostOptions(),
         body: JSON.stringify({purchase_all})}

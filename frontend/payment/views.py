@@ -1801,13 +1801,14 @@ def get_geom(request, payload):
     feature = ''
     geo_id = payload.get('geo_id')
 
-    geom = utils.get_geom(geo_id)
+    geom = utils.geo_cache('geom', geo_id, utils.get_geom(geo_id), 1800)
     if geom:
         geo_json = geom.json
         feature = utils.get_feature_from_geojson(geo_json)
 
     rsp = {
-        'feature': feature
+        'success': True,
+        'data': feature,
     }
 
     return JsonResponse(rsp)
