@@ -193,7 +193,6 @@ async function setBaseLayers(map) {
             layers.push(layer)
             map.removeLayer(layer)
         })
-        console.log('removed layers');
         layers.map(layer => map.addLayer(layer))
         map.addControl(new BaseLayers({ layers: base_layer_controls }))
     }
