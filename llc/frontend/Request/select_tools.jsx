@@ -75,8 +75,6 @@ export default class UsedTools extends Component {
             tool_datas, info, state, selected_tools
         } = this.props.values
 
-        console.log(tool_datas);
-
         return (
             <div className="col-md-12">
                 <label htmlFor=''> Зураглал үйлдэхдээ ашигласан багаж</label>
