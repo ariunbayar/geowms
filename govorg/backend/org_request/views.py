@@ -191,11 +191,6 @@ def get_change_all(request):
 
     if org_request_qs:
         org_request_list = [_get_org_request(ob, employee) for ob in org_request_qs]
-        print('aaaa')
-        print('aaaa')
-        print('aaaa')
-        print('aaaa')
-        print(org_request_list)
         if org_request_list[0] != '':
             rsp = {
                 'success': True,
