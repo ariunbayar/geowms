@@ -9,6 +9,7 @@ import { Vector as VectorLayer } from 'ol/layer';
 import { setBaseLayers } from "@helpUtils/ol"
 
 import 'ol/ol.css'
+import './style.css'
 
 export default class MapRegion extends Component {
 
