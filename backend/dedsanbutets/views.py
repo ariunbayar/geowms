@@ -426,10 +426,11 @@ def propertyFields(request, tid, fid):
         view = view_qs.first()
         id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view.id)]
         url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
-
-        style_name = geoserver.get_layer_style('gp_layer_' + view_name)
-        if ':' in style_name:
-            style_name = style_name.split(':')[1]
+        style_name = ''
+        style = geoserver.get_layer_style('gp_layer_' + view_name)
+        if style:
+            if ':' in style:
+                style_name = style.split(':')[1]
 
         rsp = {
             'success': True,
