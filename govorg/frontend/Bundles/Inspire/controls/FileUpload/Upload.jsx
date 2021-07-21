@@ -158,7 +158,6 @@ export class Upload extends Component {
 
     cancel() {
         var file_value = document.getElementById('Upload')
-        console.log(file_value);
         file_value.value = ''
         this.setState({ files: [] })
     }
