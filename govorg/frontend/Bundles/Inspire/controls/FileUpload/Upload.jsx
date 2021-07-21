@@ -140,8 +140,7 @@ export class Upload extends Component {
                     if (success) {
                         alert(info)
                         global.refreshCount()
-                        this.setState({ btn_upload_is_laod: false, files: [], not_cancel: false })
-                        this.cancel()
+                        this.setState({ btn_upload_is_laod: false, files: [], not_cancel: false, is_upload_button: true })
                         this.props.func()
                     }
                     else {
@@ -245,13 +244,13 @@ export class Upload extends Component {
                     <div>
                         <div className="custom-control custom-switch">
                             <input
-                                    type='radio'
-                                    id="gml"
-                                    name="types"
-                                    className="custom-control-input"
-                                    value="gml"
-                                    onChange={() => this.setType('gml')}
-                                />
+                                type='radio'
+                                id="gml"
+                                name="types"
+                                className="custom-control-input"
+                                value="gml"
+                                onChange={() => this.setType('gml')}
+                            />
                             <label className="custom-control-label" htmlFor="gml">GML</label>
                             &nbsp;
                             <i role="button"
