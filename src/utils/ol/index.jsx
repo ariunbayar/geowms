@@ -60,7 +60,7 @@ function removeFeatureFromSource(featureID, source, key='id') {
 }
 
 function writeFeat(features) {
-    const { format } = this.state
+    const { format } = vars
     const data = format.writeFeatureObject(features, {
         dataProjection: vars.projection_display,
         featureProjection: vars.feature_projection,
@@ -152,9 +152,9 @@ async function setBaseLayers(map) {
                         source: new WMTS({
                             url: base_layer_info.url,
                             layer: base_layer_info.layers,
-                            matrixSet: this.state.projection_display,
+                            matrixSet: vars.feature_projection,
                             format: 'image/png',
-                            projection: this.state.projection_display,
+                            projection: vars.feature_projection,
                             tileGrid: new WMTSTileGrid({
                                 tileSize: [256,256],
                                 extent: [-180.0,-90.0,180.0,90.0],
