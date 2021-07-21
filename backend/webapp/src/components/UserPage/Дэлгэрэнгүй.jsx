@@ -1,12 +1,10 @@
 import React, { Component } from "react"
 import {service} from './service'
 import ModalLimit from "./ModalLimit"
-import ModalAlert from "../ModalAlert"
 import BackButton from "@utils/Button/BackButton"
 
 
 export class Дэлгэрэнгүй extends Component {
-
 
     constructor(props) {
         super(props)
@@ -16,8 +14,6 @@ export class Дэлгэрэнгүй extends Component {
             is_superuser:false,
             is_active: false,
             is_modal_limit_open:false,
-            modal_alert_check: "closed",
-            title_name: ""
         }
 
         this.handleModalLimitClose=this.handleModalLimitClose.bind(this)
@@ -25,7 +21,6 @@ export class Дэлгэрэнгүй extends Component {
         this.handleIsActiveTrue=this.handleIsActiveTrue.bind(this)
         this.handleIsActiveFalse=this.handleIsActiveFalse.bind(this)
         this.handleSaveSuccess=this.handleSaveSuccess.bind(this)
-        this.closeModalTime=this.closeModalTime.bind(this)
     }
 
     componentDidMount() {
@@ -48,49 +43,49 @@ export class Дэлгэрэнгүй extends Component {
     }
 
     handleIsActiveFalse(){
-
         service.userDetailChange(this.props.match.params.id, false)
         .then(({success}) => {
-            if(success){this.setState({is_active: false, is_modal_limit_open: false})}
+            if(success) {
+                this.setState({ is_active: false, is_modal_limit_open: false })
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: 'fa fa-check-circle',
+                    modal_bg: '',
+                    icon_color: 'success',
+                    title: 'Амжилттай хязгаарлалаа',
+                    text:'',
+                    has_button: false,
+                    actionNameBack: '',
+                    actionNameDelete: '',
+                    modalAction: null,
+                    modalClose: null
+                }
+                global.MODAL(modal)
+            }
         })
-
-    }
-
-    handleIsActiveFalse(){
-
-        service.userDetailChange(this.props.match.params.id, false)
-        .then(({success}) => {
-            if(success){
-                this.setState({is_active: false, is_modal_limit_open: false})
-                this.setState({modal_alert_check: 'open'})
-                this.setState({title_name: "хязгаарлалаа"})
-        }
-        })
-        this.closeModalTime()
     }
 
     handleIsActiveTrue(){
         service.userDetailChange(this.props.match.params.id, true)
         .then(({success}) => {
             if(success){
-                this.setState({is_active: true})
-                this.setState({modal_alert_check: 'open'})
-                this.setState({title_name: "идэвхжилээ"})
+                this.setState({ is_active: true })
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: 'fa fa-check-circle',
+                    modal_bg: '',
+                    icon_color: 'success',
+                    title: 'Амжилттай идэвхжилээ',
+                    text:'',
+                    has_button: false,
+                    actionNameBack: '',
+                    actionNameDelete: '',
+                    modalAction: null,
+                    modalClose: null
+                }
+                global.MODAL(modal)
             }
         })
-        this.closeModalTime()
-
-    }
-
-    handleModalAlert(){
-        this.setState({modal_alert_check: 'closed'})
-        clearTimeout(this.state.timer)
-    }
-
-    closeModalTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_check: 'closed'})
-        }, 2000)
     }
 
     render() {
@@ -126,12 +121,6 @@ export class Дэлгэрэнгүй extends Component {
                             }
                             </div>
                         </div>
-                        <ModalAlert
-                            title = {["Амжилттай ", this.state.title_name]}
-                            model_type_icon = "success"
-                            status={this.state.modal_alert_check}
-                            modalAction={() => this.handleModalAlert()}
-                        />
                     </div>
                 </div>
                 <BackButton {...this.props} name={'Буцах'}></BackButton>
