@@ -6,6 +6,7 @@ from django.utils.deconstruct import deconstructible
 
 from main import utils
 
+
 class Role(models.Model):
     ROLE1 = 1
     ROLE2 = 2
