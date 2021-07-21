@@ -173,7 +173,8 @@ def _get_org_request(ob, employee):
         'org': employee.org.name,
         'order_no': ob.order_no,
         'order_at': ob.order_at.strftime('%Y-%m-%d') if ob.order_at else '',
-        'project_name': project_name
+        'project_name': project_name,
+        'description': ob.description
     }
 
 
