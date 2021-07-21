@@ -1097,7 +1097,11 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                         'success': success,
                         'info': info
                     }
-
+        else:
+            rsp = {
+                'success': False,
+                'info': "Дата байхгүй байна."
+            }
     else:
         rsp = {
             'success': False,
