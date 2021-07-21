@@ -153,11 +153,11 @@ export class LLCSettings extends Component {
                 modal_bg: '',
                 icon_color: 'warning',
                 title: 'Геометр төрөл зөрсөн байна!',
-                text: `Хадгалахдаа итгэлтэй байна уу?`,
-                has_button: true,
-                actionNameBack: 'Үгүй',
-                actionNameDelete: 'Тийм',
-                modalAction: () => this.Save(value, idx),
+                text: ` Та тохиргоогоо дахин хянана уу!`,
+                has_button: false,
+                actionNameBack: '',
+                actionNameDelete: '',
+                modalAction: null,
                 modalClose: () => this.modalClose(idx)
             }
             global.MODAL(modal)
@@ -176,6 +176,37 @@ export class LLCSettings extends Component {
     Save(value, idx) {
         var list_of_datas = this.state.list_of_datas
         service.Save(value).then(({ success }) => {
+            if (success) {
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: "fa fa-check-circle",
+                    modal_bg: '',
+                    icon_color: 'success',
+                    title: 'Амжилттай',
+                    text: ``,
+                    has_button: false,
+                    actionNameBack: '',
+                    actionNameDelete: '',
+                    modalAction: null,
+                    modalClose: null,
+                }
+                global.MODAL(modal)
+            }
+            else {
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: "fa fa-exclamation-circle",
+                    modal_bg: '',
+                    icon_color: 'warning',
+                    title: 'Геометр төрөл зөрсөн байна!',
+                    has_button: false,
+                    actionNameBack: '',
+                    actionNameDelete: '',
+                    modalAction: null,
+                    modalClose: null
+                }
+                global.MODAL(modal)
+            }
             list_of_datas[idx].icon_state = true
             this.setState({ list_of_datas })
         })

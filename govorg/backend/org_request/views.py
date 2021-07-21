@@ -1522,11 +1522,21 @@ def llc_request_approve(request, request_id):
             req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
             req_file_shape.save()
 
+        raise Exception('lol')
+
     rsp = {
         'success': True,
         'data': 'Амжилттай хүсэлт үүслээ'
     }
     return JsonResponse(rsp)
+
+
+def _get_geom_type_from_feature(feature_id):
+    m_datas = MGeoDatas.objects.filter(feature_id=feature_id).first()
+    if m_datas:
+        return m_datas.geo_data.geom_type
+
+    return False
 
 
 @require_POST
@@ -1536,21 +1546,29 @@ def inspire_save(request, payload):
     id = values.get('id')
     order_no = values.get('order_no')
     order_at = values.get('order_at')
+    order_at = utils.date_to_timezone(order_at)
 
     theme_id = values.get('theme').get('id') or None
     feature_id = values.get('feature').get('id') or None
     package_id = values.get('package').get('id') or None
+    geom_type = values.get('geom_type')
 
-    RequestFilesShape.objects.filter(id=id).update(
-        theme_id=theme_id,
-        package_id=package_id,
-        feature_id=feature_id,
-        order_no=order_no,
-        order_at=order_at or None,
-    )
+    valid_geom_type = _get_geom_type_from_feature(feature_id)
+    if valid_geom_type and valid_geom_type == geom_type:
+        RequestFilesShape.objects.filter(id=id).update(
+            theme_id=theme_id,
+            package_id=package_id,
+            feature_id=feature_id,
+            order_no=order_no,
+            order_at=order_at or None,
+        )
+
+        return JsonResponse({
+            'success': True,
+        })
 
     return JsonResponse({
-        'success': True,
+        "success": False,
     })
 
 
