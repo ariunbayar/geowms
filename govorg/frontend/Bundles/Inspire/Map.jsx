@@ -1438,6 +1438,7 @@ export default class BarilgaSuurinGazar extends Component{
 
     updateFromList(coord_list) {
 
+      const source = this.vector_layer.getSource()
       const id = coord_list.id
       const coords = coord_list.data.map(({geom, turning}) => {
         const conv_geom = transformCoordinate(geom, this.state.dataProjection, this.state.featureProjection)
@@ -1445,9 +1446,10 @@ export default class BarilgaSuurinGazar extends Component{
       })
       const {selected_feature} = this.state
       const feature_id = selected_feature.get('inspire_id')
+
       if (feature_id == id) {
         const getType = selected_feature.getGeometry().getType()
-        const geom_coordinate = selected_feature.getGeometry().getCoordinates()
+        let geom_coordinate = selected_feature.getGeometry().getCoordinates()
         if (getType.includes('MultiPolygon')) {
           geom_coordinate.map((geo, idx) => {
             geo.map((g, ix) => {
@@ -1478,6 +1480,24 @@ export default class BarilgaSuurinGazar extends Component{
           geometry: geom,
           id: feature_id
         })
+        source.addFeature(new_feature)
+
+        new_feature.setStyle(new Style({
+          fill: new Fill({
+            color: 'rgba(28, 159, 252, 0.2)',
+          }),
+          stroke: new Stroke({
+            color: 'rgba(28, 159, 252, 1)',
+            width: 2,
+          }),
+          image: new CircleStyle({
+            radius: 7,
+            fill: new Fill({
+              color: 'rgba(28, 159, 252, 1)',
+            }),
+          })
+        }))
+
         const changedJson = this.writeFeat(new_feature)
         this.setState({ changedJson, is_not_mongolia: false, update_geom_from_list: true, null_form_isload: false })
         this.FormButton()
