@@ -175,18 +175,19 @@ const qgis_plugin = {
 
     get: function() {
         const requestOptions = getGetOptions()
-        return fetch('/back/api/config/qgis_plugin/', requestOptions).then(handleResponse)
+        return fetch('/back/api/config/qgis-plugin/', requestOptions).then(handleResponse)
     },
 
     save: function(values) {
         const opts = {
             ...getPostOptions(),
-            body: JSON.stringify(values),
+            body: values
         }
-        return fetch('/back/api/config/qgis_plugin/save/', opts).then(handleResponse)
+        return fetch('/back/api/config/qgis-plugin/save/', opts).then(handleResponse)
     },
 
 }
+
 
 export const service = {
     config: {

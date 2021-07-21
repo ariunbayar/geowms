@@ -1,14 +1,8 @@
 import React, { Component, Fragment } from "react"
-import { Formik, Form, Field} from 'formik'
-import * as Yup from 'yup'
 import FileUpload from '@utils/Tools/FileUpload'
 
 import {service} from './service'
-
-
-/* const validationSchema = Yup.object().shape({
-})
- */
+import { disable } from "ol/rotationconstraint"
 
 export default class ConfigSystem extends Component {
 
@@ -16,9 +10,8 @@ export default class ConfigSystem extends Component {
 
         super(props)
         this.state = {
-            is_editing: false,
-            initial_values: {
-            },
+            is_editing: true,
+            icon_name: 'edit',
             values: {},
             files: [],
         }
@@ -28,161 +21,91 @@ export default class ConfigSystem extends Component {
     }
 
     componentDidMount() {
+        console.log("get ywuulchihaldaa")
         service.config.qgis_plugin.get().then((values) => {
             this.setState({
-                initial_values: values,
                 values,
-                files,
             })
         })
+    }
+
+    componentDidUpdate(pP, pS) {
+        const {files, is_editing} = this.state
+        if (pS.files !== files) {
+            if (files && is_editing) {
+                this.handleSubmit()
+            }
+        }
     }
 
     handleEdit(e) {
         e.preventDefault()
-
-        const { is_editing } = this.state
+        var { is_editing, icon_name } = this.state
+        if ( !is_editing ) {
+            icon_name = 'edit'}
+        else icon_name = 'floppy-o'
 
         this.setState({
             is_editing: !is_editing,
+            icon_name
         })
     }
 
-    handleSubmit(values, { setStatus, setValues }) {
+    handleSubmit(values) {
+        const { files} = this.state
+        var blob = []
+        const file = files[0]
 
-        setStatus('saving')
-
-        service.config.qgis_plugin
-            .save(values)
-            .then(({ success }) => {
-
+        if (file) {
+                const obj = file
+                blob = new Blob([JSON.stringify(obj, null, 2)])
+            }
+        else blob = file
+        const form_datas = new FormData()
+        form_datas.append('files', blob, 'qgis_plugin.zip')
+        service.config.qgisplugin
+            .save(form_datas)
+            .then(({success}) => {
                 if (success) {
-                    setStatus('save_success')
                     this.setState({ values })
-                } else {
-                    return Promise.reject()
                 }
-
             })
-            .catch(() => {
-                setValues(this.state.values)
-                setStatus('save_error')
-            })
-            .finally(() => {
-                this.setState({
-                    is_editing: false,
-                    hide_file: false })
-            })
-
     }
 
-    // setInfo(type) {
-    //     if (type == 'qgis pulgin') {
-    //         const text = '.qgis pulgin нэртэй файл оруулах'
-    //         this.setState({ text, type })
-    //     }
-    // }
-    getFile(e) {
-        console.log("e", e.target.value)
+    getFile(files) {
+        this.setState({ files })
     }
 
     render() {
 
-        const {
-            is_editing,
-            initial_values,
-            hide_file,
-        } = this.props
-        var { files } = this.state
+        const { values } = this.state
+        var { files, icon_name } = this.state
         return (
             <div className="card">
-
                 <div className="card-header">
                     QGIS Plugin
                     <div className="card-action">
                         <a href="#" onClick={ this.handleEdit }>
-                            <i className="fa fa-edit"></i>
+                            <i className={'fa fa-' +icon_name}></i>
                         </a>
                     </div>
                 </div>
                 <div className="card-body">
-                    <Formik
-                        initialValues={ initial_values }
-                        initialStatus={ 'initial' }
-                        enableReinitialize
-                        validationSchema={ validationSchema }
-                        onSubmit={ this.handleSubmit }
-                    >
-                        {({
-                            errors,
-                            status,
-                            touched,
-                            isSubmitting,
-                            setFieldValue,
-                            setStatus,
-                            setValues,
-                            handleBlur,
-                            values,
-                            isValid,
-                            dirty,
-                        }) => {
-                            return (
-                                <Form>
-                                        { is_editing &&
-                                        <Fragment>
-                                        <div className="form-group">
-                                            <label htmlFor="">Qgis Plugin файл оруулах</label>
-                                            <FileUpload
-                                            files={files}
-                                            className="mt-2 d-flex justify-content-between"
-                                            default_text="Файл оруулна уу"
-                                            getFile={this.getFile}
-                                            info_text='Файл оруулсан байх ёстой'
-                                            accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
-                                        />
-                                        </div>
-                                            <button
-                                                type="submit"
-                                                className="btn gp-btn-primary"
-                                                disabled={ status == 'saving' }
-                                            >
-                                                {status == 'saving' &&
-                                                    <Fragment>
-                                                        <i className="fa fa-circle-o-notch fa-spin"></i> {}
-                                                        Түр хүлээнэ үү...
-                                                    </Fragment>
-                                                }
-                                                {status != 'saving' && 'Хадгалах' }
-                                            </button>
-                                        </Fragment>
-                                        }
-                                    { !is_editing && status == 'save_success' &&
-                                        <div className="alert alert-icon-success alert-dismissible" role="alert">
-                                            <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
-                                            <div className="alert-icon icon-part-success">
-                                                <i className="icon-check"></i>
-                                            </div>
-                                            <div className="alert-message">
-                                                <span>Амжилттай хадгаллаа!</span>
-                                            </div>
-                                        </div>
-                                    }
-                                    { !is_editing && status == 'save_error' &&
-                                        <div className="alert alert-icon-warning alert-dismissible" role="alert">
-                                            <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
-                                            <div className="alert-icon icon-part-warning">
-                                                <i className="icon-check"></i>
-                                            </div>
-                                            <div className="alert-message">
-                                                <span>Хадгалахад алдаа гарлаа!</span>
-                                            </div>
-                                        </div>
-                                    }
-                                </Form>
-                            )
-                        }}
-                    </Formik>
+                    <div className="form-group ">
+                    <label>.zip өргөтгөлтэй файл оруулна уу</label>
+                        <FileUpload
+                            files={files}
+                            className="d-flex justify-content-between"
+                            default_text="Файлаа оруулна уу"
+                            getFile={this.getFile}
+                            accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
+                            onChange={(e) => fileAction(e, 'files')}
+                        />
+                    </div>
                 </div>
             </div>
         )
     }
 }
+
+// modal fade show d-block

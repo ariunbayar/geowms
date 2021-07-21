@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 import json
@@ -7,7 +8,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
 from django.db import connections
-from django.http import JsonResponse
+from django.conf import settings
+from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.utils.timezone import localtime
@@ -19,7 +21,6 @@ from backend.org.models import Org
 from backend.config.models import Error500
 from main.decorators import ajax_required
 from main import geoserver, utils
-
 
 CACHE_TIMEOUT_DISK_INFO = 5
 
@@ -608,3 +609,71 @@ def save_value_types(request, payload):
         'success': True,
     }
     return JsonResponse(rsp)
+
+# @require_GET
+# @ajax_required
+# @user_passes_test(lambda u: u.is_superuser)
+# def qgisplugin_configs(request, payload):
+
+#     upload_file = request.FILES['files']
+#     file_name = upload_file.name
+#     file_not_ext_name = utils.get_file_name(file_name)
+#     form_datas = payload.get( 'form_datas')
+#     if form_datas['file_name']:
+#         file_name = form_datas['file_name']
+
+#     return JsonResponse({'success': True})
+
+@require_GET
+
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def qgis_plugin_configs(request):
+    path = '/assets/'
+    upload_file = request.FILES['files']
+    file_name = upload_file.name
+    if file_name != 'blob':
+        # extract_path = os.path.join(path, file_name)
+        file_path = os.path.join(settings.STATIC_ROOT + '/' + file_name)
+    return JsonResponse ({'success': True} , file_path )
+
+
+def upload_file(uploaded_file, check_data_of_file, file_name, main_path, file_path,):
+    extract_path = os.path.join(settings.STATIC_ROOT, main_path)
+    path = '/assets/'
+    if check_data_of_file or file_name:
+        if file_name != 'blob':
+            extract_path = os.path.join(extract_path, 'qgis_plugin.zip')
+            uploaded_file = os.path.join(settings.STATIC_ROOT, file_path, file_name='qgis_plugin.zip')
+            utils.unzip(file_path, extract_path)
+            utils.remove_file(uploaded_file)
+        return True, extract_path
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def qgis_plugin_configs_save(request):
+    path = '/assets/'
+    upload_file = request.FILES['files']
+    file_name = upload_file.name
+    if file_name != 'blob':
+        extract_path = os.path.join(path, file_name)
+        zip.file(os.path.join(settings.STATIC_ROOT + '/' + file_name))
+    return True, extract_path
+
+
+def upload_file(uploaded_file, check_data_of_file, file_name, main_path, file_path,):
+    extract_path = os.path.join(settings.STATIC_ROOT, main_path)
+    path = '/assets/'
+    if check_data_of_file or file_name:
+        if file_name != 'blob':
+            real_path = os.path.join(path, 'qgis_plugin.zip')
+            print("dsnfvjcsbv jc")
+            print("dsnfvjcsbv jc")
+            print("dsnfvjcsbv jc")
+            print("dsnfvjcsbv jc", real_path)
+            file_path = os.path.realpath(settings.STATIC_ROOT, file_path, file_name='qgis_plugin.zip')
+            utils.unzip(file_path, extract_path)
+            utils.remove_file(file_path)
+        return True, real_path

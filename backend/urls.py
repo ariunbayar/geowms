@@ -204,6 +204,9 @@ urlpatterns = [
         path('qpay/save/', config_views.qpay_configs_save),
         path('get-value-type-fields/', config_views.get_value_type_fields),
         path('save-value-types/', config_views.save_value_types),
+        path('qgis-plugin/', config_views.qgis_plugin_configs),
+        path('qgis-plugin/save/', config_views.qgis_plugin_configs_save)
+
     ], 'config'))),
 
     path('api/error500/', include(([
@@ -258,4 +261,8 @@ urlpatterns = [
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
+
+#     path('geoportal_app/static/assets/', include(([
+#         path('qgis_plugin.zip/', bundle_views.zip, name='qgis_plugin.zip'),
+#     ], 'ppt'))),
 ]
