@@ -145,9 +145,14 @@ def wms_layers(request, pk):
                 url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
                 chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
 
+            proxy_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
+            proxy_cache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
+
             wms_data = {
                 'name': wms.name,
                 'url': url,
+                "proxy_url": proxy_url,
+                "proxy_chache_url": proxy_cache_url,
                 'chache_url': chache_url,
                 'layers': [_layer_to_display(layer) for layer in layers],
                 'wms_or_cache_ur': True if wms.cache_url else False,
