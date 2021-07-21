@@ -22,12 +22,11 @@ from backend.inspire.models import (
     LCodeListConfigs,
     MDatas
 )
-from backend.org.models import Employee, Org
+from backend.org.models import Employee
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 from main.inspire import GEoIdGenerator
-from django.core.cache import cache
 from main.decorators import get_conf_geoserver_base_url
 
 
@@ -52,16 +51,14 @@ def _get_qgis_service_url(request, token, fid):
 
 
 def _get_perm_atts(system, code):
-    access = system.govorgwmslayer_set.first()
-    has_layer = False
-    if access.wms_layer.code == code:
-        has_layer = True
-    if has_layer:
-        access = system.govorgwmslayer_set.first()
+    wms_layer_qs = system.govorgwmslayer_set.filter(wms_layer__code=code)
+    if wms_layer_qs:
+        access = wms_layer_qs.first()
         atts = utils.json_load(access.attributes)
         atts.insert(0, 'geo_data')
         return atts
-    return False
+    else:
+        return []
 
 
 def _get_char(request):
