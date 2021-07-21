@@ -1,9 +1,6 @@
 import React, { Component } from "react"
 import ImageUploader from 'react-images-upload'
-import {NavLink} from "react-router-dom"
-import { service } from "./service"
 import BackButton from "@utils/Button/BackButton"
-import { disable } from "ol/rotationconstraint"
 
 
 export default class BundleForm extends Component {
@@ -35,7 +32,6 @@ export default class BundleForm extends Component {
             const {id, name, layers, icon_url} = this.props.values
             this.setState({id, name, layers, icon_url})
         }
-
 
     }
 
