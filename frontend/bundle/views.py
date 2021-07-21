@@ -134,7 +134,7 @@ def wms_layers(request, pk):
         url = ''
         if wms.is_active:
             check_url = wms.url
-            if utils.check_nsdi_address(request) and ('geo.nsdi.gov.mn' in check_url or '192.168.10.15' in check_url or '192.168.10.92' in check_url):
+            if utils.check_nsdi_address(request) and ('geo.nsdi.gov.mn' in check_url or '192.168.10.15' in check_url):
                 ws_name = check_url.split('/')[3]
                 if wms.cache_url:
                     chache_url = 'https://geo.nsdi.gov.mn/{ws_name}/gwc/service/wmts'.format(
