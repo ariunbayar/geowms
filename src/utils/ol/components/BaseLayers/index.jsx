@@ -1,11 +1,14 @@
-import React, {Component} from "react"
 import {Control} from 'ol/control'
 import {CLASS_CONTROL, CLASS_UNSELECTABLE} from 'ol/css.js'
 
+
 const CLASS_ACTIVE = 'active'
 
-export class BaseLayer extends Control {
+
+class BaseLayers extends Control {
+
     constructor(opt_options) {
+
         const options = opt_options || {}
 
         super({
@@ -26,6 +29,7 @@ export class BaseLayer extends Control {
         const element = this.element
         element.className = cssClasses
         base_layers.forEach((l) => element.appendChild(l))
+
     }
 
     initLayer({thumbnail_1x, thumbnail_2x, layer, is_active}) {
@@ -46,6 +50,7 @@ export class BaseLayer extends Control {
         this.toggleLayer(is_active === true, el, layer)
 
         return el
+
     }
 
     toggleLayer(is_active, el, layer) {
@@ -67,4 +72,7 @@ export class BaseLayer extends Control {
             return
         this.toggleLayer(true, el, layer)
     }
+
 }
+
+export default BaseLayers

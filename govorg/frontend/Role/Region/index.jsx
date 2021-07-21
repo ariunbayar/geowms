@@ -1,12 +1,13 @@
 import React, { Component } from "react"
 import { Map, View } from 'ol'
 
-import OSM from 'ol/source/OSM';
-import TileLayer from 'ol/layer/Tile';
 import { Fill, Stroke, Style } from 'ol/style'
 import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorSource } from 'ol/source';
 import { Vector as VectorLayer } from 'ol/layer';
+
+import { setBaseLayers } from "@helpUtils/ol"
+
 import 'ol/ol.css'
 
 export default class MapRegion extends Component {
@@ -27,20 +28,13 @@ export default class MapRegion extends Component {
         this.loadMap()
     }
 
-    loadMap() {
+    async loadMap() {
         const map = new Map({
-          layers: [
-              new TileLayer({
-                source: new OSM(),
-              })
-          ],
+          layers: [],
           target: 'map',
-          view: new View({
-              center: [11461613.630815497, 5878656.0228370065],
-              zoom: 5.041301562246971,
-          }),
         });
         this.map = map
+        await setBaseLayers(map)
         this.loadMapData(this.state.allowed_geom)
     }
 
@@ -71,12 +65,12 @@ export default class MapRegion extends Component {
         const vectorLayerNew = new VectorLayer({
             source: vectorSourceNew,
             style: function (feature) {
-            return styles_new[feature.getGeometry().getType()];
+                return styles_new[feature.getGeometry().getType()];
             }
         });
 
         this.map.addLayer(vectorLayerNew)
-        this.map.getView().fit(features_new[0].getGeometry(),{ padding: [300, 300, 300, 300] })
+        this.map.getView().fit(features_new[0].getGeometry(),{ padding: [20, 20, 20, 20] })
     }
 
     render() {
