@@ -8,8 +8,7 @@ export function BaseMaps(props) {
     var last_active = null
 
     useEffect(() => {
-        element = document.getElementsByClassName('суурь-давхаргууд')
-        element = element[0]
+        element = document.getElementById('base-layer')
         const base_layers = props.base_layer_controls.map(initLayer)
         base_layers.forEach((l) => element.appendChild(l))
 
@@ -43,7 +42,6 @@ export function BaseMaps(props) {
             last_active.layer.setVisible(false)
             last_active.el.classList.toggle(CLASS_ACTIVE, false)
         }
-
         layer.setVisible(is_active)
         el.classList.toggle(CLASS_ACTIVE, is_active)
 
@@ -58,6 +56,6 @@ export function BaseMaps(props) {
     }
 
     return (
-        <div className="суурь-давхаргууд"></div>
+        <div className="суурь-давхаргууд" id="base-layer"></div>
     )
 }

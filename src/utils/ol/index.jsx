@@ -12,8 +12,6 @@ import { logicOp } from '../functions'
 
 import { service } from './service'
 
-import './style.css'
-
 const options_scale = [
     {'zoom': '2.9903484967519145', 'scale': 5000000},
     {'zoom': '4.3576399772248543', 'scale': 1000000},
