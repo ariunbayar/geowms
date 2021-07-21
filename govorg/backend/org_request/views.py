@@ -1137,9 +1137,12 @@ def _get_file_name(kind, item):
     return file_path
 
 
-def _get_ann_name(kind, item):
-    file = RequestFiles.objects.filter(id=item['file_id']).first()
-    return file.name
+def _get_ann_name(items):
+    qs = RequestFiles.objects
+    for item in items:
+        request_file = qs.filter(id=item['file_id']).first()
+        item['name'] = request_file.name if request_file else ''
+    return items
 
 
 @require_POST
@@ -1159,7 +1162,6 @@ def get_llc_list(request, payload):
             {"field": "state", "action": _get_state, "new_field": "state"},
             {"field": "kind", "action": _get_kind, "new_field": "kind"},
             {"field": "created_at", "action": _get_file_name, "new_field": "file_path"},
-            {"field": "description", "action": _get_ann_name, "new_field": "name"}
         ]
 
         datatable = Datatable(
@@ -1170,8 +1172,9 @@ def get_llc_list(request, payload):
             хувьсах_талбарууд=хувьсах_талбарууд,
         )
         items, total_page, start_index = datatable.get()
+        new_items = _get_ann_name(items)
         rsp = {
-            'items': items,
+            'items': new_items,
             'total_page': total_page,
             'start_index': start_index
         }
