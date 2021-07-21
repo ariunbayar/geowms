@@ -1552,7 +1552,7 @@ def inspire_save(request, payload):
     geom_type = values.get('geom_type')
 
     valid_geom_type = _get_geom_type_from_feature(feature_id)
-    if valid_geom_type and valid_geom_type == geom_type:
+    if valid_geom_type and valid_geom_type in geom_type:
         RequestFilesShape.objects.filter(id=id).update(
             theme_id=theme_id,
             package_id=package_id,
