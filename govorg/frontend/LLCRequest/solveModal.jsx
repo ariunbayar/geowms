@@ -63,7 +63,7 @@ export class DetailModalBody extends Component {
     }
 
     handleErrors(errors) {
-        if (errors['list_idx']) {
+        if ("list_idx" in errors) {
             this.setState({ current_count: errors['list_idx'] })
         }
         else{

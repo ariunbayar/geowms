@@ -1533,6 +1533,14 @@ def llc_request_approve(request, request_id):
     return JsonResponse(rsp)
 
 
+def _get_geom_type_from_feature(feature_id):
+    m_datas = MGeoDatas.objects.filter(feature_id=feature_id).first()
+    if m_datas:
+        return m_datas.geo_data.geom_type
+
+    return False
+
+
 @require_POST
 @ajax_required
 def inspire_save(request, payload):
@@ -1540,10 +1548,21 @@ def inspire_save(request, payload):
     id = values.get('id')
     order_no = values.get('order_no')
     order_at = values.get('order_at')
+    order_at = utils.date_to_timezone(order_at)
 
     theme_id = values.get('theme').get('id') or None
     feature_id = values.get('feature').get('id') or None
     package_id = values.get('package').get('id') or None
+    geom_type = values.get('geom_type')
+
+    valid_geom_type = _get_geom_type_from_feature(feature_id)
+    if valid_geom_type and  geom_type not in valid_geom_type:
+        feature_id = None
+        success = False
+        info = 'Feature-ийн төрөл таарахгүй байна'
+    else:
+        success = True
+        info = 'Амжилттай'
 
     RequestFilesShape.objects.filter(id=id).update(
         theme_id=theme_id,
@@ -1554,7 +1573,8 @@ def inspire_save(request, payload):
     )
 
     return JsonResponse({
-        'success': True,
+        "success": success,
+        "info": info
     })
 
 
