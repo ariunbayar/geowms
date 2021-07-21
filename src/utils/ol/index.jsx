@@ -49,13 +49,15 @@ export {
 
 // tuhain feature ийн id аваад source аас нь арилгах
 function removeFeatureFromSource(featureID, source, key='id') {
-    const features = source.getFeatures();
-    if (features != null && features.length > 0) {
-        for (var i = 0; i < features.length; i++) {
-            const properties = features[i].getProperties();
-            if (properties[key] == featureID) {
-                source.removeFeature(features[i]);
-                break;
+    if (source) {
+        const features = source.getFeatures();
+        if (features != null && features.length > 0) {
+            for (var i = 0; i < features.length; i++) {
+                const properties = features[i].getProperties();
+                if (properties[key] == featureID) {
+                    source.removeFeature(features[i]);
+                    break;
+                }
             }
         }
     }

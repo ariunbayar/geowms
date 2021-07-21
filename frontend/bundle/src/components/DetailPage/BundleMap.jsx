@@ -104,6 +104,7 @@ export default class BundleMap extends Component {
         this.setVisibleMarker = this.setVisibleMarker.bind(this)
         this.setFeatureOnMap = this.setFeatureOnMap.bind(this)
         this.resetSearch = this.resetSearch.bind(this)
+        this.getOpenLayers = this.getOpenLayers.bind(this)
     }
 
     initMarker() {
@@ -436,7 +437,7 @@ export default class BundleMap extends Component {
     }
 
     resetSearch() {
-        this.setState({ refreshLayerFn: null })
+        this.setState({ refreshLayerFn: null, border_feature: null })
     }
 
     // updateViewProjection() {
@@ -641,9 +642,22 @@ export default class BundleMap extends Component {
         return scale * 1000
     }
 
+    getOpenLayers() {
+        const open_layers = Array()
+        this.state.map_wms_list.map(({ layers }, idx) => {
+            layers.map(({ checked, code }, l_idx) => {
+                if (checked) {
+                    open_layers.push(code)
+                }
+            })
+        })
+        return open_layers
+    }
+
     getPopUpInfo(coordinate, layers_code) {
         const latlong = toLonLat(coordinate)
-        let layer_codes = layers_code.length > 0 ? layers_code : this.is_not_visible_layers.length > 0 ? this.is_not_visible_layers : []
+
+        const layer_codes = this.getOpenLayers()
 
         const scale = this.scale_line.renderedHTML_.split(' ')
         let scale_value = scale[0]
@@ -754,7 +768,7 @@ export default class BundleMap extends Component {
                                                     this.sendFeatureInfo.push(feature_info)
                                                 }
                                                 if(geodb_table == 'mpoint_view') {
-                                                    this.state.vector_layer.setSource(null)
+                                                    this.state.vector_layer.getSource().clear()
                                                 }
                                                 if (not_visible_layers.length > 0) {
                                                     this.getPopUpInfo(coordinate, not_visible_layers)
@@ -822,9 +836,6 @@ export default class BundleMap extends Component {
 
     setSourceInPopUp(mode) {
         const source = this.selectSource
-        if (mode != 'private') {
-            this.state.vector_layer.setSource(null)
-        }
         if (mode == 'private') {
             this.state.vector_layer.setSource(source)
         }
@@ -1038,6 +1049,8 @@ export default class BundleMap extends Component {
     }
 
     setFeatureOnMap(feature, refreshLayerFn, is_feature=false) {
+        this.onClickCloser()
+
         if (feature) {
             const { vector_layer } = this.state
 
@@ -1055,9 +1068,23 @@ export default class BundleMap extends Component {
 
             new_feature.setProperties({ id })
             source.addFeature(new_feature)
-            this.map.getView().fit(new_feature.getGeometry(), { padding: [100, 100, 100, 100], duration: 2000 })
+
+            let padding
+            let maxZoom = 18
+
+            const geom_type = new_feature.getGeometry().getType()
+            if (geom_type.includes('Point')) {
+                padding = [300, 300, 300, 300]
+            }
+            else {
+                padding = [100, 100, 100, 100]
+            }
+            this.map.getView().fit(new_feature.getGeometry().getExtent(), { padding: padding, duration: 2000, maxZoom })
             if (refreshLayerFn) {
-                this.setState({ refreshLayerFn })
+                this.setState({ refreshLayerFn, border_feature: feature })
+            }
+            else {
+                this.setState({ border_feature: feature })
             }
         }
     }

@@ -116,7 +116,7 @@ function checkButtonEnableWithId(geo_id, pdf_id) {
 function getPopUpInfo(layers_code, coordinate, scale_value) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({layers_code, coordinate, scale_value})
+        body: JSON.stringify({ layers_code, coordinate, scale_value })
     }
     return fetch('/payment/get-popup-info/', requestOptions).then(handleResponse)
 }
