@@ -1074,8 +1074,13 @@ def save_file_to_storage(file, folder_name, file_full_name):
     fs = FileSystemStorage(
         location=path
     )
+    print("hoo")
+    print("hoo")
+    print("hoo", file.name)
     file = fs.save(file_full_name, file)
     fs.url(file)
+    print("file_path")
+    print("file_path", path)
     return path
 
 

@@ -1,7 +1,10 @@
 import os
 import re
-import subprocess
 import json
+
+import zipfile
+from io import BytesIO
+import subprocess
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
@@ -610,70 +613,43 @@ def save_value_types(request, payload):
     }
     return JsonResponse(rsp)
 
-# @require_GET
-# @ajax_required
-# @user_passes_test(lambda u: u.is_superuser)
-# def qgisplugin_configs(request, payload):
-
-#     upload_file = request.FILES['files']
-#     file_name = upload_file.name
-#     file_not_ext_name = utils.get_file_name(file_name)
-#     form_datas = payload.get( 'form_datas')
-#     if form_datas['file_name']:
-#         file_name = form_datas['file_name']
-
-#     return JsonResponse({'success': True})
 
 @require_GET
-
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def qgis_plugin_configs(request):
-    path = '/assets/'
-    upload_file = request.FILES['files']
-    file_name = upload_file.name
-    if file_name != 'blob':
-        # extract_path = os.path.join(path, file_name)
-        file_path = os.path.join(settings.STATIC_ROOT + '/' + file_name)
-    return JsonResponse ({'success': True} , file_path )
+def check_qgis_path(request):
+    success = False
+    file_name ='qgis_plugin.zip'
 
-
-def upload_file(uploaded_file, check_data_of_file, file_name, main_path, file_path,):
-    extract_path = os.path.join(settings.STATIC_ROOT, main_path)
-    path = '/assets/'
-    if check_data_of_file or file_name:
-        if file_name != 'blob':
-            extract_path = os.path.join(extract_path, 'qgis_plugin.zip')
-            uploaded_file = os.path.join(settings.STATIC_ROOT, file_path, file_name='qgis_plugin.zip')
-            utils.unzip(file_path, extract_path)
-            utils.remove_file(uploaded_file)
-        return True, extract_path
+    file_path = os.path.join(settings.STATIC_ROOT + '/' 'assets/'+ file_name)
+    file_list = []
+    file_detail = {
+        'name': '',
+        'size': ''
+    }
+    if os.path.exists(file_path):
+        file_detail['name'] = file_name
+        file_detail['size'] = os.path.getsize(file_path)
+        file_list.append(file_detail)
+    print("hoho")
+    print("hoho")
+    print("hoho",  file_list)
+    return JsonResponse ({
+        'files': file_list
+    })
 
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def qgis_plugin_configs_save(request):
-    path = '/assets/'
+def qgis_plugin_save(request):
     upload_file = request.FILES['files']
     file_name = upload_file.name
-    if file_name != 'blob':
-        extract_path = os.path.join(path, file_name)
-        zip.file(os.path.join(settings.STATIC_ROOT + '/' + file_name))
-    return True, extract_path
+    file_path = os.path.join(settings.STATIC_ROOT + '/' + 'assets/')
+    extract_path = os.path.join(file_path, 'qgis_plugin')
+    os.mkdir(extract_path)
+    utils.unzip(upload_file, extract_path)
 
-
-def upload_file(uploaded_file, check_data_of_file, file_name, main_path, file_path,):
-    extract_path = os.path.join(settings.STATIC_ROOT, main_path)
-    path = '/assets/'
-    if check_data_of_file or file_name:
-        if file_name != 'blob':
-            real_path = os.path.join(path, 'qgis_plugin.zip')
-            print("dsnfvjcsbv jc")
-            print("dsnfvjcsbv jc")
-            print("dsnfvjcsbv jc")
-            print("dsnfvjcsbv jc", real_path)
-            file_path = os.path.realpath(settings.STATIC_ROOT, file_path, file_name='qgis_plugin.zip')
-            utils.unzip(file_path, extract_path)
-            utils.remove_file(file_path)
-        return True, real_path
+    return True, extract_path({
+        'success': True
+    })

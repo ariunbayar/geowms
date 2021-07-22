@@ -1,8 +1,6 @@
 import React, { Component, Fragment } from "react"
 import FileUpload from '@utils/Tools/FileUpload'
-
 import {service} from './service'
-import { disable } from "ol/rotationconstraint"
 
 export default class ConfigSystem extends Component {
 
@@ -13,6 +11,8 @@ export default class ConfigSystem extends Component {
             is_editing: true,
             icon_name: 'edit',
             values: {},
+            file_uploaded: false,
+            file_name: '',
             files: [],
         }
         this.handleEdit = this.handleEdit.bind(this)
@@ -21,20 +21,17 @@ export default class ConfigSystem extends Component {
     }
 
     componentDidMount() {
-        console.log("get ywuulchihaldaa")
-        service.config.qgis_plugin.get().then((values) => {
+        service.config.qgis_plugin.get().then(({files}) => {
             this.setState({
-                values,
+                files
             })
         })
     }
 
     componentDidUpdate(pP, pS) {
-        const {files, is_editing} = this.state
-        if (pS.files !== files) {
-            if (files && is_editing) {
-                this.handleSubmit()
-            }
+        const {file_uploaded, is_editing, icon_name} = this.state
+        if (pS.file_uploaded !== file_uploaded) {
+            this.handleSubmit()
         }
     }
 
@@ -55,15 +52,14 @@ export default class ConfigSystem extends Component {
         const { files} = this.state
         var blob = []
         const file = files[0]
-
         if (file) {
                 const obj = file
-                blob = new Blob([JSON.stringify(obj, null, 2)])
+                blob = new Blob([JSON.stringify(obj)])
             }
         else blob = file
-        const form_datas = new FormData()
+        var form_datas = new FormData()
         form_datas.append('files', blob, 'qgis_plugin.zip')
-        service.config.qgisplugin
+        service.config.qgis_plugin
             .save(form_datas)
             .then(({success}) => {
                 if (success) {
@@ -73,13 +69,14 @@ export default class ConfigSystem extends Component {
     }
 
     getFile(files) {
-        this.setState({ files })
+        var {is_editing, icon_name} = this.state
+        this.setState({ files, file_uploaded: true })
     }
 
     render() {
 
-        const { values } = this.state
-        var { files, icon_name } = this.state
+        var { files, icon_name, is_editing } = this.state
+        console.log(files)
         return (
             <div className="card">
                 <div className="card-header">
