@@ -78,42 +78,27 @@ export default class Forms extends Component {
     }
 
     connectedFields(value_obj, idx) {
+        var type = getOposite(value_obj.data)
         function getOposite(data) {
             if (data == 'true') return 'false'
             if (data == 'false') return 'true'
         }
 
         if (value_obj.field_name == 'is_connect_to_feature') {
-            this.state.values[idx - 3].data = getOposite(value_obj.data)
-            this.setState({ values: this.state.values })
-            if (getOposite(value_obj.data)=='true') {
-                this.state.values.map((field) => {
-                    const fieldddd = field.data
-                    if (field.field_name == 'connect_feature_id') {
-                        this.setState({ fieldddd: [] })
-                    }
-                    if (field.field_name == 'connect_feature_property_id') {
-                        this.setState({ fieldddd: [] })
-                    }
-                })
+            this.state.values[idx - 3].data = type
+            if (type == 'true') {
+                this.state.values[idx + 1].data = ''
+                this.state.values[idx + 2].data = ''
             }
         }
         if (value_obj.field_name == 'has_class') {
-            this.state.values[idx + 3].data = getOposite(value_obj.data)
-            this.setState({ values: this.state.values })
-
-            if (getOposite(value_obj.data)=='false') {
-                this.state.values.map((field) => {
-                    const fieldddd = field.data
-                    if (field.field_name == 'connect_feature_id') {
-                        this.setState({ fieldddd: [] })
-                    }
-                    if (field.field_name == 'connect_feature_property_id') {
-                        this.setState({ fieldddd: [] })
-                    }
-                })
+            this.state.values[idx + 3].data = type
+            if (type == 'false') {
+                this.state.values[idx + 4].data = ''
+                this.state.values[idx + 5].data = ''
             }
         }
+        this.setState({ values: this.state.values })
     }
 
     getValue(data, idx) {
@@ -309,13 +294,14 @@ function Select(props) {
 
     const [value, setValue] = useState(props.data)
 
+    useEffect(() => {
+        setValue(props.data)
+    }, [props.data])
+
     const handleOnChange = (e) => {
         let val = e.target.value
         setValue(val)
         props.setValue(val, props.index)
-        if (!props.can_connect_feature && props.field_name.includes('connect_feature')) {
-            // setValue(val)
-        }
     }
     return (
         <select
@@ -349,6 +335,10 @@ function Select(props) {
 function Input(props) {
 
     const [value, setValue] = useState(props.data)
+
+    useEffect(() => {
+        setValue(props.data)
+    }, [props.data])
 
     const handleOnChange = (e) => {
         let val = e.target.value
