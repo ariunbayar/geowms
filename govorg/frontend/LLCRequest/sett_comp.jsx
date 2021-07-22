@@ -138,7 +138,6 @@ export class LLCSettings extends Component {
     }
 
     handleSaveModal(value, idx) {
-        const { selected_values, geom_type } = this.state
         this.Save(value, idx)
     }
 
