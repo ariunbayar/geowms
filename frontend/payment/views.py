@@ -1225,10 +1225,14 @@ def createPdf(values):
     pdf.ln(70)
     if 'photoOfControlPointToNear' in values:
         if values['photoOfControlPointToNear']:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPointToNear']), x = 11, y = 91, w = 92, h = 60, type = '', link = '')
+            near_photo_path = os.path.join(settings.MEDIA_ROOT, values['photoOfControlPointToNear'])
+            if utils.is_file(near_photo_path):
+                pdf.image(near_photo_path, x = 11, y = 91, w = 92, h = 60, type = '', link = '')
     if 'photoOfControlPoinFromFar' in values:
         if values['photoOfControlPoinFromFar']:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPoinFromFar']), x = 105, y = 91, w = 92, h = 60, type = '', link = '')
+            far_photo_path = os.path.join(settings.MEDIA_ROOT, values['photoOfControlPoinFromFar'])
+            if utils.is_file(far_photo_path):
+                pdf.image(far_photo_path, x = 105, y = 91, w = 92, h = 60, type = '', link = '')
     # mor 6
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
@@ -1245,10 +1249,14 @@ def createPdf(values):
         pdf.ln(62)
         if 'pointCentreType' in values:
             if values['pointCentreType']:
-                pdf.image(os.path.join(settings.MEDIA_ROOT, values['pointCentreType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+                center_photo_path = os.path.join(settings.MEDIA_ROOT, values['pointCentreType'])
+                if utils.is_file(center_photo_path):
+                    pdf.image(center_photo_path, x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
         if 'overviewPhotoOfControlPointLocation' in values:
             if values['overviewPhotoOfControlPointLocation']:
-                pdf.image(os.path.join(settings.MEDIA_ROOT, values['overviewPhotoOfControlPointLocation']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
+                location_photo_path = os.path.join(settings.MEDIA_ROOT, values['overviewPhotoOfControlPointLocation'])
+                if utils.is_file(location_photo_path):
+                    pdf.image(location_photo_path, x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
     else:
         pdf.ln(0)
     # mor 6

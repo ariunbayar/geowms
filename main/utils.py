@@ -2059,3 +2059,8 @@ def start_time():
 # эхлэл хугацаанаас төгсөл хугацааг гаргана
 def end_time(start_time, text=""):
     print(text, time.time() - start_time)
+
+
+# файлын зам өгөөд байгаа эсэхийг шалгана return bool
+def is_file(path):
+    return os.path.isfile(path)
