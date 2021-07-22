@@ -1,7 +1,8 @@
+from backend.dedsanbutets.models import ViewNames
 import os
 import json
 import datetime
-from geojson import FeatureCollection
+from geojson import FeatureCollection, feature
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -52,6 +53,7 @@ from main.utils import (
     convert_3d_with_srid,
     datetime_to_string,
     get_feature,
+    start_time,
 )
 from main import utils
 
@@ -1534,11 +1536,25 @@ def llc_request_approve(request, request_id):
 
 
 def _get_geom_type_from_feature(feature_id):
-    m_datas = MGeoDatas.objects.filter(feature_id=feature_id).first()
-    if m_datas:
-        return m_datas.geo_data.geom_type
-
-    return False
+    feature = LFeatures.objects.filter(feature_id=feature_id).first()
+    view_name = utils.make_view_name(feature)
+    has_view_name = utils.has_materialized_view(view_name)
+    if has_view_name:
+        cursor = connections['default'].cursor()
+        sql = '''
+            SELECT
+                ST_GeometryType(geo_data) as field_type
+            FROM
+                {view_name}
+        '''.format(view_name=view_name)
+        data = utils.get_sql_execute(sql, cursor, 'one')[0]
+        geom_type = utils.remove_text_from_str(data, 'ST_')
+        return geom_type
+    else:
+        m_datas = MGeoDatas.objects.filter(feature_id=feature_id).first()
+        if m_datas:
+            g_type = m_datas.geo_data.geom_type
+        return g_type
 
 
 @require_POST
