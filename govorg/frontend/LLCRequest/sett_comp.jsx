@@ -139,32 +139,7 @@ export class LLCSettings extends Component {
 
     handleSaveModal(value, idx) {
         const { selected_values, geom_type } = this.state
-        // const { features } = selected_values
-
-        // var file_geom_type
-        // features.map((details, idx) =>
-        //     file_geom_type = details.geometry.type
-        // )
-        // file_geom_type = utils.checkMultiGeomTypeName(file_geom_type)
-        // if(geom_type !== file_geom_type) {
-        //     const modal = {
-        //         modal_status: "open",
-        //         modal_icon: "fa fa-exclamation-circle",
-        //         modal_bg: '',
-        //         icon_color: 'warning',
-        //         title: 'Геометр төрөл зөрсөн байна!',
-        //         text: ` Та тохиргоогоо дахин хянана уу!`,
-        //         has_button: false,
-        //         actionNameBack: '',
-        //         actionNameDelete: '',
-        //         modalAction: null,
-        //         modalClose: () => this.modalClose(idx)
-        //     }
-        //     global.MODAL(modal)
-        // }
-        // else {
         this.Save(value, idx)
-        // }
     }
 
     modalClose(idx) {
