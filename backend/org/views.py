@@ -280,6 +280,15 @@ def _remove_user(user, employee):
         return True
 
 
+def _get_role_id(org):
+    org_role_id = -1
+    qs = org.govperm_set.first()
+    qs = qs.govperminspire_set.last()
+    if qs.gov_role_inspire:
+        org_role_id = qs.gov_role_inspire.gov_role.id
+    return org_role_id
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -302,11 +311,11 @@ def org_add(request, payload, level):
         org.level = org_level
         org.geo_id = geo_id
         org.save()
-        if int(role_id) > -1:
+        if int(role_id) > -1 and int(role_id) != _get_role_id(org):
             with transaction.atomic():
                 objs = list()
                 gov_role = org_role_filter
-                all_gov_role_perms = gov_role.govroleinspire_set.all()
+                all_gov_role_perms = org_role_filter.govroleinspire_set.prefetch_related('govperminspire_set')
                 gov_perm_qs = GovPerm.objects.filter(org=org_id)
                 gov_perm = gov_perm_qs.first()
                 has_role = gov_perm.gov_role
@@ -314,12 +323,12 @@ def org_add(request, payload, level):
                 gov_perm_qs.update(gov_role_id=role_id)
                 if has_role:
                     delete_ids = list()
-                    for role_perm in has_role.govroleinspire_set.all():
+                    for role_perm in has_role.govroleinspire_set.all().prefetch_related('govperminspire_set'):
                         gov_perm_role = role_perm.govperminspire_set.all()
                         if gov_perm_role:
                             for perm in gov_perm_role:
                                 delete_ids.append(perm.id)
-                        gov_perms_inspire.filter(id__in=delete_ids).delete()
+                    gov_perms_inspire.filter(id__in=delete_ids).delete()
 
                 for gov_role_inspire in all_gov_role_perms:
                     has_perm = False
