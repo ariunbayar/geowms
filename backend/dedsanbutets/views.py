@@ -624,15 +624,12 @@ def _str_to_bool(str):
 
 
 def _rsp_validation(data):
-    # find_data = dict()
-    info = ''
     if not data['data']:
-        # if model_name == 'feature_config':
-        #     find_data['name'] = 'data_type_id'
-        #     find_data['find'] = 'data_type'
-        # else:
-        info = 'Хоосон байна утга оруулна уу!'
-    return info
+        if data['field_name'] == "connect_feature_id" and not data['field_name'] == "connect_feature_property_id":
+            return True
+        else:
+            info = 'Хоосон байна утга оруулна уу!'
+            return info
 
 
 @require_POST
@@ -659,7 +656,7 @@ def save(request, payload):
             datas[data['field_name']] = data['data']
             info = _rsp_validation(data)
             if info:
-                return JsonResponse({'success': False, 'info': info})
+                rsp = {'success': False, 'info': info}
 
     model_qs = Model.objects
 

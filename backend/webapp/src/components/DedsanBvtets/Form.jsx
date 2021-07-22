@@ -86,10 +86,33 @@ export default class Forms extends Component {
         if (value_obj.field_name == 'is_connect_to_feature') {
             this.state.values[idx - 3].data = getOposite(value_obj.data)
             this.setState({ values: this.state.values })
+            if (getOposite(value_obj.data)=='true') {
+                this.state.values.map((field) => {
+                    const fieldddd = field.data
+                    if (field.field_name == 'connect_feature_id') {
+                        this.setState({ fieldddd: [] })
+                    }
+                    if (field.field_name == 'connect_feature_property_id') {
+                        this.setState({ fieldddd: [] })
+                    }
+                })
+            }
         }
         if (value_obj.field_name == 'has_class') {
             this.state.values[idx + 3].data = getOposite(value_obj.data)
             this.setState({ values: this.state.values })
+
+            if (getOposite(value_obj.data)=='false') {
+                this.state.values.map((field) => {
+                    const fieldddd = field.data
+                    if (field.field_name == 'connect_feature_id') {
+                        this.setState({ fieldddd: [] })
+                    }
+                    if (field.field_name == 'connect_feature_property_id') {
+                        this.setState({ fieldddd: [] })
+                    }
+                })
+            }
         }
     }
 
@@ -290,8 +313,10 @@ function Select(props) {
         let val = e.target.value
         setValue(val)
         props.setValue(val, props.index)
+        if (!props.can_connect_feature && props.field_name.includes('connect_feature')) {
+            // setValue(val)
+        }
     }
-
     return (
         <select
             className='form-control'
