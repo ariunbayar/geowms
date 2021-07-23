@@ -30,6 +30,7 @@ class PopUpCmp extends Component {
             pdf_id:'',
             is_purchase: false,
             is_enable: false,
+            is_purchased: false,
             is_authenticated: props.is_authenticated,
         }
         this.plusTab = this.plusTab.bind(this)
@@ -184,10 +185,8 @@ class PopUpCmp extends Component {
                 service.purchaseFromCart(data)
                     .then(({success, msg, payment_id}) => {
                         if(success){
-                            setTimeout(() => {
-                                this.setState({ data: [], is_purchase: false })
-                                window.location.href=`/payment/purchase/${payment_id}/`;
-                            }, 1000);
+                            this.setState({ data: [], is_purchase: false, is_purchased: true })
+                            window.location.href=`/payment/purchase/${payment_id}/`;
                         }
                     })
                     .catch(error => {
@@ -199,8 +198,12 @@ class PopUpCmp extends Component {
     }
 
     render() {
-        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated } = this.state
+        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, is_purchased } = this.state
         const { is_empty, is_from_inspire, is_loading } = this.props
+        console.log(this.state.is_purchased);
+        console.log(this.state.is_purchased);
+        console.log(this.state.is_purchased);
+        console.log(this.state.is_purchased);
         return (
                 <div>
                     <div className="ol-popup-header">
@@ -284,65 +287,74 @@ class PopUpCmp extends Component {
                                                         )
                                                     )
                                                 :
-                                                <tr><th>Хоосон байна</th></tr>
+                                                    <tr>
+                                                        <th>
+                                                        {
+                                                            !is_purchased
+                                                            ? "Хоосон байна"
+                                                            : "Амжилттай"
+                                                        }
+                                                        </th>
+                                                    </tr>
                                             }
                                         </tbody>
                                     </table>
                                 </div>
                     }
-                    {!is_authenticated && !is_empty && is_from_inspire
-                        ?
-                        <div className="m-5">
-                            <button
-                                className="btn btn-primary p-2 mx-4"
-                            >
-                                <a className="text-decoration-none text-white" href="/login/">Нэвтрэх</a>
-                            </button>
-                        </div>
-                        :
-                        !is_empty
+                    {
+                        is_purchased
+                        ? <div></div>
+                        : !is_authenticated && !is_empty && is_from_inspire
                             ?
-                                this.state.is_purchase
-                                ?
-                                    <div className="btn-group flex-wrap d-flex justify-content-center">
-                                        <button className="btn btn-xs btn-primary my-2 mx-3" disabled>
-                                            <div className="spinner-border" role="status">
-                                                <span className="sr-only"></span>
-                                            </div>
-                                            {} Хүлээнэ үү..
-                                        </button>
-                                    </div>
-                                :
-                                is_from_inspire && this.is_from_inspire
-                                ?
-                                    <div className="btn-group flex-wrap d-flex justify-content-center p-3">
-                                        <button
-                                            className="btn btn-xs btn-primary mx-1 my-1"
-                                            onClick={() => this.checkDataForPurchase()}
-                                            disabled={is_enable ? "" : "disabled"}
-                                            // disabled={true}
-                                        >
-                                            {
-                                                is_enable
-                                                ?
-                                                    "Худалдаж авах"
-                                                :
-                                                    "Худалдаж авах боломжгүй"
-                                            }
-                                            {/* Засвартай байгаа */}
-                                        </button>
-                                        <button
-                                            className="btn btn-xs btn-primary mx-1 my-1"
-                                            onClick={() => this.openCartSide()}
-                                            disabled={is_enable ? "" : "disabled"}
-                                        >
-                                            Сагсанд нэмэх
-                                        </button>
-                                    </div>
-                                :
-                                null
+                                <div className="m-5">
+                                    <button
+                                        className="btn btn-primary p-2 mx-4"
+                                    >
+                                        <a className="text-decoration-none text-white" href="/login/">Нэвтрэх</a>
+                                    </button>
+                                </div>
                             :
-                            null
+                                !is_empty
+                                ?
+                                    this.state.is_purchase
+                                    ?
+                                        <div className="btn-group flex-wrap d-flex justify-content-center">
+                                            <button className="btn btn-xs btn-primary my-2 mx-3" disabled>
+                                                <div className="spinner-border" role="status">
+                                                    <span className="sr-only"></span>
+                                                </div>
+                                                {} Хүлээнэ үү..
+                                            </button>
+                                        </div>
+                                    :
+                                        is_from_inspire && this.is_from_inspire
+                                        ?
+                                            <div className="btn-group flex-wrap d-flex justify-content-center p-3">
+                                                <button
+                                                    className="btn btn-xs btn-primary mx-1 my-1"
+                                                    onClick={() => this.checkDataForPurchase()}
+                                                    disabled={is_enable ? "" : "disabled"}
+                                                    // disabled={true}
+                                                >
+                                                    {
+                                                        is_enable
+                                                        ?
+                                                            "Худалдаж авах"
+                                                        :
+                                                            "Худалдаж авах боломжгүй"
+                                                    }
+                                                    {/* Засвартай байгаа */}
+                                                </button>
+                                                <button
+                                                    className="btn btn-xs btn-primary mx-1 my-1"
+                                                    onClick={() => this.openCartSide()}
+                                                    disabled={is_enable ? "" : "disabled"}
+                                                >
+                                                    Сагсанд нэмэх
+                                                </button>
+                                            </div>
+                                        : null
+                                    : null
                     }
                     <div className="ol-popup-arrow">
 
