@@ -645,37 +645,6 @@ def _create_lavlagaa_file(class_infos, path):
     pdf.output(os.path.join(path, file_name + "." + file_ext), 'F')
 
 
-def _list_items(point_info):
-    infos = {
-        'point_id': point_info['point_id'],
-        'ondor': point_info['ondor'],
-        'aimag': point_info['aimag'],
-        'sum': point_info['sum'],
-        'sheet2': point_info['sheet2'],
-        'sheet3': point_info['sheet3'],
-        'n_utm': point_info['n_utm'],
-        'e_utm': point_info['e_utm']
-    }
-    return infos
-
-
-def _append_to_item_with_check(class_names, point_info, before_org_name, pdf):
-    org_name = point_info['org_name']
-    for class_name in class_names:
-        if class_name['t_type'] == point_info['t_type'] and org_name == class_name['org_name']:
-            if class_name['pdf_id'] != pdf:
-                class_name['infos'].append(_list_items(point_info))
-        else:
-            class_names.append({
-                't_type': point_info['t_type'],
-                'org_name': org_name,
-                'class_name': point_info['class_name'],
-                'pdf_id': point_info['pdf_id'],
-                'infos': [_list_items(point_info)]
-            })
-    return class_names
-
-
 def _get_attribute_name_from_file(content):
     att = dict()
     for idx in range(0, len(content)):
