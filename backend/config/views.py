@@ -3,6 +3,7 @@ import re
 import json
 
 import zipfile
+from django.core.files.storage import FileSystemStorage
 from io import BytesIO
 import subprocess
 from django.db.models import F
@@ -643,13 +644,18 @@ def check_qgis_path(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def qgis_plugin_save(request):
-    upload_file = request.FILES['files']
-    file_name = upload_file.name
+    uploaded_file = request.FILES['files']
+    file_name = uploaded_file.name
+
     file_path = os.path.join(settings.STATIC_ROOT + '/' + 'assets/')
     extract_path = os.path.join(file_path, 'qgis_plugin')
-    os.mkdir(extract_path)
-    utils.unzip(upload_file, extract_path)
-
-    return True, extract_path({
+    
+    fs = FileSystemStorage(
+        location=extract_path
+    )
+    fs.save(file_name, uploaded_file)
+    real_file = extract_path + '/' + file_name
+    utils.unzip(real_file, extract_path)
+    return JsonResponse({
         'success': True
     })
