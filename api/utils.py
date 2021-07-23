@@ -124,7 +124,7 @@ def replace_src_url(content, old_url, new_url, service_type):
                     service_type=service_type,
                     host=host
                 )
-        elif 'ows' in old_url:
+        elif 'ows' in old_url and not ( 'wms' == service_type ):
             old_url = old_url.replace('ows', service_type)
 
     content = content.replace(old_url, new_url)

@@ -33,9 +33,9 @@ export default class SearchSelects extends Component {
     getGeom(geo_id) {
         service
             .getGeom(geo_id)
-            .then(({ feature }) => {
-                if (feature) {
-                    this.props.sendFeature(feature)
+            .then(({ data }) => {
+                if (data) {
+                    this.props.sendFeature(data)
                 }
             })
     }

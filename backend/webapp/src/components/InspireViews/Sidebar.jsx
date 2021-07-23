@@ -86,9 +86,11 @@ export default class SideBar extends Component {
             form_datas.append('files', files[0])
         }
         form_datas.append('values',  JSON.stringify({values}))
+        this.setState({ is_loading: true })
         service
             .setPropertyFields(form_datas)
             .then(({ success, msg }) => {
+                this.setState({ save_is_load: false, is_loading: false})
                 if(success) {
                     this.props.getAll()
                     this.modalChange(
@@ -116,7 +118,6 @@ export default class SideBar extends Component {
                         null,
                     )
                 }
-                this.setState({ save_is_load: false, is_loading: false})
             })
     }
 
@@ -359,7 +360,7 @@ export default class SideBar extends Component {
         const state = this.state
         return (
             <Fragment>
-                <Loader is_loading={is_loading} text={state.load_text ? state.load_text : "Хүсэлтийг уншиж байна."}/>
+                <Loader is_loading={is_loading} text={state.load_text ? state.load_text : "Уншиж байна."}/>
                 <div className={`card col-md-6 mb-1 bundle-view-right-scroll`} style={{left:"10px"}}>
                     <div className="card-header">
                         <h4 className="text-center">{fname}</h4>

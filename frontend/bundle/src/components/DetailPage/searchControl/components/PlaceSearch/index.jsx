@@ -93,7 +93,7 @@ class index extends Component {
         }
 
         wms_list.map(({ is_display, layers }, idx) => {
-            layers.map(({ checked, code, wms_or_cache_ur, tile, wms_tile }, l_idx) => {
+            layers.map(({ checked, code, wms_or_cache_ur, tile, wms_tile, proxy_url }, l_idx) => {
 
                 const search_layer_name = FEATUREID + "_" + code
                 if (!is_visible) {
@@ -104,12 +104,10 @@ class index extends Component {
 
                     let layer_tile = wms_or_cache_ur ? tile : wms_tile
                     layer_tile.setVisible(false)
-                    const source = layer_tile.getSource()
-                    const urls = source.getUrls();
 
                     const layer = new TileLayer({
                         source: new TileWMS({
-                            url: urls[0],
+                            url: proxy_url,
                             projection: utils.vars.feature_projection,
                             ratio: 1,
                             params: {

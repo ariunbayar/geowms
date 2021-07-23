@@ -1,24 +1,19 @@
-
-
-
 import os
 from itertools import groupby
 
 from django.conf import settings
 from django.http import JsonResponse
 from django.http import HttpResponse, Http404
-from django.shortcuts import redirect, render, reverse, get_object_or_404
+from django.shortcuts import render, reverse, get_object_or_404
+from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_GET, require_POST
 from django.core.cache import cache
-from django.contrib.postgres.search import SearchVector
 from django.db import connections
 
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
-from backend.inspire.models import LThemes, LPackages, LFeatures, LFeatureConfigs, MDatas, MDatas, MGeoDatas
+from backend.inspire.models import LThemes, MDatas, MGeoDatas
 from backend.geoserver.models import WmtsCacheConfig
-from backend.config.models import Config
-from geoportal_app.models import User
 
 from main import utils
 from main.decorators import ajax_required
@@ -29,13 +24,15 @@ from api.utils import (
 )
 
 
+CACHE_TIMEOUT = 30
+
+
 def all(request):
     context_list = []
 
-    bundles = Bundle.objects.all()
+    bundles = Bundle.objects.prefetch_related('ltheme')
     for bundle in bundles:
-        bundle_list = []
-        theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
+        theme = bundle.ltheme
         bundle_list = {
             'pk': bundle.id,
             'icon': bundle.icon,
@@ -148,9 +145,14 @@ def wms_layers(request, pk):
                 url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
                 chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
 
+            proxy_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
+            proxy_cache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
+
             wms_data = {
                 'name': wms.name,
                 'url': url,
+                "proxy_url": proxy_url,
+                "proxy_chache_url": proxy_cache_url,
                 'chache_url': chache_url,
                 'layers': [_layer_to_display(layer) for layer in layers],
                 'wms_or_cache_ur': True if wms.cache_url else False,
@@ -177,6 +179,7 @@ def get_user(request):
 
 
 @require_GET
+@cache_page(60 * CACHE_TIMEOUT)
 @ajax_required
 def aimag(request):
 
@@ -337,7 +340,6 @@ def get_search_value(request, payload):
 
 
 def download_ppt(request):
-    path = ''
     file_path = os.path.join(settings.MEDIA_ROOT, 'geoportal.pptx')
     if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:

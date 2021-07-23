@@ -10,7 +10,6 @@ from geoportal_app.models import User
 from backend.org.models import Employee
 
 from .form import RegisterForm, LoginForm
-from main import utils
 
 
 HEADERS = {
@@ -123,26 +122,6 @@ def loginUser(request):
     return render(request, 'secure/loginUser.html')
 
 
-def _make_captcha():
-    text = utils.password_generate(4)
-    texts = [
-        {
-            'text': text,
-            'xy': [25, 5],
-            'rgb': [255, 255, 255],
-            'size': 20,
-        }
-    ]
-    img = utils.creat_empty_image(100, 33, bg_color=[3, 78, 162])
-    img = utils.set_text_to_image(texts, img)
-    image_path = 'test.png'
-    img.save(image_path)
-    byte_img = utils.image_to_64_byte(image_path)
-    utils.remove_file(image_path)
-    byte_img = byte_img.decode()
-    return text, byte_img
-
-
 def login(request):
     if request.method == 'POST':
         email = request.POST.get('email', None)
@@ -182,8 +161,7 @@ def login(request):
             return redirect('secure:login')
 
     form = LoginForm()
-    text, byte_img = _make_captcha()
-    return render(request, 'secure/login.html', {'form': form, 'captcha': {"text": text, "byte_img": byte_img}})
+    return render(request, 'secure/login.html', {'form': form})
 
 
 @require_GET

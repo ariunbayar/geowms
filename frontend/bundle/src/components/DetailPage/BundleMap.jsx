@@ -104,6 +104,7 @@ export default class BundleMap extends Component {
         this.setVisibleMarker = this.setVisibleMarker.bind(this)
         this.setFeatureOnMap = this.setFeatureOnMap.bind(this)
         this.resetSearch = this.resetSearch.bind(this)
+        this.getOpenLayers = this.getOpenLayers.bind(this)
     }
 
     initMarker() {
@@ -181,12 +182,14 @@ export default class BundleMap extends Component {
         var resolutions = [0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125, 0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125, 0.001373291015625, 6.866455078125E-4, 3.4332275390625E-4, 1.71661376953125E-4, 8.58306884765625E-5, 4.291534423828125E-5, 2.1457672119140625E-5, 1.0728836059570312E-5, 5.364418029785156E-6, 2.682209014892578E-6, 1.341104507446289E-6, 6.705522537231445E-7, 3.3527612686157227E-7];
         var gridNames = ['EPSG:4326:0', 'EPSG:4326:1', 'EPSG:4326:2', 'EPSG:4326:3', 'EPSG:4326:4', 'EPSG:4326:5', 'EPSG:4326:6', 'EPSG:4326:7', 'EPSG:4326:8', 'EPSG:4326:9', 'EPSG:4326:10', 'EPSG:4326:11', 'EPSG:4326:12', 'EPSG:4326:13', 'EPSG:4326:14', 'EPSG:4326:15', 'EPSG:4326:16', 'EPSG:4326:17', 'EPSG:4326:18', 'EPSG:4326:19', 'EPSG:4326:20', 'EPSG:4326:21'];
 
-        const map_wms_list = wms_list.map(({name, url, chache_url, wms_or_cache_ur, layers}) => {
+        const map_wms_list = wms_list.map(({name, url, chache_url, proxy_url, proxy_cache_url, wms_or_cache_ur, layers}) => {
             return {
                 name,
                 layers: layers.map((layer) => {
                     return {
                         ...layer,
+                        proxy_cache_url,
+                        proxy_url,
                         wms_or_cache_ur,
                         tile: new Tile({
                             preload: 6,
@@ -434,7 +437,7 @@ export default class BundleMap extends Component {
     }
 
     resetSearch() {
-        this.setState({ refreshLayerFn: null })
+        this.setState({ refreshLayerFn: null, border_feature: null })
     }
 
     // updateViewProjection() {
@@ -639,9 +642,22 @@ export default class BundleMap extends Component {
         return scale * 1000
     }
 
+    getOpenLayers() {
+        const open_layers = Array()
+        this.state.map_wms_list.map(({ layers }, idx) => {
+            layers.map(({ checked, code }, l_idx) => {
+                if (checked) {
+                    open_layers.push(code)
+                }
+            })
+        })
+        return open_layers
+    }
+
     getPopUpInfo(coordinate, layers_code) {
         const latlong = toLonLat(coordinate)
-        let layer_codes = layers_code.length > 0 ? layers_code : this.is_not_visible_layers.length > 0 ? this.is_not_visible_layers : []
+
+        const layer_codes = this.getOpenLayers()
 
         const scale = this.scale_line.renderedHTML_.split(' ')
         let scale_value = scale[0]
@@ -752,7 +768,7 @@ export default class BundleMap extends Component {
                                                     this.sendFeatureInfo.push(feature_info)
                                                 }
                                                 if(geodb_table == 'mpoint_view') {
-                                                    this.state.vector_layer.setSource(null)
+                                                    this.state.vector_layer.getSource().clear()
                                                 }
                                                 if (not_visible_layers.length > 0) {
                                                     this.getPopUpInfo(coordinate, not_visible_layers)
@@ -820,9 +836,6 @@ export default class BundleMap extends Component {
 
     setSourceInPopUp(mode) {
         const source = this.selectSource
-        if (mode != 'private') {
-            this.state.vector_layer.setSource(null)
-        }
         if (mode == 'private') {
             this.state.vector_layer.setSource(source)
         }
@@ -1036,6 +1049,8 @@ export default class BundleMap extends Component {
     }
 
     setFeatureOnMap(feature, refreshLayerFn, is_feature=false) {
+        this.onClickCloser()
+
         if (feature) {
             const { vector_layer } = this.state
 
@@ -1053,9 +1068,23 @@ export default class BundleMap extends Component {
 
             new_feature.setProperties({ id })
             source.addFeature(new_feature)
-            this.map.getView().fit(new_feature.getGeometry(), { padding: [100, 100, 100, 100], duration: 2000 })
+
+            let padding
+            let maxZoom = 18
+
+            const geom_type = new_feature.getGeometry().getType()
+            if (geom_type.includes('Point')) {
+                padding = [300, 300, 300, 300]
+            }
+            else {
+                padding = [100, 100, 100, 100]
+            }
+            this.map.getView().fit(new_feature.getGeometry().getExtent(), { padding: padding, duration: 2000, maxZoom })
             if (refreshLayerFn) {
-                this.setState({ refreshLayerFn })
+                this.setState({ refreshLayerFn, border_feature: feature })
+            }
+            else {
+                this.setState({ border_feature: feature })
             }
         }
     }

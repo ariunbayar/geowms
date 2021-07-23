@@ -358,6 +358,8 @@ def _get_open_layer_url(request, bundle_id, wms_id, layer_id, url_type):
 def _check_open_datas(open_datas):
     is_true = True
     open_datas = utils.json_load(open_datas)
+    if not open_datas:
+        return False
     len_datas = len(open_datas)
     if len_datas == 1:
         if not open_datas[0]:

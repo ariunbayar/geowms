@@ -966,6 +966,15 @@ def _check_perm(employee, feature_id, geo_json):
     return success, info, request_kind
 
 
+def _check_type(val, geo_json_list):
+    geo_json = val.geom.json
+    geo_type = utils.json_dumps(geo_json)
+    geo_json_load = utils.json_load(geo_type)
+    geo_type = geo_json_load['type']
+    geo_json_list.append(geo_type)
+    return geo_json_list
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -1030,11 +1039,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     for val in layer:
                         values = dict()
                         for name in range(0, len(layer.fields)):
-                            geo_json = val.geom.json
-                            geo_type = utils.json_dumps(geo_json)
-                            geo_json_load = utils.json_load(geo_type)
-                            geo_type = geo_json_load['type']
-                            geo_json_list.append(geo_type)
+                            geo_json_list = _check_type(val, geo_json_list)
 
                         if all(geom_type in item for item in geo_json_list):
                             for name in range(0, len(layer.fields)):
@@ -1097,7 +1102,84 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                         'success': success,
                         'info': info
                     }
+            else:
+                with transaction.atomic():
+                    Sid = transaction.savepoint()
+                    val = layer[0]
+                    values = dict()
+                    for name in range(0, len(layer.fields)):
+                        geo_json_list = _check_type(val, geo_json_list)
 
+                    if all(geom_type in item for item in geo_json_list):
+                        for name in range(0, len(layer.fields)):
+                            field_name = val[name].name  # field name
+                            value = val.get(name)  # value ni
+
+                            if name == 0:
+
+                                # geo_id = _make_geo_id(feature_id)
+                                geo_json = val.geom.json  # goemetry json
+
+                                if geo_json:
+                                    success, info, request_kind = _check_perm(
+                                        employee,
+                                        feature_id,
+                                        geo_json
+                                    )
+
+                                    if not success:
+                                        _delete_file(for_delete_items, Sid)
+                                        rsp = {
+                                            'success': success,
+                                            'info': info,
+                                        }
+                                        return JsonResponse(rsp)
+
+                                else:
+                                    _delete_file(for_delete_items, Sid)
+                                    rsp = {
+                                        'success': False,
+                                        'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
+                                    }
+                                    return JsonResponse(rsp)
+
+                            values[field_name] = value
+
+                        request_values = {
+                            'theme_id': tid,
+                            'package_id': pid,
+                            'feature_id': fid,
+                            'employee': employee,
+                            'geo_json': geo_json,
+                            'kind': request_kind,
+                            'order_at': order_at,
+                            'order_no': order_no,
+                            'group_id': main_request_id,
+                        }
+                        success, info = _make_request(values, request_values)
+                        if not success:
+                            _delete_file(for_delete_items, Sid)
+                            rsp = {
+                                'success': success,
+                                'info': info,
+                            }
+                            return JsonResponse(rsp)
+                        rsp = {
+                            'success': success,
+                            'info': info
+                        }
+                    else:
+                        _delete_file(for_delete_items, Sid)
+                        rsp = {
+                            'success': False,
+                            'info': "Геометр өгөгдлийн төрөл нь тухайн feature-ийн төрөлтэй таарахгүй байна!!!."
+                        }
+                        return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+                'info': "Дата байхгүй байна."
+            }
     else:
         rsp = {
             'success': False,

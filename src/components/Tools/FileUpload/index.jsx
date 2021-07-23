@@ -114,7 +114,7 @@ function FileUpload(props) {
                                 null
                         }
                     </div>
-                    <div className="col-5 ml-4 font-italic custom-media ">
+                    <div className={`col-5 ml-4 font-italic custom-media ${info_text ? "mt-3" : ""}`}>
                         {
                             is_multiple
                             ?

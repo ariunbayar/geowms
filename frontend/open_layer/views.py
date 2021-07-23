@@ -92,6 +92,8 @@ def _wms_layers(wms_layers, bundle, request, views):
 def _check_open_datas(open_datas):
     has_datas = True
     open_datas = utils.json_load(open_datas)
+    if not open_datas:
+        return False
     len_datas = len(open_datas)
     if len_datas == 1:
         if not open_datas[0]:
