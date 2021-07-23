@@ -22,6 +22,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
+from django.contrib.gis import geos
 from django.contrib.gis.geos import GEOSGeometry, Point
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 from django.contrib.gis.measure import D
@@ -1615,7 +1616,8 @@ def remove_file(file_path):
 
 
 def remove_folder(folder_path):
-    shutil.rmtree(folder_path)
+    if has_file(folder_path):
+        shutil.rmtree(folder_path)
 
 
 def copy_image(img, plus):
@@ -2062,5 +2064,22 @@ def end_time(start_time, text=""):
 
 
 # файлын зам өгөөд байгаа эсэхийг шалгана return bool
-def is_file(path):
-    return os.path.isfile(path)
+def has_file(path):
+    return os.path.exists(path)
+
+
+# bbox оос polygon үүсгэх
+def bboxToPolygon(bbox=list(), get_wkt=True):
+    geom = geos.Polygon.from_bbox(bbox)
+    return geom.wkt if get_wkt else geom
+
+
+# текстнээс илүү хоосон зайнуудыг арилгана
+def remove_empty_spaces(text):
+    text_list = [
+        per_name
+        for per_name in text.split(" ")
+        if per_name
+    ]
+    clean_text = " ".join(text_list)
+    return clean_text
