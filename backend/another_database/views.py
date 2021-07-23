@@ -4,7 +4,6 @@ from backend.inspire.models import LFeatures, LPackages, LThemes, MDatas, MGeoDa
 import requests
 from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
-from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
