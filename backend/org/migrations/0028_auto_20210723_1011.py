@@ -67,7 +67,7 @@ def authorize_org(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_org', '0027_auto_20210723_1007'),
+        ('backend_org', '0027_auto_20210616_1138'),
     ]
 
     operations = [
