@@ -224,7 +224,7 @@ def _get_file_ext():
     return obj
 
 
-def generate_zip(files):
+def _generate_zip(files):
     mem_zip = BytesIO()
 
     with zipfile.ZipFile(mem_zip, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
@@ -247,7 +247,7 @@ def _file_replace(content):
             file_items.append(buffer)
             files.append(file_items)
 
-    content = generate_zip(files)
+    content = _generate_zip(files)
     return content
 
 
