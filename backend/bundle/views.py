@@ -141,7 +141,7 @@ def _get_bundle_display(bundle):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def all(request):
-    bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
+    bundle_list = [_get_bundle_display(bundle) for bundle in Bundle.objects.all().order_by('sort_order')]
     rsp = {
         'bundle_list': bundle_list,
     }

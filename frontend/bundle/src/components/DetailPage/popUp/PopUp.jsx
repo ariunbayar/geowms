@@ -22,7 +22,7 @@ class PopUpCmp extends Component {
             is_plus: true,
             data: [],
             datas: '',
-            mode: '',
+            feature: '',
             name: '',
             id: '',
             code: '',
@@ -56,6 +56,7 @@ class PopUpCmp extends Component {
             this.properties = []
             const startNumber = 1
             this.setState({ startNumber, is_plus: true, is_prev: false, is_enable: false })
+            this.props.setSource(undefined)
             this.checkModeAndCode(startNumber, datas)
         }
     }
@@ -91,7 +92,7 @@ class PopUpCmp extends Component {
     }
 
     checkModeAndCode(number, datas) {
-        let mode
+        let feature
         let code
         let values
         let localid
@@ -100,31 +101,28 @@ class PopUpCmp extends Component {
         let check = 0
         this.click_count = 0
         if (datas.length > 0) {
+            let data = datas[number - 1]['properties']
+            feature = datas[number - 1]['geometry']
             if (this.props.is_from_inspire) {
-                code = datas[number - 1][0]
-                values = datas[number - 1][1]
+                code = data[0]
+                values = data[1]
             }
             else {
-                mode = datas[number - 1][1]
-                code = datas[number - 1][2]
-                values = datas[number - 1][0][1]
-                geom_name = datas[number - 1][0][0]
+                code = data[2]
+                values = data[0][1]
+                geom_name = data[0][0]
             }
             values.map((value, idx) => {
                 if (value[0] == 'geo_id') {
                     this.setState({ id: value[1] })
                     localid = value[1]
                 }
-                if (value[0] == 'pid' && mode == 'mpoint_view') {
-                    // this.checkButtonEnableWithPdf(value[1])
-                }
                 if (value[2] && value[2].toLowerCase() == 'pointname') {
                     check ++
-                    // this.checkButtonEnableWithId(localid, value[1])
                     this.setState({ name: value[1] })
                     geom_name = value[1]
                 }
-                if (value[2].toLowerCase() == 'pointid') {
+                if (value[2] && value[2].toLowerCase() == 'pointid') {
                     check ++
                     this.setState({ pdf_id: value[1] })
                 }
@@ -132,22 +130,22 @@ class PopUpCmp extends Component {
             if (check == 2) {
                 is_enable = true
             }
-            this.setNowData(number, datas, mode, code, geom_name, is_enable)
-            this.props.setSource(mode)
+            this.setNowData(number, datas, feature, code, geom_name, is_enable)
+            this.props.setSource(feature)
         }
     }
 
-    setNowData(number, datas, mode, code, geom_name, is_enable) {
+    setNowData(number, datas, feature, code, geom_name, is_enable) {
         let data
         this.is_from_inspire = true
 
-        if (this.props.is_from_inspire) data = [datas[number - 1]]
-        else data = datas[number - 1]
+        if (this.props.is_from_inspire) data = [datas[number - 1]['properties']]
+        else data = datas[number - 1]['properties']
 
         if (!code.includes("gp_layer_geodeticalpoint_gp_view")) {
             this.is_from_inspire = false
         }
-        this.setState({ data, mode, datas, code, geom_name, is_enable })
+        this.setState({ data, feature, datas, code, geom_name, is_enable })
     }
 
     // checkButtonEnableWithPdf(pdf_id){
@@ -207,32 +205,41 @@ class PopUpCmp extends Component {
                 <div>
                     <div className="ol-popup-header">
                         <div className="ol-popup-header-content">
-                            {!is_empty && datas && datas.length > 0
-                                ?
-                                <div className="ol-header-cont" role="group">
-                                    {startNumber}
-                                    &nbsp; - &nbsp;
-                                    {datas.length}
-                                    &nbsp;
-                                    {is_prev ? <span onClick={this.prevTab} className="span-left" role="button">
-                                        <i className="fa fa-caret-left gp-text-primary fa-1x" aria-hidden="true" ></i>
-                                    </span> : null}
-                                    &nbsp;&nbsp;&nbsp;
-                                    {!(datas.length == startNumber) && is_plus ? <span className="span-right" onClick={this.plusTab} role="button">
-                                        <i className="fa fa-caret-right gp-text-primary fa-1x"  aria-hidden="true" ></i>
-                                    </span> : null}
-                                    <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>
-                                        <i className="fa fa-times" aria-hidden="true"></i>
-                                    </div>
-                                </div>
-                                :
-                                "Сонгоогүй байна"
-                            }
-                            {!datas &&
+                            <div className="ol-header-cont" role="group">
+                                {!is_empty && datas && datas.length > 0
+                                    ?
+                                        <>
+                                            {startNumber}
+                                            &nbsp; - &nbsp;
+                                            {datas.length}
+                                            &nbsp;
+                                            {
+                                                is_prev
+                                                ?
+                                                    <span onClick={this.prevTab} className="span-left" role="button">
+                                                        <i className="fa fa-caret-left gp-text-primary fa-1x" aria-hidden="true" ></i>
+                                                    </span>
+                                                :
+                                                    null
+                                            }
+                                            &nbsp;&nbsp;&nbsp;
+                                            {
+                                                !(datas.length == startNumber) && is_plus
+                                                ?
+                                                    <span className="span-right" onClick={this.plusTab} role="button">
+                                                        <i className="fa fa-caret-right gp-text-primary fa-1x"  aria-hidden="true" ></i>
+                                                    </span>
+                                                :
+                                                    null
+                                            }
+                                        </>
+                                    :
+                                        "Сонгоогүй байна"
+                                }
                                 <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>
                                     <i className="fa fa-times" aria-hidden="true"></i>
                                 </div>
-                            }
+                            </div>
                         </div>
                     </div>
                     <Loader is_loading={is_loading} />

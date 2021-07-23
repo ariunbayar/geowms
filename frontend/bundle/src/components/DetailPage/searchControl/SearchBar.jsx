@@ -124,6 +124,7 @@ export class SearchBarComponent extends Component {
         this.resetSearchLayerFeatures()
         this.resetButton()
         this.props.funcs.setVisibleMarker(false)
+        this.props.funcs.closePopUp()
 
         this.setState({ selected_tab })
     }
