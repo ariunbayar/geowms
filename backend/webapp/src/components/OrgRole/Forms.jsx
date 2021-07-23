@@ -25,18 +25,21 @@ export class Forms extends Component {
     }
 
     getDetail() {
-        service
-            .getDetailRole(this.props.match.params.id)
-            .then(({ success, name, description }) => {
-                if (success) {
-                    this.setState({
-                        values: {
-                            name: name,
-                            description: description
-                        },
-                    })
-                }
-            })
+        const role_id = this.props.match.params.id
+        if (role_id) {
+            service
+                .getDetailRole(role_id)
+                .then(({ success, name, description }) => {
+                    if (success) {
+                        this.setState({
+                            values: {
+                                name: name,
+                                description: description
+                            },
+                        })
+                    }
+                })
+        }
     }
 
     handleSubmit(values, {setStatus, setSubmitting, setErrors}) {
