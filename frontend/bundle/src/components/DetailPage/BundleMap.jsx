@@ -8,7 +8,7 @@ import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
 import { Vector as VectorLayer, Tile } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
-import { Icon, Style, Stroke } from 'ol/style'
+import { Icon, Style, Stroke, Circle as CircleStyle, Fill } from 'ol/style'
 import { Point } from 'ol/geom'
 import { TileImage, TileWMS, WMTS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
@@ -45,6 +45,7 @@ export default class BundleMap extends Component {
         this.is_not_visible_layers = []
         this.saved_aimag_name = ''
         this.au_search_layer_name = utils.vars.au_search_layer_name
+        this.pop_up_feature_id = 'popup'
 
         this.state = {
             projection: 'EPSG:3857',
@@ -332,12 +333,20 @@ export default class BundleMap extends Component {
             )
 
         const vector_layer_name = 'vector_layer'
+
         const vector_layer = new VectorLayer({
-            source: new VectorSource({}),
+            source: new VectorSource(),
             style: new Style({
                 stroke: new Stroke({
                     color: 'rgba(100, 255, 0, 1)',
-                    width: 2
+                    width: 2,
+                }),
+                image: new CircleStyle({
+                    radius: 7,
+                    stroke: new Stroke({
+                        color: 'rgba(100, 255, 0, 1)',
+                        width: 2,
+                    }),
                 }),
             }),
             name: vector_layer_name,
@@ -413,7 +422,9 @@ export default class BundleMap extends Component {
         overlay.setPosition(undefined);
         closer.blur();
         this.setVisibleMarker(false)
-        // this.state.vector_layer.setSource(null)
+
+        const source = this.state.vector_layer.getSource()
+        utils.removeFeatureFromSource(this.pop_up_feature_id, source)
     }
 
     getElement(element) {
@@ -734,11 +745,8 @@ export default class BundleMap extends Component {
                                         if (features.length > 0) {
                                             features.map((feature, idx) => {
                                                 if(feature.getGeometry().getType().includes('Polygon')) {
-                                                    const source = new VectorSource({
-                                                        features: features
-                                                    });
-                                                    this.selectSource = source
-                                                    this.state.vector_layer.setSource(this.selectSource)
+                                                    const source = this.state.vector_layer.getSource()
+                                                    source.addFeature(feature)
                                                 }
                                             })
                                         }
@@ -834,10 +842,14 @@ export default class BundleMap extends Component {
         }
     }
 
-    setSourceInPopUp(mode) {
-        const source = this.selectSource
-        if (mode == 'private') {
-            this.state.vector_layer.setSource(source)
+    setSourceInPopUp(feature) {
+        const pop_up_feature_id = this.pop_up_feature_id
+        const source = this.state.vector_layer.getSource()
+        utils.removeFeatureFromSource(pop_up_feature_id, source)
+        if (feature) {
+            const ol_feature = utils.featureToOLFeature(feature)
+            ol_feature.setProperties({ id: pop_up_feature_id })
+            source.addFeature(ol_feature)
         }
     }
 
@@ -1110,6 +1122,7 @@ export default class BundleMap extends Component {
                 "is_not_visible_layers": this.is_not_visible_layers,
                 resetSearch: this.resetSearch,
                 "marker": this.marker.point,
+                'closePopUp': this.onClickCloser
             }
 
             return (

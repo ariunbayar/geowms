@@ -4,6 +4,7 @@ import { transform, fromLonLat } from 'ol/proj'
 import { Tile } from 'ol/layer'
 import { TileImage, TileWMS, WMTS } from 'ol/source'
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
+import { fromExtent } from "ol/geom/Polygon"
 
 import BaseLayers from './components/BaseLayers'
 
@@ -43,6 +44,8 @@ export {
     setCenter,
     clearFeatures,
     setBaseLayers,
+    featureToOLFeature,
+    fromExtentPolygon
 }
 
 // tuhain feature ийн id аваад source аас нь арилгах
@@ -198,4 +201,20 @@ async function setBaseLayers(map) {
         layers.map(layer => map.addLayer(layer))
         map.addControl(new BaseLayers({ layers: base_layer_controls }))
     }
+}
+
+
+// django оос дуудсан feature ийг ol дээр ашиглах feature болгоно
+function featureToOLFeature(feature, get=true) {
+    const new_feature = vars.format.readFeatures(feature, {
+        dataProjection: vars.display_projection,
+        featureProjection: vars.feature_projection,
+    });
+    if (get) return new_feature[0]
+    else return new_feature
+}
+
+// extent ээс polygon үүсгэх
+function fromExtentPolygon(extent) {
+    return fromExtent(extent)
 }

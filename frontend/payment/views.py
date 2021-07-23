@@ -1692,6 +1692,7 @@ def get_popup_info(request, payload):
     radius = _radius_formula(radius)
 
     infos = list()
+    send_features = list()
     views_qs = ViewNames.objects
     views_qs = views_qs.filter(
         view_name__in=[
@@ -1710,9 +1711,12 @@ def get_popup_info(request, payload):
         feature_id = view.feature_id
 
         viewproperty_ids, property_qs = _get_properties_qs(view)
-        properties = property_qs.values("property_code", "property_name", "value_type_id")
+        properties = list(property_qs.values("property_code", "property_name", "value_type_id"))
 
-        select_properties = gs_geo_id + "," + ",".join([prop_code['property_code'] for prop_code in properties])
+        select_properties = [prop_code['property_code'] for prop_code in properties]
+        select_properties.append('geo_data')
+
+        select_properties = gs_geo_id + "," + ",".join(select_properties)
         if not properties:
             select_properties = select_properties.replace(",", '')
 
@@ -1735,6 +1739,7 @@ def get_popup_info(request, payload):
         base_geoserver_url = base_geoserver_url + "&" + "srsName=EPSG:4326"
         base_geoserver_url = base_geoserver_url + "&outputFormat=application/json"
         base_geoserver_url = base_geoserver_url + '&format_options=CHARSET:UTF-8'
+        base_geoserver_url = base_geoserver_url + '&MAXFEATURES=5'
 
         rsp = requests.get(base_geoserver_url, headers=headers, timeout=300, verify=False)
         content = rsp.content
@@ -1745,6 +1750,7 @@ def get_popup_info(request, payload):
         content = utils.json_load(content)
         features = content['features']
         for feature in features:
+            send_feature = dict()
             ps = feature['properties']
             ps[geo_id] = ps[gs_geo_id]
             del ps[gs_geo_id]
@@ -1761,8 +1767,12 @@ def get_popup_info(request, payload):
             if datas:
                 infos.append(datas)
 
+            send_feature['properties'] = datas
+            send_feature['geometry'] = utils.get_feature_from_geojson(feature['geometry'])
+            send_features.append(send_feature)
+
     rsp = {
-        'datas': infos,
+        'datas': send_features,
     }
 
     return JsonResponse(rsp)
