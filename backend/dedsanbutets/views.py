@@ -627,12 +627,19 @@ def _str_to_bool(str):
     return False
 
 
-def _rsp_validation(data):
-    if not data['data']:
-        if data['field_name'] == "connect_feature_id" and not data['field_name'] == "connect_feature_property_id":
-            return True
-        else:
-            info = 'Хоосон байна утга оруулна уу!'
+def _rsp_validation(data, datas):
+    if 'has_class' in datas:
+        has_class = datas['has_class']
+    if 'connect_feature_id' in datas:
+        connect_feature_id = datas['connect_feature_id']
+    if 'connect_feature_property_id' in datas:
+        connect_feature_property_id = datas['connect_feature_property_id']
+
+        if not data['data']:
+            if has_class is True and connect_feature_id is None and connect_feature_property_id is None:
+                info = 'true'
+            else:
+                info = 'false'
             return info
 
 
@@ -658,9 +665,12 @@ def save(request, payload):
         #     datas[data['field_name']] = order_no
         else:
             datas[data['field_name']] = data['data']
-            info = _rsp_validation(data)
-            if info:
-                rsp = {'success': False, 'info': info}
+            info = _rsp_validation(data, datas)
+            if info == 'true':
+                rsp = {'success': True}
+            elif info == 'false':
+                return JsonResponse({'success': False, 'info': 'Хоосон байна утга оруулна уу!'})
+
 
     model_qs = Model.objects
 
@@ -908,12 +918,12 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
     wms_layer = wms.wmslayer_set.filter(code=layer_name).first()
     if not wms_layer:
         wms_layer = WMSLayer.objects.create(
-                        name=layer_title,
-                        code=layer_name,
-                        wms=wms,
-                        title=layer_title,
-                        feature_price=0,
-                    )
+            name=layer_title,
+            code=layer_name,
+            wms=wms,
+            title=layer_title,
+            feature_price=0,
+        )
 
     bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer.id).first()
     bundle_id = theme.bundle.id
