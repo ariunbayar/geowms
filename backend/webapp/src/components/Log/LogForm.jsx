@@ -12,7 +12,7 @@ export class LogForm extends Component {
             custom_query: {},
             талбарууд: [
                 {'field': 'user_firstname', "title": 'Хэрэглэгч', 'has_action': true},
-                {'field': 'is_success', "title": 'Төлөв'},
+                {'field': 'is_success', "title": 'Төлөв', 'has_action':true},
                 {'field': 'total_amount', "title": 'Нийт дүн'},
                 {'field': 'description', "title": 'Тодорхойлолт'},
                 {'field': 'code', "title": 'Код'},
@@ -24,7 +24,7 @@ export class LogForm extends Component {
             ],
             хувьсах_талбарууд: [
                 {"field": "user_firstname", "action": (values) => this.go_link(values)},
-                {"field": "is_success",  "text": ""},
+                {"field": "is_success", "action":this.set_success_icon, "action_type":true},
                 {"field": "total_amount",  "text": ""},
                 {"field": "description",  "text": ""},
                 {"field": "code",  "text": ""},
@@ -37,9 +37,19 @@ export class LogForm extends Component {
         }
     }
 
+
     go_link(values){
         this.props.history.push(`/back/user/${values.user_id}/дэлгэрэнгүй/`)
     }
+
+
+    set_success_icon(values){
+        var icon
+        if(values) {
+            return icon = "text-success fa fa-check-circle-o"
+        }
+    }
+
 
     render() {
         const {
