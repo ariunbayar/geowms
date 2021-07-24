@@ -167,6 +167,10 @@ export default class Modal extends Component {
                                         ?
                                             <small className=''>{this.props.text}</small>
                                         :
+                                        typeof(this.props.text) == 'function'
+                                        ?
+                                            <this.props.text/>
+                                        :
                                             this.props.text
                                     )
                                 }
