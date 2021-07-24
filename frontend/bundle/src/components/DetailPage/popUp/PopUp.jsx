@@ -13,8 +13,7 @@ class PopUpCmp extends Component {
         super(props)
 
         this.click_count = 0
-        this.is_from_inspire = true
-        this.properties = []
+        this.is_point = false
         this.state = {
             startNumber: null,
             totalNumner: null,
@@ -38,23 +37,21 @@ class PopUpCmp extends Component {
         this.checkModeAndCode = this.checkModeAndCode.bind(this)
         this.openCartSide = this.openCartSide.bind(this)
         this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
-        // this.checkButtonEnableWithPdf = this.checkButtonEnableWithPdf.bind(this)
         this.checkButtonEnableWithId = this.checkButtonEnableWithId.bind(this)
     }
 
     componentDidMount() {
         this.element = document.getElementById("popup")
         if (this.props.sendElem) this.props.sendElem(this.element)
-        service.getUser().then(({is_authenticated}) =>
+        service.getUser().then(({ is_authenticated }) =>
         {
-            this.setState({is_authenticated: is_authenticated})
+            this.setState({ is_authenticated: is_authenticated })
         })
     }
 
     componentDidUpdate(pP, pS) {
         const { datas } = this.props
         if(pP.datas !== datas && !this.props.is_loading) {
-            this.properties = []
             const startNumber = 1
             this.setState({ startNumber, is_plus: true, is_prev: false, is_enable: false })
             this.props.setSource(undefined)
@@ -63,8 +60,6 @@ class PopUpCmp extends Component {
     }
 
     plusTab() {
-        this.properties = []
-
         const { startNumber, datas } = this.state
         var plus = startNumber + 1
         plus = Math.min(datas.length, plus)
@@ -78,7 +73,6 @@ class PopUpCmp extends Component {
     }
 
     prevTab() {
-        this.properties = []
 
         const { startNumber, datas } = this.state
         var minus = startNumber - 1
@@ -102,17 +96,11 @@ class PopUpCmp extends Component {
         let check = 0
         this.click_count = 0
         if (datas.length > 0) {
-            let data = datas[number - 1]['properties']
-            feature = datas[number - 1]['geometry']
-            if (this.props.is_from_inspire) {
-                code = data[0]
-                values = data[1]
-            }
-            else {
-                code = data[2]
-                values = data[0][1]
-                geom_name = data[0][0]
-            }
+            let data = datas[number - 1]
+            feature = data[2]
+            code = data[0]
+            values = data[1]
+
             values.map((value, idx) => {
                 if (value[0] == 'geo_id') {
                     this.setState({ id: value[1] })
@@ -138,25 +126,16 @@ class PopUpCmp extends Component {
 
     setNowData(number, datas, feature, code, geom_name, is_enable) {
         let data
-        this.is_from_inspire = true
+        this.is_point = false
 
-        if (this.props.is_from_inspire) data = [datas[number - 1]['properties']]
-        else data = datas[number - 1]['properties']
+        data = datas[number - 1]
 
         if (!code.includes("gp_layer_geodeticalpoint_gp_view")) {
-            this.is_from_inspire = false
+            this.is_point = true
         }
+
         this.setState({ data, feature, datas, code, geom_name, is_enable })
     }
-
-    // checkButtonEnableWithPdf(pdf_id){
-    //     service.checkButtonEnableWithPdf(pdf_id)
-    //         .then(({is_enable, success}) => {
-    //             if(success){
-    //                 this.setState({ is_enable, pdf_id })
-    //             }
-    //         })
-    // }
 
     checkButtonEnableWithId(geo_id, pdf_id){
         service.checkButtonEnableWithId(geo_id, pdf_id)
@@ -199,7 +178,7 @@ class PopUpCmp extends Component {
 
     render() {
         const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, is_purchased } = this.state
-        const { is_empty, is_from_inspire, is_loading } = this.props
+        const { is_empty, is_loading } = this.props
         return (
                 <div>
                     <div className="ol-popup-header">
@@ -300,7 +279,7 @@ class PopUpCmp extends Component {
                     {
                         is_purchased
                         ? <div></div>
-                        : !is_authenticated && !is_empty && is_from_inspire
+                        : !is_authenticated && !is_empty
                             ?
                                 <div className="m-5">
                                     <button
@@ -323,7 +302,7 @@ class PopUpCmp extends Component {
                                             </button>
                                         </div>
                                     :
-                                        is_from_inspire && this.is_from_inspire
+                                        this.is_point
                                         ?
                                             <div className="btn-group flex-wrap d-flex justify-content-center p-3">
                                                 <button
@@ -406,8 +385,8 @@ export class PopUp extends Control {
         this.renderComponent({sendElem, close})
     }
 
-    getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading=true, is_authenticated=false) {
+    getData(isload, datas, close, setSource, cartButton, is_empty, is_loading=true, is_authenticated=false) {
         this.toggleControl(isload)
-        this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading, is_authenticated})
+        this.renderComponent({datas, close, setSource, cartButton, is_empty, is_loading, is_authenticated})
     }
 }
