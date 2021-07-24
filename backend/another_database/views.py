@@ -115,7 +115,7 @@ def mongo_get(request, pk):
     return JsonResponse(rsp)
 
 
-def get_unique_id(is_db, ano_database):
+def get_unique_id(is_db, ano_database=None):
 
     obj = AnotherDatabase.objects.all().order_by('unique_id').first()
 

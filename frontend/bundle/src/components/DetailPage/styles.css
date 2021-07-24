@@ -417,3 +417,12 @@ element.style {
 .gp-font-plus:hover {
     color: rgba(3, 78, 162, 0.7);
 }
+
+.gp-text-link {
+    cursor: pointer;
+    text-decoration: underline;
+}
+.gp-text-link:hover {
+    color: #034ea2;
+    transition: color .1s ease;
+}
