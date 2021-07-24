@@ -6,6 +6,8 @@ import Loader from "@utils/Loader"
 
 import { service } from '../service'
 
+const DEFAULT_PER_PAGE = 5
+
 class PopUpCmp extends Component {
 
     constructor(props) {
@@ -31,6 +33,7 @@ class PopUpCmp extends Component {
             is_enable: false,
             is_purchased: false,
             is_authenticated: props.is_authenticated,
+            per_page_limit: DEFAULT_PER_PAGE
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
@@ -63,13 +66,16 @@ class PopUpCmp extends Component {
         const { startNumber, datas } = this.state
         var plus = startNumber + 1
         plus = Math.min(datas.length, plus)
-        if (plus == datas.length) {
-            this.setState({ is_plus: false, is_prev: true, is_enable: false })
-        } else {
-            this.setState({ is_plus: true, is_prev: true, is_enable: false })
-        }
+
+        let obj = Object()
+        obj['is_prev'] = true
+        obj['is_enable'] = false
+        obj['per_page_limit'] = DEFAULT_PER_PAGE
+        if (plus == datas.length) obj['is_plus'] = false
+        else obj['is_plus'] = true
+
         this.checkModeAndCode(plus, datas)
-        this.setState({ startNumber: plus })
+        this.setState({ startNumber: plus, ...obj })
     }
 
     prevTab() {
@@ -77,13 +83,16 @@ class PopUpCmp extends Component {
         const { startNumber, datas } = this.state
         var minus = startNumber - 1
         minus = Math.max(minus, 1)
-        if (minus == 1) {
-            this.setState({ is_prev: false, is_plus: true, is_enable: false })
-        }else {
-            this.setState({ is_plus: true, is_prev: true, is_enable: false })
-        }
+
+        let obj = Object()
+        obj['is_plus'] = true
+        obj['is_enable'] = false
+        obj['per_page_limit'] = DEFAULT_PER_PAGE
+        if (minus == 1) obj['is_prev'] = false
+        else obj['is_prev'] = true
+
         this.checkModeAndCode(minus, datas)
-        this.setState({ startNumber: minus })
+        this.setState({ startNumber: minus, ...obj })
     }
 
     checkModeAndCode(number, datas) {
@@ -130,7 +139,7 @@ class PopUpCmp extends Component {
 
         data = datas[number - 1]
 
-        if (!code.includes("gp_layer_geodeticalpoint_gp_view")) {
+        if (code.includes("gp_layer_geodeticalpoint_gp_view")) {
             this.is_point = true
         }
 
@@ -155,14 +164,13 @@ class PopUpCmp extends Component {
         this.props.cartButton(true, this.state.name, this.state.code, this.state.id, is_again_clicked, this.state.geom_name, this.state.pdf_id)
     }
 
-
     checkDataForPurchase(){
         if (this.state.is_enable) {
             this.setState({ is_purchase: true })
             var data = [{ 'name': this.state.name,'id': this.state.id, 'code': this.state.code, 'geom_name': this.state.geom_name, 'pdf_id': this.state.pdf_id }]
             if(this.state.data.length > 0){
                 service.purchaseFromCart(data)
-                    .then(({success, msg, payment_id}) => {
+                    .then(({ success, msg, payment_id }) => {
                         if(success){
                             this.setState({ data: [], is_purchase: false, is_purchased: true })
                             window.location.href=`/payment/purchase/${payment_id}/`;
@@ -176,9 +184,20 @@ class PopUpCmp extends Component {
         }
     }
 
+    showMore() {
+        let per_page_limit = this.state.data[1].length + 1
+        this.setState({ per_page_limit })
+    }
+
     render() {
-        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, is_purchased } = this.state
+        const {
+            datas, data, startNumber, is_prev, is_plus,
+            is_enable, is_authenticated, is_purchased,
+            per_page_limit,
+        } = this.state
+
         const { is_empty, is_loading } = this.props
+
         return (
                 <div>
                     <div className="ol-popup-header">
@@ -232,34 +251,30 @@ class PopUpCmp extends Component {
                             &&
                                 <div className="ol-popup-contet">
                                     {
-                                        data.length >= 1
+                                        data.length > 0 && data[1].length >= 1
                                         &&
-                                            data[0].map((layer, idx) =>
-                                                idx == 1 &&
-                                                layer.map((value, v_idx) =>
-                                                    value[0].toLowerCase().startsWith('name')
-                                                    && <b key={v_idx}>{value[1]}</b>
-                                                )
+                                            data[1].map((value, idx) =>
+                                                value[0].toLowerCase().startsWith('name')
+                                                && <b key={idx}>{value[1]}</b>
                                             )
                                     }
                                     <hr className="m-1 border border-secondary rounded"/>
                                     <table className="table borderless no-padding">
                                         <tbody>
                                             {
-                                                data.length >= 1
+                                                data.length > 0 && data[1].length >= 1
                                                 ?
-                                                    data[0].map((layer, idx) =>
-                                                        idx == 1 &&
-                                                        layer.map((value, v_idx) =>
-                                                            value[0] != 'geo_id' && !value[0].toLowerCase().startsWith('name')
+                                                    data[1].map((value, idx) =>
+                                                        idx <= per_page_limit
+                                                        &&
+                                                        value[0] != 'geo_id' && !value[0].toLowerCase().startsWith('name')
                                                             &&
-                                                                <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
-                                                                    <th className="font-weight-normal">
-                                                                        <b>{value[0].charAt(0).toUpperCase() + value[0].substring(1)}:</b>
-                                                                        <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1].charAt(0).toUpperCase() + value[1].substring(1)}</p>
-                                                                    </th>
-                                                                </tr>
-                                                        )
+                                                            <tr className="p-0" style={{fontSize: '12px'}} key={idx}>
+                                                                <th className="font-weight-normal">
+                                                                    <b>{value[0].charAt(0).toUpperCase() + value[0].substring(1)}:</b>
+                                                                    <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1].charAt(0).toUpperCase() + value[1].substring(1)}</p>
+                                                                </th>
+                                                            </tr>
                                                     )
                                                 :
                                                     <tr>
@@ -271,6 +286,19 @@ class PopUpCmp extends Component {
                                                         }
                                                         </th>
                                                     </tr>
+                                            }
+                                            {
+                                                data.length > 0 && data[1].length >= per_page_limit
+                                                ?
+                                                    <tr>
+                                                        <th>
+                                                            <span className="gp-text-link" onClick={() => this.showMore()}>
+                                                                Илүүг үзэх
+                                                            </span>
+                                                        </th>
+                                                    </tr>
+                                                :
+                                                    null
                                             }
                                         </tbody>
                                     </table>

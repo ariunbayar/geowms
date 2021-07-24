@@ -667,7 +667,6 @@ export default class BundleMap extends Component {
     }
 
     async getPopUpInfo(coordinate) {
-        console.log('pop up info from back');
         const latlong = toLonLat(coordinate)
 
         const layer_codes = this.getOpenLayers()
@@ -678,8 +677,6 @@ export default class BundleMap extends Component {
         if (scale_unit == 'km') {
             scale_value = this.getMetrScale(scale_value)
         }
-
-        console.log(layer_codes);
 
         try {
             const { datas } = await service.getPopUpInfo(layer_codes, latlong, scale_value)
@@ -759,7 +756,7 @@ export default class BundleMap extends Component {
             }
         }
 
-        console.log(this.sendFeatureInfo);
+        if (this.sendFeatureInfo.length > 0) this.is_empty = false
 
         this.controls.popup.getData(
             true,
@@ -799,13 +796,13 @@ export default class BundleMap extends Component {
         }
     }
 
-    setSourceInPopUp(feature, is_ol_feature=false) {
+    setSourceInPopUp(feature) {
         const pop_up_feature_id = this.pop_up_feature_id
         const source = this.state.vector_layer.getSource()
         utils.removeFeatureFromSource(pop_up_feature_id, source)
         if (feature) {
             let ol_feature = feature
-            if (!is_ol_feature) {
+            if (!(feature instanceof Feature)) {
                 ol_feature = utils.featureToOLFeature(feature)
             }
             ol_feature.setProperties({ id: pop_up_feature_id })
