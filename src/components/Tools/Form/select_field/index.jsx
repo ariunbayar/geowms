@@ -10,6 +10,7 @@ import React, { Component } from 'react';
 //     option_key                                     // сонголтын value
 //     errors                                         // validition алдаануудыг харуулна
 //     className={"comd-4"}                           // Класс өгч болно
+//     bracket_option={ }                             // текстийн хаалтыг сонгох
 //     default_text={'feature-ийн нэр сонгоно уу'}    // select input - ийг сонгоогүй үед харагдах анхны утга
 //     handleSelectField={this.handleChange}          // сонголт буцаах функц
 // />
@@ -29,6 +30,7 @@ import React, { Component } from 'react';
     data_list={selected_packages}
     default_value={package_name}
     className={"col-md-4"}
+    bracket_option={ }
     default_text={'package-ийн нэр сонгоно уу'}
     handleSelectField={this.handleChange}
 /> */}
@@ -40,7 +42,12 @@ export default class SelectField extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selected_value: ''
+            selected_value: '',
+            bracket_options:[
+                {open: '(', close: ')'},
+                {open:"'", close: "'"},
+                {open:"/", close:"/"}
+            ]
         }
         this.dataSelection = this.dataSelection.bind(this)
     }
@@ -76,6 +83,7 @@ export default class SelectField extends Component {
                 option_text, disabled, option_name_2, display_mode,
         } = this.props
         const state = this.state
+        var { bracket_options } = this.state
         let title = label ? label : ''
         return (
             <div className={`form-group ${className ? className : "col-md-4"}`} >
@@ -126,7 +134,7 @@ export default class SelectField extends Component {
 }
 
 
-function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode) {
+function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode, bracket_options) {
     var option_data = option_name
     if (option_text) option_data = option_text
     const options =
@@ -141,7 +149,7 @@ function OptionComp (options_data,  option_key, option_name, option_name_2, opti
                     {
                         display_mode
                         ?
-                            row[option_data]  + "   (   " + row[option_name_2] + "   )   "
+                            row[option_data]  + bracket_option[bracket_options.open] + row[option_name_2] + bracket_option[bracket_options.close]
                         :
                             row[option_data]
                     }
