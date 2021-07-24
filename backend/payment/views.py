@@ -9,70 +9,69 @@ from django.contrib.postgres.search import SearchVector
 from geoportal_app.models import User
 from .models import Payment, PaymentPoint
 
-
+from main.components import Datatable
 from main.decorators import ajax_required
 from main.utils import get_start_index
+
+
+def _get_user(user_id, item):
+    user = User.objects.filter(id=user_id).first()
+    return user.username if user else ''
+
+
+def _get_user_firstname(user_id, item):
+    user_firstname = User.objects.filter(id=user_id).first()
+    return user_firstname.first_name if user_firstname else ''
+
+
+def _get_user_lastname(user_id, item):
+    user_lastname = User.objects.filter(id=user_id).first()
+    return user_lastname.first_name if user_lastname else ''
 
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def paymentList(request, payload):
-
-    query = payload.get('query')
-    page = payload.get('page')
-    per_page = payload.get('perpage')
-    sort_name = payload.get('sort_name')
-
-    payment_all = []
-    if not sort_name:
-        sort_name = 'id'
-    payments = Payment.objects.all().annotate(search=SearchVector(
+    qs = Payment.objects.all()
+    qs = qs.annotate(search=SearchVector(
         'user__first_name',
         'geo_unique_number'
         )
-    ).filter(search__icontains=query).order_by(sort_name)
-    total_items = Paginator(payments, per_page)
-    items_page = total_items.page(page)
-    page_items = items_page.object_list
+    )
 
-    for payment in page_items:
-        if payment.created_at:
-            created_date = payment.created_at.strftime('%Y-%m-%d')
-        else:
-            created_date = None
-        if payment.success_at:
-            success_date = payment.success_at.strftime('%Y-%m-%d')
-        else:
-            success_date = None
-        if payment.failed_at:
-            failed_date = payment.failed_at.strftime('%Y-%m-%d')
-        else:
-            failed_date = None
-        payment_all.append({
-            'id': payment.id,
-            'geo_unique_number': payment.geo_unique_number,
-            'bank_unique_number': payment.bank_unique_number,
-            'description': payment.description,
-            'total_amount': payment.total_amount,
-            'user': payment.user.username,
-            'user_id': payment.user_id,
-            'user_firstname': payment.user.first_name,
-            'user_lastname': payment.user.last_name,
-            'is_success': payment.is_success,
-            'card_number': payment.card_number,
-            'message': payment.message,
-            'code': payment.code,
-            'created_at': created_date,
-            'success_at': success_date,
-            'failed_at': failed_date,
-        })
-    total_page = total_items.num_pages
+    qs = qs.filter(search__icontains=payload.get('query'))
+    if not qs:
+        rsp = {
+            'items': [],
+            'page': payload.get('page'),
+            'total_page': 1,
+        }
+        return JsonResponse(rsp)
+
+    оруулах_талбарууд = ['id', 'user_id', 'geo_unique_number', 'bank_unique_number', 'description', 'total_amount', 'is_success', 'card_number', 'message', 'code', 'created_at']
+    хувьсах_талбарууд = [
+        {"field": "user_id", "action": _get_user, "new_field": "user"},
+        {"field": "user_id", "action": _get_user_firstname, "new_field": "user_firstname"},
+        {"field": "user_id", "action": _get_user_lastname, "new_field": "user_lastname"},
+    ]
+
+    datatable = Datatable(
+        model=Payment,
+        payload=payload,
+        initial_qs=qs,
+        оруулах_талбарууд=оруулах_талбарууд,
+        хувьсах_талбарууд=хувьсах_талбарууд,
+        has_search=False,
+    )
+
+    items, total_page, start_index = datatable.get()
+
     rsp = {
-        'items': payment_all,
-        'page': page,
+        'items': items,
+        'page': payload.get('page'),
         'total_page': total_page,
-        'start_index': get_start_index(per_page, page),
+        'start_index': start_index
     }
     return JsonResponse(rsp)
 
