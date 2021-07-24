@@ -200,10 +200,6 @@ class PopUpCmp extends Component {
     render() {
         const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, is_purchased } = this.state
         const { is_empty, is_from_inspire, is_loading } = this.props
-        console.log(this.state.is_purchased);
-        console.log(this.state.is_purchased);
-        console.log(this.state.is_purchased);
-        console.log(this.state.is_purchased);
         return (
                 <div>
                     <div className="ol-popup-header">
