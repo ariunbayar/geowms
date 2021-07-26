@@ -181,8 +181,9 @@ export default class BarilgaSuurinGazar extends Component{
       Promise.all([
         service.qgisGetUrl(fid),
         service.apiGetUrl(),
-      ]).then(([{ wms_url, wfs_url }, { api_links }]) => {
-        this.setState({ wms_url, wfs_url, api_links })
+        service.getLayers(fid),
+      ]).then(([{ wms_url, wfs_url }, { api_links }, { layer_choices }]) => {
+        this.setState({ wms_url, wfs_url, api_links, layer_choices })
       })
       this.geomType()
       this.loadMap()
@@ -381,7 +382,6 @@ export default class BarilgaSuurinGazar extends Component{
         })
       })
       this.setState({vector_layer})
-      vector_layer.setZIndex(3)
 
       const vector = new VectorLayer({
         source: new VectorSource(),
@@ -1164,15 +1164,6 @@ export default class BarilgaSuurinGazar extends Component{
 
     async SideBarBtn(){
       this.setInActiveButtonStyle('side')
-      const { is_first, fid } = this.state
-      if (is_first) {
-        await service
-          .getLayers(fid).then(({ success, layer_choices }) => {
-            if (success) {
-              this.setState({ layer_choices, is_first: false })
-            }
-          })
-      }
       this.WmsTile()
     }
 
