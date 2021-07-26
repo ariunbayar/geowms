@@ -1165,8 +1165,10 @@ export default class BarilgaSuurinGazar extends Component{
       this.setInActiveButtonStyle('side')
       service
         .getLayers().then(({success, layer_choices}) => {
-        this.setState({layer_choices})
-        this.WmsTile(layer_choices)
+          if (success) {
+            this.setState({layer_choices})
+            this.WmsTile(layer_choices)
+          }
       })
     }
 

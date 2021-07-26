@@ -183,7 +183,7 @@ function deleteMeta(pk) {
     return fetch(`${meta_prefix}/${pk}/delete/`, requestOptions).then(handleResponse)
 }
 
-function getLayers(fid) {
+function getLayers() {
     const requestOptions = {
         ...getGetOptions(),
     }
