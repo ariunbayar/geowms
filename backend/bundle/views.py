@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import user_passes_test
 from main.decorators import ajax_required
-from main.utils import end_time, resize_b64_to_sizes, start_time
+from main.utils import resize_b64_to_sizes
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
