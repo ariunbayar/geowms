@@ -23,21 +23,21 @@ export class LogForm extends Component {
                 {'field': 'created_at', "title": 'Огноо'},
             ],
             хувьсах_талбарууд: [
-                {"field": "user_firstname", "action": (values) => this.go_link(values)},
+                {"field": "user_firstname", "action": (values) => this.goLink(values)},
                 {"field": "is_success", "action": this.setSuccessIcon, "action_type":true},
-                {"field": "total_amount",  "text": ""},
-                {"field": "description",  "text": ""},
-                {"field": "code",  "text": ""},
-                {"field": "message",  "text": ""},
-                {"field": "data_id",  "text": ""},
-                {"field": "bank_unique_number",  "text": ""},
-                {"field": "geo_unique_number",  "text": ""},
-                {"field": "created_at",  "text": ""},
+                {"field": "total_amount", "text": ""},
+                {"field": "description", "text": ""},
+                {"field": "code", "text": ""},
+                {"field": "message", "text": ""},
+                {"field": "data_id", "text": ""},
+                {"field": "bank_unique_number", "text": ""},
+                {"field": "geo_unique_number", "text": ""},
+                {"field": "created_at", "text": ""},
             ],
         }
     }
 
-    go_link(values){
+    goLink(values){
         this.props.history.push(`/back/user/${values.user_id}/дэлгэрэнгүй/`)
     }
 
