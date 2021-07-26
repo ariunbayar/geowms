@@ -12,13 +12,24 @@ export default class WMSLayerItem extends Component {
             tile: props.layer.tile,
             is_visible: false,
             legend: props.layer.legend,
+            z_index: props.z_index,
         }
 
         this.toggle = this.toggle.bind(this)
     }
 
+    componentDidUpdate(pP, pS) {
+        if (this.props.z_index != this.state.z_index) {
+            this.setState({ z_index: this.props.z_index })
+        }
+    }
+
     toggle(is_visible) {
         this.state.tile.setVisible(is_visible)
+        if (is_visible) {
+            this.props.handleSetZIndex()
+            this.state.tile.setZIndex(this.state.z_index)
+        }
         this.setState({is_visible})
     }
 
