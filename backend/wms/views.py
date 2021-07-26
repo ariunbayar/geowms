@@ -388,24 +388,23 @@ def paginated_list(request, payload):
     оруулах_талбарууд = ['id', 'name', 'url', 'created_at', 'is_active']
 
     geoserver_host = get_object_or_404(Config, name='geoserver_host').value
-    wms_objects = WMS.objects
-    wms_list = wms_objects.values('name', 'url', 'id')
+    wms_objects = WMS.objects.all()
     geoserver_layer_group = geoserver.get_layer_groups()
     geoserver_ws_list = geoserver.get_ws_list()
     geoserver_detail = geoserver_layer_group + geoserver_ws_list
 
-    for wms in wms_list:
-        if geoserver_host or nsdi_geoserver in wms['url']:
-            wms_name = wms['url'].split('/')[-2]
+    for wms in wms_objects:
+        if ('192.168.10.15' in geoserver_host and nsdi_geoserver in wms.url) or (geoserver_host in wms.url):
+            wms_name = wms.url.split('/')[-2]
         if wms_name:
             search_item = next((item for item in geoserver_detail if item['name'] == wms_name), None)
             if not search_item:
-                delete_layers = WMSLayer.objects.filter(wms_id=wms['id'])
+                delete_layers = WMSLayer.objects.filter(wms_id=wms.id)
                 for layer in delete_layers:
                     PaymentLayer.objects.filter(wms_layer=layer).delete()
                     BundleLayer.objects.filter(layer=layer).delete()
                 delete_layers.delete()
-                wms_objects.filter(pk=wms['id']).delete()
+                wms.delete()
 
     datatable = Datatable(
         model=WMS,
