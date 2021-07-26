@@ -120,6 +120,18 @@ def _get_position_name(postition_id, item):
     return position_name
 
 
+def _get_state_name(state_id, item):
+    if state_id == 1:
+        state = Employee.STATE_WORKING
+    elif state_id == 2:
+        state = Employee.STATE_BREAK
+    elif state_id == 3:
+        state = Employee.STATE_FIRED
+    else:
+        state = Employee.STATE_SICK
+    return state    
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -149,11 +161,12 @@ def list(request, payload):
         }
         return JsonResponse(rsp)
 
-    оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token']
+    оруулах_талбарууд = ['id', 'state', 'position_id', 'is_admin', 'user_id', 'token']
     хувьсах_талбарууд = [
         {"field": "user_id", "action": _get_name, "new_field": "user__first_name"},
         {"field": "user_id", "action": _get_email, "new_field": "user__email"},
-        {"field": "position_id", "action": _get_position_name, "new_field": "position"},
+        {"field": "state", "action": _get_state_name, "new_field": "user_state"},
+        {"field": "position_id", "action": _get_position_name, "new_field": "position"},      
     ]
     нэмэлт_талбарууд = [
         {"field": "role_name", "action": _get_role_name},
