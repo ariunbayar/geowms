@@ -20,13 +20,13 @@ def _get_user(user_id, item):
 
 
 def _get_user_firstname(user_id, item):
-    user_firstname = User.objects.filter(id=user_id).first()
-    return user_firstname.first_name if user_firstname else ''
+    user = User.objects.filter(id=user_id).first()
+    return user.first_name if user else ''
 
 
 def _get_user_lastname(user_id, item):
-    user_lastname = User.objects.filter(id=user_id).first()
-    return user_lastname.first_name if user_lastname else ''
+    user = User.objects.filter(id=user_id).first()
+    return user.last_name if user else ''
 
 
 @require_POST
