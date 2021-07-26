@@ -44,6 +44,7 @@ export default class  ExportCreate extends Component {
             pk_field_type: "",
             pk_field_count: "",
             pk_field_max_range: "",
+            pk_field_limit_count: "",
             checked_choices: [],
             checked_datas: [],
             check_ids: [],
@@ -69,8 +70,14 @@ export default class  ExportCreate extends Component {
                 {
                     'id': 4,
                     'name': 'Оруулах өгөгдлийн тоо хэмжээгээр',
-                    'eng_name': 'limit',
+                    'eng_name': '',
                     'keys': [3]
+                },
+                {
+                    'id': 5,
+                    'name': '1 удаа Select хийх өгөгдлийн тоогоор ',
+                    'eng_name': 'limit',
+                    'keys': [4]
                 },
             ],
             choice_datas: [
@@ -90,6 +97,12 @@ export default class  ExportCreate extends Component {
                     'name': 'Оруулах өгөгдлийн тоо хэмжээ',
                     'eng_name': 'pk_field_count',
                     'key': 3,
+                    'value': '',
+                },
+                {
+                    'name': '1 удаа Select хийх өгөгдлийн тоо ',
+                    'eng_name': 'pk_field_limit_count',
+                    'key': 4,
                     'value': '',
                 },
             ],
@@ -143,6 +156,11 @@ export default class  ExportCreate extends Component {
                     choice_datas[2]['value'] = form_datas.pk_field_count
                     check_ids.push(data_list[3].id)
                     checked_datas.push(choice_datas[2])
+                }
+                if (form_datas.pk_field_limit_count) {
+                    choice_datas[3]['value'] = form_datas.pk_field_limit_count
+                    check_ids.push(data_list[4].id)
+                    checked_datas.push(choice_datas[3])
                 }
                 this.setState({ ...form_datas, is_loading: false, checked_datas, check_ids })
             }
@@ -278,6 +296,7 @@ export default class  ExportCreate extends Component {
                 "pk_field_type": pk_field_type,
                 "pk_field_count": choice_datas[2].value,
                 "pk_field_max_range": choice_datas[1].value,
+                "pk_field_limit_count": choice_datas[3].value,
             }
 
             var values = {
