@@ -1177,13 +1177,13 @@ export default class BarilgaSuurinGazar extends Component{
                 ...layer,
                 tile: new Image({
                   source: new ImageWMS({
-                    url: this.state.emp_perm_prefix,
-                      params: {
-                        'LAYERS': layer.code,
-                        'FORMAT': 'image/png',
-                        'VERSION': '1.1.1',
-                        "STYLES": '',
-                        "exceptions": 'application/vnd.ogc.se_inimage',
+                    url: layer.url,
+                    params: {
+                      'LAYERS': layer.code,
+                      'FORMAT': 'image/png',
+                      'VERSION': '1.1.1',
+                      "STYLES": '',
+                      "exceptions": 'application/vnd.ogc.se_inimage',
                     },
                     serverType: 'geoserver',
                     transition: 0,

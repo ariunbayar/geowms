@@ -445,6 +445,14 @@ def _get_emp_perm_properties(token, fid):
     return perms_prop
 
 
+def _get_value_from_request(request, param_name):
+    if request.GET.get(param_name.upper()):
+        return request.GET.get(param_name.upper()).lower()
+    elif request.GET.get(param_name.lower()):
+        return request.GET.get(param_name.lower()).lower()
+    return ""
+
+
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def qgis_proxy(request, base_url, token, fid=''):
@@ -475,10 +483,7 @@ def qgis_proxy(request, base_url, token, fid=''):
         raise Http404
     allowed_props.insert(0, 'geo_data')
 
-    if request.GET.get('request'):
-        service_request = request.GET.get('request').lower()
-    elif request.GET.get('REQUEST'):
-        service_request = request.GET.get('REQUEST').lower()
+    service_request = _get_value_from_request(request, 'request')
 
     unneed_requests = ['getmap', 'getlegendgraphic']
     if service_request not in unneed_requests:
@@ -492,6 +497,18 @@ def qgis_proxy(request, base_url, token, fid=''):
         service_url = _get_qgis_service_url(request, token, fid)
         service_type = request.GET.get('SERVICE')
         content = replace_src_url(content, base_url, service_url, service_type)
+
+    elif service_request == 'getlegendgraphic':
+        request_layers = _get_value_from_request(request, 'layer')
+        request_layers = request_layers.split(":")[len(request_layers.split(":")) - 1]
+        if request_layers not in allowed_layers:
+            raise Http404
+
+    elif service_request == 'getmap':
+        request_layers = _get_value_from_request(request, 'layers')
+        request_layers = request_layers.split(":")[len(request_layers.split(":")) - 1]
+        if request_layers not in allowed_layers:
+            raise Http404
 
     qs_request = queryargs.get('REQUEST', 'no request')
 

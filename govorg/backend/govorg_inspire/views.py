@@ -1249,6 +1249,7 @@ def get_layers(request, fid):
         data = dict()
         data['name'] = feature.feature_name
         data['code'] = _make_layer_code(feature)
+        data['url'] = request.build_absolute_uri(reverse('api:qgis:qgis-proxy', args=[employee.token, feature.feature_id]))
         layer_choices.append(data)
 
     rsp = {
