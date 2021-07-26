@@ -627,19 +627,27 @@ def _str_to_bool(str):
     return False
 
 
-def _rsp_validation(data, datas):
-    if 'has_class' in datas:
-        has_class = datas['has_class']
-    if 'connect_feature_id' in datas:
-        connect_feature_id = datas['connect_feature_id']
-    if 'connect_feature_property_id' in datas:
-        connect_feature_property_id = datas['connect_feature_property_id']
-
-        if not data['data']:
-            if has_class is True and connect_feature_id is None and connect_feature_property_id is None:
+def _rsp_validation(data, datas, model_name):
+    info = ''
+    keys = ['connect_feature_id', 'connect_feature_property_id', 'is_connect_to_feature']
+    if model_name == 'feature_config':
+        if 'has_class' in datas:
+            has_class = datas['has_class']
+            if has_class == True:
+                rem_data = utils.key_remove_of_dict(datas, keys)
+                for check_data in rem_data:
+                    if not rem_data[check_data]:
+                        info = 'false'
+                        return info
                 info = 'true'
+                return info
             else:
-                info = 'false'
+                if not data['data']:
+                    info = 'false'
+                    return info
+    else:
+        if not data['data']:
+            info = 'false'
             return info
 
 
@@ -665,12 +673,11 @@ def save(request, payload):
         #     datas[data['field_name']] = order_no
         else:
             datas[data['field_name']] = data['data']
-            info = _rsp_validation(data, datas)
+            info = _rsp_validation(data, datas, model_name)
             if info == 'true':
                 rsp = {'success': True}
             elif info == 'false':
-                return JsonResponse({'success': False, 'info': 'Хоосон байна утга оруулна уу!'})
-
+                return JsonResponse({'success': False, 'info': 'Хоосон байна, утга оруулна уу!'})
 
     model_qs = Model.objects
 
