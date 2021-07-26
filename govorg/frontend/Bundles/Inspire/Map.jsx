@@ -106,6 +106,7 @@ export default class BarilgaSuurinGazar extends Component{
           wfs_url: '',
           api_links: {},
           is_delete_request: false,
+          is_first: true
       }
 
       this.controls = {
@@ -180,8 +181,9 @@ export default class BarilgaSuurinGazar extends Component{
       Promise.all([
         service.qgisGetUrl(fid),
         service.apiGetUrl(),
-      ]).then(([{ wms_url, wfs_url }, { api_links }]) => {
-        this.setState({ wms_url, wfs_url, api_links })
+        service.getLayers(fid),
+      ]).then(([{ wms_url, wfs_url }, { api_links }, { layer_choices }]) => {
+        this.setState({ wms_url, wfs_url, api_links, layer_choices })
       })
       this.geomType()
       this.loadMap()
@@ -274,7 +276,7 @@ export default class BarilgaSuurinGazar extends Component{
       })}
 
       this.setState({map_wms})
-      map_wms.tile.setZIndex(2)
+      map_wms.tile.setZIndex(1000) // TODO үндсэн давхарга хамгийн наана харагдана
       this.map.addLayer(map_wms.tile);
 
       const Mongolia_feaure = (new GeoJSON().readFeatures(Mongolia_boundary, {
@@ -380,7 +382,6 @@ export default class BarilgaSuurinGazar extends Component{
         })
       })
       this.setState({vector_layer})
-      vector_layer.setZIndex(3)
 
       const vector = new VectorLayer({
         source: new VectorSource(),
@@ -1163,28 +1164,26 @@ export default class BarilgaSuurinGazar extends Component{
 
     SideBarBtn(){
       this.setInActiveButtonStyle('side')
-      service.getLayers(this.state.emp_perm_prefix).then((layer_choices) => {
-        this.setState({layer_choices})
-        this.WmsTile(layer_choices)
-      })
+      this.WmsTile()
     }
 
-    WmsTile(layer_choices){
+    WmsTile(){
+      const layer_choices = this.state.layer_choices
       const map = this.map
       const wms_map_list = {
             name: "Таны харах эрхтэй давхаргууд",
-            layers: layer_choices.slice(1, layer_choices.length).map((layer) => {
+            layers: layer_choices.map((layer) => {
               return {
                 ...layer,
                 tile: new Image({
                   source: new ImageWMS({
-                    url: this.state.emp_perm_prefix,
-                      params: {
-                        'LAYERS': layer.code,
-                        'FORMAT': 'image/png',
-                        'VERSION': '1.1.1',
-                        "STYLES": '',
-                        "exceptions": 'application/vnd.ogc.se_inimage',
+                    url: layer.url,
+                    params: {
+                      'LAYERS': layer.code,
+                      'FORMAT': 'image/png',
+                      'VERSION': '1.1.1',
+                      "STYLES": '',
+                      "exceptions": 'application/vnd.ogc.se_inimage',
                     },
                     serverType: 'geoserver',
                     transition: 0,

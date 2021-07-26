@@ -1,3 +1,5 @@
+import { handleResponse, getGetOptions, getPostOptions } from "@helpUtils/handleRequest"
+
 export const service = {
     getAll,
     update,
@@ -11,73 +13,22 @@ export const service = {
 
 const prefix = '/back'
 
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-function handleResponse(response) {
-    return response.text().then(text => {
-        const data = text && JSON.parse(text)
-        if (!response.ok) {
-            if ([401, 403].indexOf(response.status) !== -1) {
-                // TODO auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-                location.reload(true)
-            }
-            const error = (data && data.message) || response.statusText
-            return Promise.reject(error)
-        }
-
-        return data
-    })
-}
-
-function _getGetOptions() {
-    return {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-    }
-}
-
-function _getPostOptions() {
-    return {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': getCookie('csrftoken'),
-        },
-    }
-}
-
 function getAll() {
     const requestOptions = {
-        ..._getGetOptions(),
+        ...getGetOptions(),
     }
     return fetch(`${prefix}/bundle/all/`, requestOptions).then(handleResponse)
 }
 
 
 function detail(id) {
-    const requestOptions = {..._getGetOptions()}
+    const requestOptions = {...getGetOptions()}
 
     return fetch(`${prefix}/bundle/${id}/update-detail/`, requestOptions).then(handleResponse)
 }
 
 function getLayer(id) {
-    const requestOptions = {..._getGetOptions()}
+    const requestOptions = {...getGetOptions()}
 
     return fetch(`${prefix}/bundle/get-layer/`, requestOptions).then(handleResponse)
 }
@@ -85,7 +36,7 @@ function getLayer(id) {
 function update(values) {
 
     const opts = {
-        ..._getPostOptions(),
+        ...getPostOptions(),
         body: JSON.stringify(values),
     }
 
@@ -95,7 +46,7 @@ function update(values) {
 
 function swap(swap_one, swap_two) {
     const opts = {
-        ..._getPostOptions(),
+        ...getPostOptions(),
         body: JSON.stringify({swap_one, swap_two}),
     }
 
@@ -104,7 +55,7 @@ function swap(swap_one, swap_two) {
 
 function roleCreate(values) {
     const opts = {
-        ..._getPostOptions(),
+        ...getPostOptions(),
         body: JSON.stringify(values),
     }
 
@@ -113,7 +64,7 @@ function roleCreate(values) {
 
 function roleRemove(values) {
     const opts = {
-        ..._getPostOptions(),
+        ...getPostOptions(),
         body: JSON.stringify(values),
     }
 
@@ -122,7 +73,7 @@ function roleRemove(values) {
 
 function defaultCheckUpdate(values) {
     const opts = {
-        ..._getPostOptions(),
+        ...getPostOptions(),
         body: JSON.stringify(values),
     }
 

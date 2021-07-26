@@ -54,7 +54,7 @@ export default class SelectOption extends Component {
                                     className="mx-4 px-3"
                                     htmlFor={data.id}
                                 >
-                                    {data.name} ({data.eng_name})
+                                    {data.name} {data.eng_name && `(${data.eng_name})`}
                                 </label>
                             </div>
                         )

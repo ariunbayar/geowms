@@ -9,7 +9,12 @@ export default class WMSLayerItems extends Component {
 
         this.state = {
             layers: props.layers,
+            z_index: 0,
         }
+    }
+
+    handleSetZIndex() {
+        this.setState({z_index: this.state.z_index+1})
     }
 
     render() {
@@ -19,6 +24,8 @@ export default class WMSLayerItems extends Component {
                     <WMSLayerItem
                         layer={layer}
                         key={idx}
+                        z_index={this.state.z_index}
+                        handleSetZIndex={() => this.handleSetZIndex()}
                     />
                 )}
             </div>
