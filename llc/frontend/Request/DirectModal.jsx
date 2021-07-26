@@ -189,6 +189,7 @@ export default class RequestDetail extends Component {
                                 className="col-md-12 px-0 mx-0"
                                 data_list={investment_status}
                                 default_value={hurungu_oruulalt}
+                                bracket_option={1}
                                 default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
                                 handleSelectField={this.props.handleOnChange}
                                 disabled={disabled}
@@ -210,7 +211,7 @@ export default class RequestDetail extends Component {
                                                 label="Мэргэжилтэн сонгох"
                                                 className="col-md-12 px-0 mx-0"
                                                 state_name= "choose_proffessional"
-                                                bracket_option={0}
+                                                bracket_option={1}
                                                 default_value={default_mergejilten}
                                                 disabled={(!info && disabled) && true}
                                                 handleSelectField={this.props.handleOnChange}
