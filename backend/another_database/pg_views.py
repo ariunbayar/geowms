@@ -1018,7 +1018,7 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
         else:
             count = _get_count_of_table(cursor, table_name, pk_field_max_range, start_data, pk_field_type, pk_field_name)
 
-        if limit_count or int(limit_count) >= 0:
+        if limit_count and int(limit_count) >= 0:
             SELECTCOUNT = int(limit_count)
         count = int(count)
         current_data_counts = 0
