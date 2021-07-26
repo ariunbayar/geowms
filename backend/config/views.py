@@ -647,9 +647,11 @@ def qgis_plugin_save(request):
     file_name = upload_file.name
     file_path = os.path.join(settings.STATIC_ROOT + '/' + 'assets/')
     extract_path = os.path.join(file_path, 'qgis_plugin')
-    os.mkdir(extract_path)
-    utils.unzip(upload_file, extract_path)
 
-    return True, extract_path({
+    if not os.path.exists(extract_path):
+        os.mkdir(extract_path)
+    utils.save_file_to_storage(upload_file, extract_path, file_name)
+
+    return JsonResponse ({
         'success': True
     })

@@ -76,7 +76,6 @@ export default class ConfigSystem extends Component {
     render() {
 
         var { files, icon_name, is_editing } = this.state
-        console.log(files)
         return (
             <div className="card">
                 <div className="card-header">
@@ -92,11 +91,12 @@ export default class ConfigSystem extends Component {
                     <label>.zip өргөтгөлтэй файл оруулна уу</label>
                         <FileUpload
                             files={files}
-                            className="d-flex justify-content-between"
+                            className="d-flex justify-content-between pr-4"
                             default_text="Файлаа оруулна уу"
                             getFile={this.getFile}
                             accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
                             onChange={(e) => fileAction(e, 'files')}
+                            disabled={!is_editing ? true : ''}
                         />
                     </div>
                 </div>
