@@ -1,3 +1,5 @@
+from backend import payment
+from backend.payment.views import paymentList
 import re
 from backend.inspire.models import LDataTypeConfigs, LFeatureConfigs, LFeatures, LPackages, LProperties
 import requests
@@ -492,8 +494,11 @@ def save_geo(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def remove_invalid_layers(request, payload, id):
     layers = payload.get('invalid_layers')
-    wmslayer = WMSLayer.objects.filter(wms_id=id, code__in=layers)
-    wmslayer.delete()
+    wms_layer = WMSLayer.objects.filter(wms_id=id, code__in=layers)
+    for layer in wms_layer:
+        PaymentLayer.objects.filter(wms_layer=layer).delete()
+        BundleLayer.objects.filter(layer=layer).delete()
+    wms_layer.delete()
 
     rsp = {
         'success': True
