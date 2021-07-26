@@ -4,6 +4,7 @@ from django.conf import settings
 
 from django.db import connections
 from django.forms.models import model_to_dict
+from django.db.models import ManyToOneRel
 from django.forms.utils import flatatt
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -311,8 +312,12 @@ def getFields(request, payload):
     for i in Model._meta.get_fields():
         field_name = i.name
         data = ''
+        foreign_key_field = ""
         type_name = i.get_internal_type()
-        if not field_name == 'created_on' and not field_name == 'created_by' and not field_name == 'modified_on' and not field_name == 'modified_by' and field_name != 'bundle':
+        if not field_name == 'created_on' and not field_name == 'created_by' and not field_name == 'modified_on' and not field_name == 'modified_by' and field_name != 'bundle' and not isinstance(i, ManyToOneRel):
+            if type_name == 'ForeignKey':
+                foreign_key_field = field_name
+                field_name = field_name + "_id"
             field = dict()
             if type_name == "CharField":
                 type_name = 'text'
@@ -351,6 +356,8 @@ def getFields(request, payload):
                     datas = Model.objects.filter(pk=id)
                     for data in datas:
                         data_obj = model_to_dict(data)
+                        if foreign_key_field:
+                            data_obj[field_name] = data_obj.pop(foreign_key_field)
                         dat = data_obj[field_name]
 
                         if type(dat) == 'bool' and not 1 and dat:
