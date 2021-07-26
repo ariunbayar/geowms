@@ -12,7 +12,7 @@ export class LogForm extends Component {
             custom_query: {},
             талбарууд: [
                 {'field': 'user_firstname', "title": 'Хэрэглэгч', 'has_action': true},
-                {'field': 'is_success', "title": 'Төлөв'},
+                {'field': 'is_success', "title": 'Төлөв', 'has_action': true},
                 {'field': 'total_amount', "title": 'Нийт дүн'},
                 {'field': 'description', "title": 'Тодорхойлолт'},
                 {'field': 'code', "title": 'Код'},
@@ -23,22 +23,31 @@ export class LogForm extends Component {
                 {'field': 'created_at', "title": 'Огноо'},
             ],
             хувьсах_талбарууд: [
-                {"field": "user_firstname", "action": (values) => this.go_link(values)},
-                {"field": "is_success",  "text": ""},
-                {"field": "total_amount",  "text": ""},
-                {"field": "description",  "text": ""},
-                {"field": "code",  "text": ""},
-                {"field": "message",  "text": ""},
-                {"field": "data_id",  "text": ""},
-                {"field": "bank_unique_number",  "text": ""},
-                {"field": "geo_unique_number",  "text": ""},
-                {"field": "created_at",  "text": ""},
+                {"field": "user_firstname", "action": (values) => this.goLink(values)},
+                {"field": "is_success", "action": this.setSuccessIcon, "action_type":true},
+                {"field": "total_amount", "text": ""},
+                {"field": "description", "text": ""},
+                {"field": "code", "text": ""},
+                {"field": "message", "text": ""},
+                {"field": "data_id", "text": ""},
+                {"field": "bank_unique_number", "text": ""},
+                {"field": "geo_unique_number", "text": ""},
+                {"field": "created_at", "text": ""},
             ],
         }
     }
 
-    go_link(values){
+    goLink(values){
         this.props.history.push(`/back/user/${values.user_id}/дэлгэрэнгүй/`)
+    }
+
+    setSuccessIcon(is_success){
+        var icon
+        if(is_success) {
+            return icon = "text-success fa fa-check-circle-o"
+        } else {
+            return icon = "text-danger fa fa-times"
+        }
     }
 
     render() {
