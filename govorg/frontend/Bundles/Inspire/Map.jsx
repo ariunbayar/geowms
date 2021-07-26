@@ -1162,7 +1162,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.setState({ showUpload: false })
     }
 
-    async SideBarBtn(){
+    SideBarBtn(){
       this.setInActiveButtonStyle('side')
       this.WmsTile()
     }
