@@ -25,6 +25,7 @@ urlpatterns = [
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
         path('get_user/', bundle_views.get_user, name='get_user'),
         path('api/search/', bundle_views.get_search_value, name='get_search_value'),
+        path('api/search-value/', bundle_views.get_search_property_value),
         path('api/get-buffer/', bundle_views.get_point_buffer_geom),
     ], 'bundle'))),
 

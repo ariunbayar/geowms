@@ -55,9 +55,10 @@
             </div>
             <div class="col-md-4 align-self-center">
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control search-input" placeholder="Хайх үг">
+                    <input type="text" class="form-control search-input" list="options" placeholder="Хайх үг">
+                    <datalist id="options"></datalist>
                     <div class="input-group-append">
-                        <button class="btn gp-outline-primary" type="submit">Хайх</button>
+                        <button class="btn gp-outline-primary" type="button" id="searchBtn">Хайх</button>
                     </div>
                 </div>
             </div>
@@ -233,6 +234,74 @@
                 }
             });
         });
+    </script>
+    <script>
+
+        const btn_element = document.getElementById('searchBtn')
+        btn_element.addEventListener('click', searchProperty)
+
+        function searchProperty(mouse_event) {
+            let main_element = btn_element.parentElement.parentElement
+            const childrens = main_element.children
+            for (let index = 0; index < childrens.length; index++) {
+                const element = childrens[index];
+                const tag_name = element.tagName
+                if (tag_name == 'INPUT') {
+                    const value = element.value
+                    getProperties(value)
+                    break
+                }
+            }
+        }
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function getOption(body) {
+            return {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body
+            }
+        }
+
+        function getProperties(value) {
+            fetch('/api/search-value/', getOption(JSON.stringify({ value })))
+                .then(rsp => text = rsp.text())
+                .then(text => text && JSON.parse(text))
+                .then(({ success, data, error }) => {
+                    if (success) {
+                        console.log(data);
+                        const data_list_element = document.getElementById("options")
+                        data.map(({ id, name, data }, idx) => {
+                            let option_elem =  document.createElement('option')
+                            option_elem.value = id
+                            option_elem.innerText = name
+                            data_list_element.appendChild(option_elem)
+                        })
+                    }
+                    else {
+                        alert(error)
+                    }
+                })
+        }
+
     </script>
     {% block script %}
     {% endblock %}

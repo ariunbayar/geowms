@@ -2025,24 +2025,20 @@ def has_user(id=None, username=None, email=None):
 def get_feature_ids_of_theme(theme_code):
 
     LThemes = apps.get_model('backend_inspire', 'LThemes')
-    LPackages = apps.get_model('backend_inspire', 'LPackages')
-    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
 
     feature_ids = list()
 
     theme_qs = LThemes.objects
     theme_qs = theme_qs.filter(theme_code=theme_code)
+    theme_qs = theme_qs.prefetch_related('lpackages_set__lfeatures_set')
     theme = theme_qs.first()
 
     if theme:
-        pack_qs = LPackages.objects
-        pack_qs = pack_qs.filter(theme_id=theme.theme_id)
+        pack_qs = theme.lpackages_set.all()
         for pack in pack_qs:
-            feature_qs = LFeatures.objects
-            feature_qs = feature_qs.filter(package_id=pack.package_id)
-            if feature_qs:
-                feature_ids_new = list(feature_qs.values_list('feature_id', flat=True))
-                feature_ids = feature_ids + feature_ids_new
+            feature_qs = pack.lfeatures_set.all()
+            for feature in feature_qs:
+                feature_ids.append(feature.feature_id)
 
     return feature_ids
 

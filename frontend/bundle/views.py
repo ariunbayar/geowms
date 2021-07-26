@@ -365,3 +365,76 @@ def get_point_buffer_geom(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def get_search_property_value(request, payload):
+    search_value = payload.get('value')
+
+    rsp = {
+        'success': False,
+        'data': [],
+        'error': ""
+    }
+
+    if not search_value:
+        rsp['error'] = 'Хайх утгаа оруулна уу'
+        return JsonResponse(rsp)
+
+    datas = list()
+
+    bundle_qs = Bundle.objects
+    bundle_qs = bundle_qs.prefetch_related('ltheme__lpackages_set__lfeatures_set')
+    bundle_qs = bundle_qs.order_by('sort_order')
+
+    cache_time = 3000
+
+    for bundle in bundle_qs:
+
+        geo_ids_cache_key = 'bundle_{}_geo_ids'.format(bundle.id)
+
+        print(geo_ids_cache_key)
+
+        feature_ids = list()
+        pack_qs = bundle.ltheme.lpackages_set.all()
+        for pack in pack_qs:
+            features_qs = pack.lfeatures_set.all()
+            for feature in features_qs:
+                feature_ids.append(feature.feature_id)
+
+        geo_ids = cache.get(geo_ids_cache_key)
+        if not geo_ids:
+            print("new geo ids")
+            mgeo_qs = MGeoDatas.objects
+            mgeo_qs = mgeo_qs.filter(feature_id__in=feature_ids)
+            geo_ids = list(mgeo_qs.values_list('geo_id', flat=True))
+            cache.set(geo_ids_cache_key, geo_ids, cache_time)
+
+        print(len(geo_ids))
+
+        if geo_ids:
+            start = utils.start_time()
+            qs_datas = MDatas.objects
+            qs_datas = qs_datas.filter(geo_id__in=geo_ids)
+            qs_datas = qs_datas.filter(value_text__isnull=False, value_text__icontains=search_value)
+
+            if qs_datas:
+                qs_datas = qs_datas.extra(select={'name': 'value_text'})  # select value_text as name
+                qs_datas = qs_datas.order_by('geo_id')[:5]
+                datas.append({
+                    "name": bundle.ltheme.theme_name,
+                    "id": bundle.id,
+                    "datas": list(qs_datas.values('geo_id', 'name'))
+                })
+
+            utils.end_time(start, '> mddata')
+
+    if not datas:
+        rsp['error'] = 'Мэдээлэл олдсонгүй'
+        return JsonResponse(rsp)
+
+    rsp['success'] = True
+    rsp['data'] = datas
+
+    return JsonResponse(rsp)
