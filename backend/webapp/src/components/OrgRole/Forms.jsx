@@ -1,8 +1,6 @@
 import React, { Component } from "react"
-import {NavLink} from "react-router-dom"
-import { Formik, Form, Field, ErrorMessage, validateYupSchema} from 'formik'
+import { Formik, Form, Field, ErrorMessage } from 'formik'
 import {validationSchema} from './validationSchema'
-import Modal from "@utils/Modal/Modal"
 import {service} from "./service"
 
 
@@ -21,25 +19,25 @@ export class Forms extends Component {
     }
 
     componentDidMount() {
-        this.getDetail()
+        const id = this.props.match.params.id
+        if (id) {
+            this.getDetail(id)
+        }
     }
 
-    getDetail() {
-        const role_id = this.props.match.params.id
-        if (role_id) {
-            service
-                .getDetailRole(role_id)
-                .then(({ success, name, description }) => {
-                    if (success) {
-                        this.setState({
-                            values: {
-                                name: name,
-                                description: description
-                            },
-                        })
-                    }
-                })
-        }
+    getDetail(id) {
+        service
+            .getDetailRole(id)
+            .then(({ success, name, description }) => {
+                if (success) {
+                    this.setState({
+                        values: {
+                            name: name,
+                            description: description
+                        },
+                    })
+                }
+            })
     }
 
     handleSubmit(values, {setStatus, setSubmitting, setErrors}) {
@@ -76,13 +74,6 @@ export class Forms extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="text-left">
-                        <NavLink to={`/back/org-role/`}>
-                            <p className="btn gp-outline-primary">
-                                <i className="fa fa-angle-double-left"> Буцах</i>
-                            </p>
-                        </NavLink>
-                    </div>
                     <div className="row">
                         <div className="col-md-4">
                             <Formik
