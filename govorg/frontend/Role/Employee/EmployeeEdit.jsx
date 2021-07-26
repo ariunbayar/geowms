@@ -389,9 +389,9 @@ export class EmployeeEdit extends Component {
     getGeom(geo_id) {
         service
             .getGeom(geo_id)
-            .then(({ feature }) => {
-                if (feature) {
-                    this.setState({ feature, last_geo_id: geo_id })
+            .then(({ data }) => {
+                if (data) {
+                    this.setState({ feature: data, last_geo_id: geo_id })
                 }
             })
     }
@@ -540,7 +540,7 @@ export class EmployeeEdit extends Component {
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="username" >Нэвтрэх нэр:</label>
+                                                    <label htmlFor="id_username" >Нэвтрэх нэр:</label>
                                                     <Field
                                                         className={'form-control ' + (errors.username ? 'is-invalid' : '')}
                                                         name='username'
@@ -597,7 +597,7 @@ export class EmployeeEdit extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="email">Цахим хаяг</label>
+                                                <label htmlFor="id_email">Цахим хаяг</label>
                                                 <Field
                                                     className={'form-control ' + (errors.email ? 'is-invalid' : '')}
                                                     name='email'
@@ -608,10 +608,15 @@ export class EmployeeEdit extends Component {
                                                 <ErrorMessage name="email" component="div" className="text-danger"/>
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="gender">Хүйс:</label>
+                                                <label htmlFor="id_gender">Хүйс:</label>
                                                 <Fragment>
-                                                    <Field name="gender" as="select" className="form-control"
-                                                    className={'form-control ' + (errors.gender ? 'is-invalid' : '')}>
+                                                    <Field
+                                                        name="gender"
+                                                        as="select"
+                                                        id="id_gender"
+                                                        className="form-control"
+                                                        className={'form-control ' + (errors.gender ? 'is-invalid' : '')}
+                                                    >
                                                         <option>Эрэгтэй</option>
                                                         <option>Эмэгтэй</option>
                                                     </Field>
@@ -624,7 +629,7 @@ export class EmployeeEdit extends Component {
                                             <div>
                                                 <div className="form-row">
                                                     <div className="form-group col-md-6">
-                                                        <label htmlFor="register">Регистер:</label>
+                                                        <label htmlFor="id_register">Регистер:</label>
                                                         <Field
                                                             className={'form-control ' + (errors.register ? 'is-invalid' : '')}
                                                             name='register'
@@ -648,7 +653,7 @@ export class EmployeeEdit extends Component {
                                                 <div className='form-row'>
                                                     <div className="form-group col-md-6">
                                                         <div className="position-relative has-icon-right">
-                                                            <label htmlFor="phone_number" >Утасны дугаар:</label>
+                                                            <label htmlFor="id_phone_number" >Утасны дугаар:</label>
                                                             <Field
                                                                 className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
                                                                 name='phone_number'
@@ -663,7 +668,7 @@ export class EmployeeEdit extends Component {
                                                         this.props.employee.is_admin &&
                                                             <>
                                                                 <div className="form-group col-md-2 mt-1 text-center"><br/>
-                                                                    <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                                                    <label htmlFor='id_is_admin'>Байгууллагын админ</label>
                                                                     <Field
                                                                         className="ml-2"
                                                                         name='is_admin'
@@ -698,7 +703,7 @@ export class EmployeeEdit extends Component {
                                             <div>
                                                 <div className="form-row">
                                                     <div className="form-group col-md-6">
-                                                        <label htmlFor="register">Регистер:</label>
+                                                        <label htmlFor="id_register">Регистер:</label>
                                                         <Field
                                                             className={'form-control ' + (errors.register ? 'is-invalid' : '')}
                                                             name='register'
@@ -710,7 +715,7 @@ export class EmployeeEdit extends Component {
                                                     </div>
                                                     <div className="form-group col-md-6">
                                                         <div className="position-relative has-icon-right">
-                                                            <label htmlFor="phone_number" >Утасны дугаар:</label>
+                                                            <label htmlFor="id_phone_number" >Утасны дугаар:</label>
                                                             <Field
                                                                 className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
                                                                 name='phone_number'
@@ -737,7 +742,7 @@ export class EmployeeEdit extends Component {
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <label htmlFor='id_state'>Төлөв:</label>
-                                                <Field name="state" as="select" id="state"
+                                                <Field name="state" as="select" id="id_state"
                                                     style={{ fontSize: '0.8rem' }}
                                                     className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
                                                 >
@@ -751,7 +756,7 @@ export class EmployeeEdit extends Component {
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor='id_pro_class'>Мэргэжлийн ангийн бүрэлдэхүүн:</label>
-                                                    <Field name="pro_class" as="select" id="pro_class"
+                                                    <Field name="pro_class" as="select" id="id_pro_class"
                                                         style={{ fontSize: '0.8rem' }}
                                                         className={'custom-select ' + (errors.pro_class ? 'is-invalid' : '')}
                                                     >

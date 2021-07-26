@@ -43,7 +43,8 @@ from main.utils import (
     get_config,
     get_geom,
     datetime_to_string,
-    get_feature
+    get_feature,
+    lat_long_to_utm
 )
 from main import utils
 
@@ -373,24 +374,36 @@ def save_request(request, content):
     if is_file:
         datasource_exts = ['.gml', '.geojson']
         for name in glob.glob(os.path.join(extract_path, '*')):
+            check_data_type = 0
             for ext in datasource_exts:
-                if ext in name:
-                    ds = DataSource(name)
-                    for layer in ds:
-                        if len(layer) >= 1:
-                            org_data = _get_leve_2_geo_id(layer)
-                            if not org_data:
-                                utils.remove_folder(extract_path)
-                                return JsonResponse({
-                                    'success': False,
-                                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
-                                })
-                        else:
-                            utils.remove_folder(extract_path)
-                            return JsonResponse({
-                                'success': False,
-                                'info': 'Файл хоосон байна !!!'
-                            })
+                if ext not in name:
+                    check_data_type += 1
+
+            if check_data_type == 2:
+                delete_folder = str(file_path).split("/")[1]
+                delete_folder = os.path.join(settings.MEDIA_ROOT, main_path, delete_folder)
+                utils.remove_folder(delete_folder)
+                return JsonResponse({
+                    'success': False,
+                    'info': 'GML, GEOJSON өргөтгөлтэй файл оруулах боломжтой !!!'
+                })
+
+            ds = DataSource(name)
+            for layer in ds:
+                if len(layer) >= 1:
+                    org_data = _get_leve_2_geo_id(layer)
+                    if not org_data:
+                        utils.remove_folder(extract_path)
+                        return JsonResponse({
+                            'success': False,
+                            'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
+                        })
+                else:
+                    utils.remove_folder(extract_path)
+                    return JsonResponse({
+                        'success': False,
+                        'info': 'Файл хоосон байна !!!'
+                        })
 
         request_file_data['name'] = company_name
         request_file_data['tools'] = json_dumps(get_tools)
@@ -458,7 +471,8 @@ def get_all_geo_json(request, content):
 def get_request_data(request, content, id):
 
     features = []
-    field = {}
+    field = dict()
+    files = list()
     qs = RequestForm.objects.filter(file_id=id).first()
     request_file = RequestFiles.objects.filter(pk=id).first()
     requested_employee = request_file.requested_employee
@@ -469,7 +483,6 @@ def get_request_data(request, content, id):
         'type': 'application/vnd.rar'
     }
 
-    field = dict()
     aimag_name = ''
     aimag_geom = []
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
@@ -508,6 +521,7 @@ def get_request_data(request, content, id):
         file_name = file_name.split('/')
         file_data['name'] = file_name[2]
         file_data['size'] = file_qs.size or ''
+        files.append(file_data)
 
     if qs:
         file_name = str(qs.file.file_path).split('/')[1] if qs.file.file_path else ''
@@ -516,7 +530,7 @@ def get_request_data(request, content, id):
         field['object_type'] = qs.object_type
         field['object_quantum'] = qs.object_quantum
         field['investment_status'] = qs.investment_status
-        field['file_path'] = file_data
+        field['file_path'] = files
         field['selected_tools'] = json_load(qs.file.tools)
         field['file_name'] = file_name
         field['state'] = qs.file.get_state_display()
@@ -674,12 +688,17 @@ def remove_request(request, content, id):
     form = RequestForm.objects.filter(file=initial_query.id)
     lvl2_request = LLCRequest.objects.filter(file=initial_query)
 
-    if initial_query:
-        for shape in shapes:
-            geom = ShapeGeom.objects.filter(shape=shape)
-            if geom:
-                geom.delete()
-            shape.delete()
+    if initial_query.state == RequestFiles.STATE_SENT or initial_query.kind == RequestFiles.KIND_DISMISS:
+        return JsonResponse({
+                'success': False,
+                'info': 'Устгах боломжгүй файл байна.'
+        })
+
+    for shape in shapes:
+        geom = ShapeGeom.objects.filter(shape=shape)
+        if geom:
+            geom.delete()
+        shape.delete()
 
         if form:
             form.delete()
@@ -690,17 +709,12 @@ def remove_request(request, content, id):
             change_requests.delete()
             lvl2_request.delete()
 
-        initial_query.delete()
-        _delete_prev_files(initial_query)
-
-        return JsonResponse({
-            'success': True,
-            'info': "Амжилттай устгалаа"
-        })
+    initial_query.delete()
+    _delete_prev_files(initial_query)
 
     return JsonResponse({
-        'success': False,
-        'info': "Устгахад алдаа гарлаа"
+            'success': True,
+            'info': 'Амжилттай устгалаа'
     })
 
 
@@ -732,11 +746,18 @@ def get_search_field(request, content):
 @require_GET
 @ajax_required
 @llc_required(lambda u: u)
+
 def get_count(request, content):
     company_name = content.get('company_name')
-    states = [RequestFiles.STATE_NEW, RequestFiles.STATE_SENT]
-    request_count = RequestFiles.objects.filter(state__in=states, name__exact=company_name).count()
+    count = dict()
+    request_qs = RequestFiles.objects.filter(name__exact=company_name)
+    request_count = request_qs.exclude(state=RequestFiles.STATE_SOLVED).count()
+    solved_count = request_qs.filter(state=RequestFiles.STATE_SOLVED).count()
+
+    count['request_count'] = request_count
+    count['solved_count'] = solved_count
+
     return JsonResponse({
         'success': True,
-        'request_count': request_count,
+        'counts': count,
     })

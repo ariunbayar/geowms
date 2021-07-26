@@ -3,7 +3,7 @@ import React, { Component, Fragment } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
 import Modal from '@utils/Modal/Modal'
 import { service } from "../Request/service";
-import { makeStateColor, makeKindColor } from '../helpers/functions'
+import { makeStateColor, makeKindColor } from '@helpUtils/functions'
 
 export class List extends Component {
 
@@ -87,36 +87,25 @@ export class List extends Component {
 
     handleRemove() {
         const { id } = this.state.values
-        service.removeRequest(id).then(({ success, info }) => {
+        service.removeRequest(id).then(({success, info}) => {
             if(success) {
                 const modal = {
                     modal_status: 'open',
                     modal_icon: 'fa fa-check-circle',
                     icon_color: "success",
-                    title: 'Амжилттай уcтгалаа',
-                    text: '',
+                    title: info,
                 }
                 global.MODAL(modal)
                 this.refreshData()
             }
             else {
-                this.modalChange(
-                    'fa fa-check-circle',
-                    "danger",
-                    info,
-                    '',
-                    false
-                )
                 const modal = {
                     modal_status: 'open',
-                    modal_icon: 'fa fa-check-circle',
-                    icon_color: "success",
-                    title: 'Хүсэлт амжилтгүй боллоо',
-                    text: '',
+                    modal_icon: 'fa fa-times-circle',
+                    icon_color: "danger",
+                    title: info,
                 }
                 global.MODAL(modal)
-                this.refreshData()
-                this.refreshData()
             }
         })
     }

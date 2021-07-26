@@ -83,10 +83,7 @@ def bundleButetsAll(request):
             theme.delete()
 
     utils.check_gp_design()
-    geoserver_style = geoserver.get_styles()
-    for style in geoserver_style:
-        style_names.append(style.get('name'))
-
+    style_names = geoserver.get_styles()
     url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
     rsp = {
         'success': True,
@@ -380,6 +377,8 @@ def getFields(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, tid, fid):
+
+    file_list = list()
     file_detail = dict()
 
     theme = get_object_or_404(LThemes, theme_id=tid)
@@ -400,6 +399,7 @@ def propertyFields(request, tid, fid):
 
             file_detail['name'] = str(file)
             file_detail['size'] = file_stat.st_size
+            file_list.append(file_detail)
 
     geom_type = ''
     if geom:
@@ -426,6 +426,15 @@ def propertyFields(request, tid, fid):
         view = view_qs.first()
         id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view.id)]
         url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
+
+        style_name = ''
+        style = geoserver.get_layer_style('gp_layer_' + view_name)
+        if style:
+            if ':' in style:
+                style_name = style.split(':')[1]
+            else:
+                style_name = style
+
         rsp = {
             'success': True,
             'fields': _lfeatureconfig(fid),
@@ -433,10 +442,10 @@ def propertyFields(request, tid, fid):
             'open_datas': utils.json_load(view.open_datas) if view.open_datas else [],
             'view': view_qs.values('id', 'view_name').first(),
             'url': request.build_absolute_uri(url),
-            'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
+            'style_name': style_name,
             'geom_type': geom_type,
             'cache_values': cache_values,
-            'file': file_detail
+            'files': file_list,
         }
     else:
         rsp = {
@@ -447,7 +456,7 @@ def propertyFields(request, tid, fid):
             'view': '',
             'geom_type': geom_type,
             'cache_values': cache_values,
-            'file': file_detail,
+            'files': file_list,
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
         }
 
@@ -462,7 +471,6 @@ def make_view(request):
     fid = request.POST.get('fid')
     file = request.FILES['files'] if request.FILES else ''
     values = request.POST.get('values')
-
     values = utils.json_load(values)
     values = values['values']
 
@@ -495,7 +503,6 @@ def make_view(request):
 
 
 def _import_feature_template(file, theme, feature, get_options ):
-
     main_folder = 'feature-template'
     theme_name = theme.theme_name_eng
     feature_name = feature.feature_name_eng
@@ -504,22 +511,20 @@ def _import_feature_template(file, theme, feature, get_options ):
     feature_folder = os.path.join(theme_folder, feature_name)
 
     if not get_options:
-        if file:
-            if not os.path.exists(theme_folder):
-                os.makedirs(theme_folder)
-            if not os.path.exists(feature_folder):
-                    os.makedirs(feature_folder)
+        if not os.path.exists(theme_folder):
+            os.makedirs(theme_folder)
+        if not os.path.exists(feature_folder):
+                os.makedirs(feature_folder)
 
-            folder_list = os.listdir(feature_folder)
+        folder_list = os.listdir(feature_folder)
+        for item in folder_list:
+            utils.remove_file(feature_folder + '/' + item)
 
-            for item in folder_list:
-                utils.remove_file(feature_folder + '/' + item)
-
+        if file :
             utils.save_file_to_storage(file, feature_folder, file.name)
 
     else :
         return feature_folder
-
 
 
 @require_POST
@@ -531,7 +536,6 @@ def propertyFieldsSave(request):
     tid = request.POST.get('tid')
     fid = request.POST.get('fid')
     view_id = request.POST.get('view_id')
-    view_id = utils.json_load(view_id)
 
     values = request.POST.get('values')
 
@@ -564,18 +568,19 @@ def propertyFieldsSave(request):
         }
     )[0]
 
-    if file:
-        _import_feature_template(file, theme, feature, False)
+    _import_feature_template(file, theme, feature, False)
 
     view_prop_qs = ViewProperties.objects
     view_prop_qs.filter(view=view).delete()
 
     for prop_id in id_list:
-        view_prop_qs.create(view=view, property_id=prop_id)
+        if prop_id:
+            view_prop_qs.create(view=view, property_id=prop_id)
 
     is_created = _check_geoserver_detail(table_name, theme)
     if values or not is_created:
         rsp = _create_geoserver_detail(table_name, theme, request.user.id, feature, values)
+
     else:
         rsp = {
             "success": True,

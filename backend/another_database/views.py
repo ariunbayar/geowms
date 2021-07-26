@@ -4,7 +4,6 @@ from backend.inspire.models import LFeatures, LPackages, LThemes, MDatas, MGeoDa
 import requests
 from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
-from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
@@ -116,7 +115,7 @@ def mongo_get(request, pk):
     return JsonResponse(rsp)
 
 
-def get_unique_id(is_db, ano_database):
+def get_unique_id(is_db, ano_database=None):
 
     obj = AnotherDatabase.objects.all().order_by('unique_id').first()
 

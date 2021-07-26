@@ -70,7 +70,7 @@ export class Detail extends Component {
         this.setState({ status_token_refresh: 'loading' })
         service.empTokenRefresh(emp).then(({ success }) => {
             if (success)
-                this.fetchDetail()
+                this.fetchDetail(emp)
             this.setState({ status_token_refresh: success ? 'success' : 'fail' })
         })
     }

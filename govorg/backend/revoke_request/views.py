@@ -3,11 +3,10 @@ import json
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
-from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from django.contrib.postgres.search import SearchVector
 from geojson import FeatureCollection
-from django.db import connections, transaction
+from django.db import connections
+from django.db.models import Q
 
 from backend.inspire.models import (
     MGeoDatas,
@@ -27,7 +26,6 @@ from main.utils import has_employee_perm
 from main.utils import check_form_json
 from main.utils import (
     dict_fetchall,
-    date_to_timezone,
     get_display_items,
     get_fields,
     get_feature_from_geojson,
@@ -63,22 +61,22 @@ def _date_to_str(date):
 
 def _get_revoke_request_display(revoke_request):
     return {
-            'id': revoke_request.id,
-            'old_geo_id': revoke_request.old_geo_id,
-            'order_no': revoke_request.order_no,
-            'order_at': _date_to_str(revoke_request.order_at) if revoke_request.order_at else '',
-            'theme_name': LThemes.objects.filter(theme_id=revoke_request.theme_id).first().theme_name,
-            'package_name': LPackages.objects.filter(package_id=revoke_request.package_id).first().package_name,
-            'feature_name': LFeatures.objects.filter(feature_id=revoke_request.feature_id).first().feature_name,
-            'last_name': revoke_request.employee.user.last_name,
-            'first_name': revoke_request.employee.user.first_name,
-            'org': revoke_request.employee.org.name,
-            'created_at': _date_to_str(revoke_request.created_at) if revoke_request.created_at else '',
-            'form_json': json.loads(revoke_request.form_json) if revoke_request.form_json else '',
-            'geo_json': revoke_request.geo_json,
-            'state': revoke_request.get_state_display(),
-            'kind': revoke_request.get_kind_display(),
-        }
+        'id': revoke_request.id,
+        'old_geo_id': revoke_request.old_geo_id,
+        'order_no': revoke_request.order_no,
+        'order_at': _date_to_str(revoke_request.order_at) if revoke_request.order_at else '',
+        'theme_name': LThemes.objects.filter(theme_id=revoke_request.theme_id).first().theme_name,
+        'package_name': LPackages.objects.filter(package_id=revoke_request.package_id).first().package_name,
+        'feature_name': LFeatures.objects.filter(feature_id=revoke_request.feature_id).first().feature_name,
+        'last_name': revoke_request.employee.user.last_name,
+        'first_name': revoke_request.employee.user.first_name,
+        'org': revoke_request.employee.org.name,
+        'created_at': _date_to_str(revoke_request.created_at) if revoke_request.created_at else '',
+        'form_json': json.loads(revoke_request.form_json) if revoke_request.form_json else '',
+        'geo_json': revoke_request.geo_json,
+        'state': revoke_request.get_state_display(),
+        'kind': revoke_request.get_kind_display(),
+    }
 
 
 def _хувьсах_талбарууд():
@@ -187,7 +185,7 @@ def _choice_kind_display(kind, item):
 
 
 def _str_to_json(form_json, item):
-    return json.loads(form_json) if form_json  else ''
+    return json.loads(form_json) if form_json else ''
 
 
 def _geojson_to_featurecollection(geo_json, item):
@@ -216,7 +214,7 @@ def _geojson_to_featurecollection(geo_json, item):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_list(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_features = _get_emp_features(employee)
     if emp_features:
         qs = ChangeRequest.objects
@@ -394,7 +392,7 @@ def _new_revoke_request(employee, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def revoke_new(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
 
     success, info = has_employee_perm(employee, payload.get('fid'), True, EmpPermInspire.PERM_REVOKE, payload.get('geo_json'))
     if success:

@@ -20,10 +20,12 @@ urlpatterns = [
         path('', bundle_views.all, name='all'),
         path('api/aimag/', bundle_views.aimag, name='aimag'),
         path('api/sum/', bundle_views.sumfind, name='sum'),
+        path('api/find-point/', bundle_views.findPoints, name='find-point'),
         path('дэд-сан/<int:pk>/', bundle_views.detail, name='detail'),
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
         path('get_user/', bundle_views.get_user, name='get_user'),
         path('api/search/', bundle_views.get_search_value, name='get_search_value'),
+        path('api/get-buffer/', bundle_views.get_point_buffer_geom),
     ], 'bundle'))),
 
     path('', include(([
@@ -49,7 +51,6 @@ urlpatterns = [
     path('p/', include(([
         path('үйлчилгээ/', page_views.service, name='service'),
         path('тусламж/', page_views.help, name='help'),
-        path('статистик/', page_views.statistics, name='statistics'),
     ], 'page'))),
 
 
@@ -77,11 +78,9 @@ urlpatterns = [
 
     path('profile/', include(([
         path('', profile_views.history, name='history'),
-        path('information/', profile_views.user_info_all),
-        path('updateEmail/', profile_views.update_email),
     ], 'profile'))),
 
-    path('a/', include(([
+    path('profile/api/', include(([
         path('all/', profile_views.all, name='all'),
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
@@ -90,11 +89,10 @@ urlpatterns = [
         path('set-email/', profile_views.set_email, name='set-email'),
         path('info/', profile_views.user_info),
         path('update-password/', profile_views.user_update_password),
-    ], 'a'))),
+    ], 'profile/api/'))),
 
     re_path('^payment/.*', payment_views.index, name='payment'),
     re_path('^open-layer/.*', open_layer_views.index, name='open-layer'),
     re_path('^profile/.*', profile_views.history, name='history'),
-    re_path('^api/.*', profile_views.history, name='history'),
 
 ]

@@ -45,6 +45,7 @@ export default class InsPerms extends Component {
         this.isRoleClearObjectItem = this.isRoleClearObjectItem.bind(this)
         this.sendValueSelectedAll = this.sendValueSelectedAll.bind(this)
         this.isRoleSendValue = this.isRoleSendValue.bind(this)
+        this.getCurrentCount = this.getCurrentCount.bind(this)
     }
 
     getId(id, type, name) {
@@ -317,6 +318,38 @@ export default class InsPerms extends Component {
         }
     }
 
+    getCurrentCount(inspire_name, inspire_id, parent_id) {
+        var obj = {'ХАРАХ': 0, 'НЭМЭХ': 0, 'ЗАСАХ': 0, 'ЦУЦЛАХ': 0, 'БАТЛАХ': 0, 'ХАСАХ': 0}
+        const { role, role_perm } = this.props
+        var list_of_data = []
+        var datas = []
+        if (role) datas = role
+        else datas = role_perm
+        if ( datas && Object.keys(datas).length >0) {
+            var field_of_data = obj => obj.id == inspire_id
+            if (inspire_name == 'theme') {
+                list_of_data = datas.themes
+            }
+            else if (inspire_name == 'package') {
+                list_of_data = datas.package_features
+            }
+            else {
+                var field_of_package = obj => obj.id == parent_id
+                var index_of_package = datas.package_features.findIndex(field_of_package)
+                if (index_of_package > -1) {
+                    list_of_data = datas.package_features[index_of_package].features
+                }
+            }
+
+            if (Object.keys(list_of_data).length > 0) {
+                var index_of = list_of_data.findIndex(field_of_data)
+                if (index_of > -1)  obj = list_of_data[index_of].perm_child_ids
+            }
+        }
+
+        return obj
+    }
+
     render() {
         const {themes, package_features, fid, tid, pid, properties, perms, prevTid, t_name, is_open, p_name, f_name, is_role_border, is_emp_border, border_left_right_none_bg } = this.state
         const { action_type, is_employee, addable_is_check, editable_is_check } = this.props
@@ -334,7 +367,7 @@ export default class InsPerms extends Component {
                                                 name={theme.name}
                                                 index={t_idx}
                                                 total_length={theme.all_child}
-                                                now_length={theme.perm_child_ids}
+                                                now_length={this.getCurrentCount('theme', theme.id, '')}
                                                 is_open={is_open}
                                                 t_name={t_name}
                                                 sendId={this.getId}
@@ -352,7 +385,7 @@ export default class InsPerms extends Component {
                                                     name={pack.name}
                                                     index={p_idx}
                                                     total_length={pack.all_child}
-                                                    now_length={pack.perm_child_ids}
+                                                    now_length={this.getCurrentCount('package', pack.id, '')}
                                                     is_open={is_open}
                                                     p_name={p_name}
                                                     t_name={t_name}
@@ -371,7 +404,7 @@ export default class InsPerms extends Component {
                                                                         name={feature.name}
                                                                         index={f_idx}
                                                                         total_length={feature.all_child}
-                                                                        now_length={feature.perm_child_ids}
+                                                                        now_length={this.getCurrentCount('feature', feature.id, feature.parent_id)}
                                                                         small={'text-lowercase'}
                                                                         is_open={is_open}
                                                                         t_name={t_name}

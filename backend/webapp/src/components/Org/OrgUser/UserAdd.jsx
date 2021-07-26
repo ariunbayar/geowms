@@ -211,7 +211,7 @@ export class UserAdd extends Component {
                 .employeeAdd(org_level, org_id, payload)
                 .then(({ success, errors, employee }) => {
                     if (success) {
-                        this.setModal('Амжилттай', '', 'success', 'fa fa-check-circle', false, '', () => this.modalClose(employee.user_id))
+                        this.setModal('Амжилттай', '', 'success', 'fa fa-check-circle', false, '', () => this.modalClose(employee.id))
                         global.refreshOrgCount(org_level)
                     }
                     else{
@@ -280,9 +280,9 @@ export class UserAdd extends Component {
     getGeom(geo_id) {
         service
             .getGeom(geo_id)
-            .then(({ feature }) => {
-                if (feature) {
-                    this.setState({ feature })
+            .then(({ data }) => {
+                if (data) {
+                    this.setState({ feature: data })
                 }
             })
     }
@@ -373,7 +373,7 @@ export class UserAdd extends Component {
                         <Formik
                             enableReinitialize
                             initialValues={form_values}
-                            validationSchema={validationSchema}
+                            // validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
                         >
                         {({

@@ -18,6 +18,7 @@ from django.core.files.storage import FileSystemStorage
 from django.contrib.gis.geos import MultiLineString
 from django.contrib.gis.geos import MultiPoint
 from django.contrib.gis.geos import MultiPolygon
+from django.db.models import Q
 
 from backend.dedsanbutets.models import ViewNames
 from backend.dedsanbutets.models import ViewProperties
@@ -118,7 +119,7 @@ def getRoles(request, tid, fid):
     main_folder = "feature-template"
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
 
-    employee = get_object_or_404(Employee, user__username=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
     theme = LThemes.objects.filter(theme_id=tid).first()
     feature = LFeatures.objects.filter(feature_id=fid).first()
@@ -218,7 +219,7 @@ def geom_type(request, pid, fid):
 def get_wms_layer(request, tid, pid, fid):
     feature = LFeatures.objects.filter(feature_id=fid).first()
     view_name = utils.make_view_name(feature)
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     rsp = {
         'success': False,
         'url': '',
@@ -399,7 +400,7 @@ def _get_data_list_and_value(gid, fcids, data_type_id, property_id, value_type):
 
 
 def _get_roles(request, fid, property_id):
-    employee = get_object_or_404(Employee, user__username=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
     property_ids, roles = get_emp_property_roles(employee, fid)
     property_roles = {'PERM_VIEW': True, 'PERM_CREATE':True, 'PERM_REMOVE':True, 'PERM_UPDATE':True, 'PERM_APPROVE':True, 'PERM_REVOKE':True}
     for role in roles:
@@ -426,7 +427,7 @@ def _get_data_types(qs_property_ids_of_feature, data_type_ids):
     return data_types
 
 def _get_user_perm(request, fid):
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_perm = get_object_or_404(EmpPerm, employee=employee)
     emp_perm = EmpPermInspire.objects.filter(
         emp_perm=emp_perm,
@@ -607,7 +608,7 @@ def create(request, payload):
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org = get_object_or_404(Org, pk=employee.org_id)
 
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
@@ -651,7 +652,7 @@ def remove(request, payload):
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
-    employee = get_object_or_404(Employee, user__username=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
     org = get_object_or_404(Org, pk=employee.org_id)
 
     geo_data = _get_geom(old_geo_id, fid)
@@ -705,7 +706,7 @@ def update(request, payload):
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
-    employee = get_object_or_404(Employee, user__username=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
     org = get_object_or_404(Org, pk=employee.org_id)
 
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
@@ -747,7 +748,7 @@ def control_to_approve(request, payload):
     order_no = form_json['order_no']
     order_at = datetime.datetime.strptime(form_json['order_at'], '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
 
-    employee = get_object_or_404(Employee, user__username=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
     change_request = get_object_or_404(ChangeRequest, id=change_request_id)
 
     success, info = has_employee_perm(employee, change_request.feature_id, True, EmpPermInspire.PERM_UPDATE)
@@ -965,6 +966,15 @@ def _check_perm(employee, feature_id, geo_json):
     return success, info, request_kind
 
 
+def _check_type(val, geo_json_list):
+    geo_json = val.geom.json
+    geo_type = utils.json_dumps(geo_json)
+    geo_json_load = utils.json_load(geo_type)
+    geo_type = geo_json_load['type']
+    geo_json_list.append(geo_type)
+    return geo_json_list
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -972,7 +982,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
     geo_json_list = list()
     data = MGeoDatas.objects.filter(feature_id=fid).first()
     geom_type = GEOSGeometry(data.geo_data).geom_type
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     files = request.FILES.getlist('data')
     order_at = request.POST.get('order_at')
     order_no = request.POST.get('order_no')
@@ -1029,11 +1039,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     for val in layer:
                         values = dict()
                         for name in range(0, len(layer.fields)):
-                            geo_json = val.geom.json
-                            geo_type = utils.json_dumps(geo_json)
-                            geo_json_load = utils.json_load(geo_type)
-                            geo_type = geo_json_load['type']
-                            geo_json_list.append(geo_type)
+                            geo_json_list = _check_type(val, geo_json_list)
 
                         if all(geom_type in item for item in geo_json_list):
                             for name in range(0, len(layer.fields)):
@@ -1096,7 +1102,84 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                         'success': success,
                         'info': info
                     }
+            else:
+                with transaction.atomic():
+                    Sid = transaction.savepoint()
+                    val = layer[0]
+                    values = dict()
+                    for name in range(0, len(layer.fields)):
+                        geo_json_list = _check_type(val, geo_json_list)
 
+                    if all(geom_type in item for item in geo_json_list):
+                        for name in range(0, len(layer.fields)):
+                            field_name = val[name].name  # field name
+                            value = val.get(name)  # value ni
+
+                            if name == 0:
+
+                                # geo_id = _make_geo_id(feature_id)
+                                geo_json = val.geom.json  # goemetry json
+
+                                if geo_json:
+                                    success, info, request_kind = _check_perm(
+                                        employee,
+                                        feature_id,
+                                        geo_json
+                                    )
+
+                                    if not success:
+                                        _delete_file(for_delete_items, Sid)
+                                        rsp = {
+                                            'success': success,
+                                            'info': info,
+                                        }
+                                        return JsonResponse(rsp)
+
+                                else:
+                                    _delete_file(for_delete_items, Sid)
+                                    rsp = {
+                                        'success': False,
+                                        'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
+                                    }
+                                    return JsonResponse(rsp)
+
+                            values[field_name] = value
+
+                        request_values = {
+                            'theme_id': tid,
+                            'package_id': pid,
+                            'feature_id': fid,
+                            'employee': employee,
+                            'geo_json': geo_json,
+                            'kind': request_kind,
+                            'order_at': order_at,
+                            'order_no': order_no,
+                            'group_id': main_request_id,
+                        }
+                        success, info = _make_request(values, request_values)
+                        if not success:
+                            _delete_file(for_delete_items, Sid)
+                            rsp = {
+                                'success': success,
+                                'info': info,
+                            }
+                            return JsonResponse(rsp)
+                        rsp = {
+                            'success': success,
+                            'info': info
+                        }
+                    else:
+                        _delete_file(for_delete_items, Sid)
+                        rsp = {
+                            'success': False,
+                            'info': "Геометр өгөгдлийн төрөл нь тухайн feature-ийн төрөлтэй таарахгүй байна!!!."
+                        }
+                        return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+                'info': "Дата байхгүй байна."
+            }
     else:
         rsp = {
             'success': False,
@@ -1109,7 +1192,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_qgis_url(request, fid):
-    emp = get_object_or_404(Employee, user=request.user)
+    emp = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     qgis_local_base_url = get_config('qgis_local_base_url')
     url = '{qgis_local_base_url}/api/qgis/{token}/{fid}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token, fid=fid),
     rsp = {
@@ -1124,7 +1207,7 @@ def get_qgis_url(request, fid):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_api_url(request):
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     rsp = {
         'success': True,
         'api_links': {

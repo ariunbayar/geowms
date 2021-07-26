@@ -1,7 +1,8 @@
+from backend.dedsanbutets.models import ViewNames
 import os
 import json
 import datetime
-from geojson import FeatureCollection
+from geojson import FeatureCollection, feature
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -16,7 +17,7 @@ from django.conf import settings
 
 from backend.geoserver.models import WmtsCacheConfig
 from backend.another_database.models import AnotherDatabaseTable
-from backend.org.models import Employee, Org
+from backend.org.models import Employee
 from backend.inspire.models import (
     LThemes,
     LFeatures,
@@ -32,7 +33,9 @@ from llc.backend.llc_request.models import LLCRequest
 from llc.backend.llc_request.models import ShapeGeom
 from llc.backend.llc_request.models import RequestForm
 from llc.backend.llc_request.models import RequestFilesShape
+from llc.backend.llc_request.forms import RequestFilesShapeForm
 from govorg.backend.org_request.models import ChangeRequest
+from govorg.backend.org_request.forms import ChangeRequestForm
 
 from main.decorators import ajax_required, gov_required
 from main.components import Datatable
@@ -45,13 +48,12 @@ from main.utils import (
     get_fields,
     get_feature_from_geojson,
     json_load,
-    get_geom,
     get_geoJson,
     get_cursor_pg,
     convert_3d_with_srid,
     datetime_to_string,
     get_feature,
-    value_types
+    start_time,
 )
 from main import utils
 
@@ -95,6 +97,7 @@ LLC_REQUEST_REVOKE = {
     'state': LLCRequest.STATE_SOLVED,
     'kind': LLCRequest.KIND_REVOKE,
 }
+
 
 def _get_geom(geo_id, fid):
     cursor = connections['default'].cursor()
@@ -141,7 +144,7 @@ def _get_org_request(ob, employee):
         else:
             geo_json = FeatureCollection([old_geo_data])
 
-    elif geo_json and ob.old_geo_id:
+    else:
         geo_json = ob.geo_json
         geo_json = get_geoJson(geo_json)
         geo_json = FeatureCollection([geo_json])
@@ -165,14 +168,15 @@ def _get_org_request(ob, employee):
         'state': ob.get_state_display(),
         'kind': ob.get_kind_display(),
         'group_id': ob.group_id,
-        'form_json': json.loads(ob.form_json) if ob.form_json else '',
+        'form_json': utils.json_load(ob.form_json) if ob.form_json else '',
         'geo_json': geo_json if geo_json else '',
         'created_at': ob.created_at.strftime('%Y-%m-%d'),
         'employee': employee.user.first_name,
         'org': employee.org.name,
         'order_no': ob.order_no,
         'order_at': ob.order_at.strftime('%Y-%m-%d') if ob.order_at else '',
-        'project_name': project_name
+        'project_name': project_name,
+        'description': ob.description
     }
 
 
@@ -181,7 +185,7 @@ def _get_org_request(ob, employee):
 @login_required(login_url='/gov/secure/login/')
 def get_change_all(request):
     org_request_list = list()
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org_request_qs = ChangeRequest.objects
     org_request_qs = org_request_qs.exclude(form_json__isnull=True, geo_json__isnull=True, group_id__isnull=True)
     org_request_qs = org_request_qs.filter(employee=employee)
@@ -200,8 +204,8 @@ def get_change_all(request):
             }
     else:
         rsp = {
-                'success': False,
-            }
+            'success': False,
+        }
 
     return JsonResponse(rsp)
 
@@ -418,7 +422,7 @@ def _хувьсах_талбарууд():
 @login_required(login_url='/gov/secure/login/')
 def get_list(request, payload):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_features = _get_emp_features(employee)
     if emp_features:
         qs = ChangeRequest.objects
@@ -497,7 +501,7 @@ def _set_llc_request(llc_request_id, payload):
         llc_request_data['kind'] = LLC_REQUEST_DISSMIS['kind']
         llc_request_data['state'] = LLC_REQUEST_DISSMIS['state']
         info = 'Амжилттай буцаалаа'
-        request_shape['state'] = RequestFilesShape.STATE_SENT # TODO soligdoj magdgv
+        request_shape['state'] = RequestFilesShape.STATE_SENT  # TODO soligdoj magdgv
         request_shape['kind'] = RequestFilesShape.KIND_DISMISS
         llc_changerequest_qs = llc_changerequest_qs.filter(feature_id=feature_id)
 
@@ -543,7 +547,7 @@ def request_reject(request, payload):
     ids = payload.get('ids')
     feature_id = payload.get('feature_id')
     action_type = payload.get('action_type')
-    employee = get_object_or_404(Employee, user__username=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
 
     qs = EmpPermInspire.objects
@@ -684,7 +688,7 @@ def _create_mdatas(geo_id, feature_id, form, value):
 
     if form["value_type"] == "option":
         if form["data"]:
-            value['code_list_id'] = form ["data"]
+            value['code_list_id'] = form["data"]
 
     if 'value_date' in value:
         if not isinstance(value['value_date'], datetime.datetime):
@@ -954,7 +958,7 @@ def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, descrip
 @login_required(login_url='/gov/secure/login/')
 def request_approve(request, payload):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_perm = get_object_or_404(EmpPerm, employee=employee)
 
     request_ids = payload.get("ids")
@@ -1056,12 +1060,11 @@ def request_approve(request, payload):
                 }
                 return JsonResponse(rsp)
 
-
             info = _refresh_view_direct_or_crontab(is_refresh, feature_id)
 
             rsp = {
-            'success': True,
-            'info': info
+                'success': True,
+                'info': info
             }
 
     return JsonResponse(rsp)
@@ -1087,7 +1090,7 @@ def _refresh_view_direct_or_crontab(is_refresh, feature_id):
 @login_required(login_url='/gov/secure/login/')
 def get_count(request):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_features = _get_emp_features(employee)
     qs = ChangeRequest.objects
     qs = qs.filter(state=ChangeRequest.STATE_NEW)
@@ -1098,8 +1101,8 @@ def get_count(request):
 
     geo_id = employee.org.geo_id
     llc = LLCRequest.objects
-    llc = llc.filter(file__geo_id=geo_id)
-    llc_count = llc.exclude(kind__in=[LLCRequest.KIND_APPROVED, LLCRequest.KIND_REVOKE]).count()
+    llc = llc.filter(file__geo_id=geo_id, file__requested_employee=employee.user.id)
+    llc_count = llc.exclude(state=LLCRequest.STATE_SOLVED).count()
     rsp = {
         'success': True,
         'count': request_count,
@@ -1137,9 +1140,12 @@ def _get_file_name(kind, item):
     return file_path
 
 
-def _get_ann_name(kind, item):
-    file = RequestFiles.objects.filter(id=item['file_id']).first()
-    return file.name
+def _get_ann_name(items):
+    qs = RequestFiles.objects
+    for item in items:
+        request_file = qs.filter(id=item['file_id']).first()
+        item['name'] = request_file.name if request_file else ''
+    return items
 
 
 @require_POST
@@ -1147,9 +1153,9 @@ def _get_ann_name(kind, item):
 @gov_required
 @login_required(login_url='/gov/secure/login/')
 def get_llc_list(request, payload):
-
+    empoyee = get_object_or_404(Employee, user=request.user)
     qs = LLCRequest.objects
-    qs = qs.filter(file__geo_id=request.org.geo_id)
+    qs = qs.filter(file__geo_id=request.org.geo_id, file__requested_employee=empoyee.user_id)
 
     start_index = 1
 
@@ -1159,19 +1165,19 @@ def get_llc_list(request, payload):
             {"field": "state", "action": _get_state, "new_field": "state"},
             {"field": "kind", "action": _get_kind, "new_field": "kind"},
             {"field": "created_at", "action": _get_file_name, "new_field": "file_path"},
-            {"field": "description", "action": _get_ann_name, "new_field": "name"}
         ]
 
         datatable = Datatable(
-            model=RequestFiles,
+            model=LLCRequest,
             payload=payload,
             initial_qs=qs,
             оруулах_талбарууд=оруулах_талбарууд,
             хувьсах_талбарууд=хувьсах_талбарууд,
         )
         items, total_page, start_index = datatable.get()
+        new_items = _get_ann_name(items)
         rsp = {
-            'items': items,
+            'items': new_items,
             'total_page': total_page,
             'start_index': start_index
         }
@@ -1214,6 +1220,7 @@ def get_request_data(request, id):
     shape_geometries = RequestFilesShape.objects
     shape_geometries = shape_geometries.filter(files=llc_data.file)
     shape_geometries = shape_geometries.exclude(**REQUEST_SHAPE_APPROVED)
+    shape_geometries = shape_geometries.order_by('id')
 
     for shape_geometry in shape_geometries:
         theme_name = ''
@@ -1251,7 +1258,7 @@ def get_request_data(request, id):
                 'name': feature_name
             },
             'order_no': shape_geometry.order_no or '',
-            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else ''
+            'order_at': datetime_to_string(shape_geometry.order_at) if shape_geometry.order_at else ''
         })
 
     return JsonResponse({
@@ -1422,14 +1429,25 @@ def _has_overlap(request_file_shapes):
     return False
 
 
+def _form_check(item, list_idx):
+    errors = dict()
+    form = RequestFilesShapeForm(item)
+    if not form.is_valid():
+        errors['list_idx'] = list_idx
+        errors.update(form.errors)
+    return errors
+
+
 @require_GET
 @ajax_required
 def llc_request_approve(request, request_id):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     llc_request = get_object_or_404(LLCRequest, id=request_id)
     request_file_shape_qs = RequestFilesShape.objects.filter(files_id=llc_request.file.id)
     request_file_shapes = request_file_shape_qs.exclude(**REQUEST_SHAPE_APPROVED)
+    request_file_shapes = request_file_shapes.order_by('id')
+    list_idx = 0
 
     if not request_file_shapes:
         rsp = {
@@ -1467,37 +1485,76 @@ def llc_request_approve(request, request_id):
     has_req_qs = has_req_qs.filter(llc_request_id=request_id)
     has_req_qs = has_req_qs.exclude(state=ChangeRequest.STATE_APPROVE)
     if has_req_qs:
-        #TODO huseltiin logiig enechee bichij boloh ym
+        # TODO huseltiin logiig enechee bichij boloh ym
         has_req_qs.delete()
 
-    for file_shape in request_file_shapes.values():
-        shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
-        if len(shape_geoms) == 1:
-            shape_geom = shape_geoms.first()
-            item = _make_datas(shape_geom, file_shape)
-            _make_request_datas(item)
-        else:
-            item = _make_datas(shape_geoms.first(), file_shape, True)
-            root_id = _make_request_datas(item)
-            for shape in shape_geoms:
-                item = _make_datas(shape, file_shape)
-                item['group_id'] = root_id
+    with transaction.atomic():
+        for file_shape in request_file_shapes.values():
+            shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
+            if len(shape_geoms) == 1:
+                shape_geom = shape_geoms.first()
+                item = _make_datas(shape_geom, file_shape)
+                errors = _form_check(item, list_idx)
+                if errors:
+                    rsp = {
+                        'success': False,
+                        'error': errors,
+                    }
+                    return JsonResponse(rsp)
                 _make_request_datas(item)
+            else:
+                item = _make_datas(shape_geoms.first(), file_shape, True)
+                errors = _form_check(item, list_idx)
+                if errors:
+                    rsp = {
+                        'success': False,
+                        'error': errors,
+                    }
+                    return JsonResponse(rsp)
 
-    llc_request.state = LLC_REQUEST_SENT_GOV['state']
-    llc_request.kind = LLC_REQUEST_SENT_GOV['kind']
-    llc_request.save()
+                root_id = _make_request_datas(item)
+                for shape in shape_geoms:
+                    item = _make_datas(shape, file_shape)
+                    item['group_id'] = root_id
+                    _make_request_datas(item)
+            list_idx += 1
 
-    for req_file_shape in request_file_shapes:
-        req_file_shape.state = REQUEST_SHAPE_SENT_GOV['state']
-        req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
-        req_file_shape.save()
+        llc_request.state = LLC_REQUEST_SENT_GOV['state']
+        llc_request.kind = LLC_REQUEST_SENT_GOV['kind']
+        llc_request.save()
+
+        for req_file_shape in request_file_shapes:
+            req_file_shape.state = REQUEST_SHAPE_SENT_GOV['state']
+            req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
+            req_file_shape.save()
 
     rsp = {
         'success': True,
         'data': 'Амжилттай хүсэлт үүслээ'
     }
     return JsonResponse(rsp)
+
+
+def _get_geom_type_from_feature(feature_id):
+    feature = LFeatures.objects.filter(feature_id=feature_id).first()
+    view_name = utils.make_view_name(feature)
+    has_view_name = utils.has_materialized_view(view_name)
+    if has_view_name:
+        cursor = connections['default'].cursor()
+        sql = '''
+            SELECT
+                ST_GeometryType(geo_data) as field_type
+            FROM
+                {view_name}
+        '''.format(view_name=view_name)
+        data = utils.get_sql_execute(sql, cursor, 'one')[0]
+        geom_type = utils.remove_text_from_str(data, 'ST_')
+        return geom_type
+    else:
+        m_datas = MGeoDatas.objects.filter(feature_id=feature_id).first()
+        if m_datas:
+            g_type = m_datas.geo_data.geom_type
+        return g_type
 
 
 @require_POST
@@ -1507,10 +1564,21 @@ def inspire_save(request, payload):
     id = values.get('id')
     order_no = values.get('order_no')
     order_at = values.get('order_at')
+    order_at = utils.date_to_timezone(order_at)
 
     theme_id = values.get('theme').get('id') or None
     feature_id = values.get('feature').get('id') or None
     package_id = values.get('package').get('id') or None
+    geom_type = values.get('geom_type')
+
+    valid_geom_type = _get_geom_type_from_feature(feature_id)
+    if valid_geom_type and  geom_type not in valid_geom_type:
+        feature_id = None
+        success = False
+        info = 'Feature-ийн төрөл таарахгүй байна'
+    else:
+        success = True
+        info = 'Амжилттай'
 
     RequestFilesShape.objects.filter(id=id).update(
         theme_id=theme_id,
@@ -1521,7 +1589,8 @@ def inspire_save(request, payload):
     )
 
     return JsonResponse({
-        'success': True,
+        "success": success,
+        "info": info
     })
 
 
@@ -1560,3 +1629,61 @@ def geom_type(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+def _get_shapes_geoms(shape_geometry):
+    geo_datas = []
+    geom_type = ''
+    shape_geoms = ShapeGeom.objects.filter(shape_id=shape_geometry.id)
+    geo_datas, geom_type = get_feature(shape_geoms)
+
+    return geo_datas, geom_type
+
+
+@require_GET
+@ajax_required
+def get_file_shapes(request, id):
+    list_of_datas = []
+
+    llc_data = LLCRequest.objects.filter(id=id).first()
+    shape_geometries = RequestFilesShape.objects.filter(files_id=llc_data.file_id)
+    for shape_geometry in shape_geometries:
+        geoms, geom_type = _get_shapes_geoms(shape_geometry)
+
+        theme_name = ''
+        feature_name = ''
+        package_name = ''
+        theme_id = shape_geometry.theme_id
+        feature_id = shape_geometry.feature_id
+        package_id = shape_geometry.package_id
+
+        if theme_id:
+            theme = LThemes.objects.filter(theme_id=theme_id).first()
+            theme_name = theme.theme_name
+
+        if package_id:
+            package = LPackages.objects.filter(package_id=package_id).first()
+            package_name = package.package_name
+
+        if feature_id:
+            feature = LFeatures.objects.filter(feature_id=feature_id).first()
+            feature_name = feature.feature_name
+
+        list_of_datas.append({
+            'id': shape_geometry.id,
+            'geom_type': geom_type,
+            'theme': {'id': theme_id, 'name': theme_name},
+            'feature': {'id': feature_id, 'name': feature_name},
+            'package': {'id': package_id, 'name': package_name},
+            'features': geoms,
+            'order_no': shape_geometry.order_no,
+            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else '',
+            "state": utils.get_value_from_types(RequestFilesShape.STATE_CHOICES, shape_geometry.state),
+            "kind": utils.get_value_from_types(RequestFilesShape.KIND_CHOICES, shape_geometry.kind),
+            "description": shape_geometry.description,
+            "icon_state": True,
+        })
+
+    return JsonResponse({
+        'list_of_datas': list_of_datas,
+    })

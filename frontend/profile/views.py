@@ -226,15 +226,15 @@ def _get_tseg_detail(payment):
                             info['sum'] =  code.code_list_name
                     else:
                         info['aimag'] = code.code_list_name
-            else:
-                mgeo_qs = _filter_Model([{'geo_id': point_info['geo_id']}], Model=MGeoDatas)
-                mgeo = mgeo_qs.first()
-                geo_json = utils.json_load(mgeo.geo_data.json)
-                coordinates = _get_geom_from_geo_json(geo_json)
-                aimag, sum = utils.get_aimag_sum_from_point(coordinates[0], coordinates[1])
-                info['aimag'] = aimag
-                info['sum'] = sum
             info[key] = value
+        if 'aimag' not in info:
+            mgeo_qs = _filter_Model([{'geo_id': point_info['geo_id']}], Model=MGeoDatas)
+            mgeo = mgeo_qs.first()
+            geo_json = utils.json_load(mgeo.geo_data.json)
+            coordinates = _get_geom_from_geo_json(geo_json)
+            aimag, sum = utils.get_aimag_sum_from_point(coordinates[0], coordinates[1])
+            info['aimag'] = aimag
+            info['sum'] = sum
         info['amount'] = point.amount
         points.append(info)
 
@@ -416,57 +416,3 @@ def set_email(request, payload):
     }
 
     return JsonResponse(rsp)
-
-
-def _get_user_info_display(user):
-
-    return {
-        'username': user.username,
-        'last_name': user.last_name,
-        'first_name': user.first_name,
-        'email': user.email,
-        'is_sso': user.is_sso,
-    }
-
-
-@require_GET
-@ajax_required
-@login_required
-def user_info_all(request):
-    rsp = {
-        'success': True,
-        'user_list': _get_user_info_display(request.user),
-    }
-
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required
-def update_email(request, payload):
-
-    email = payload.get('email')
-
-    if not utils.is_email(email):
-        return JsonResponse({ 'success':False, 'errors': 'Email хаяг алдаатай байна.'})
-
-    if User.objects.filter(email=email).first():
-        return JsonResponse({ 'success':False, 'errors': 'Email хаяг бүртгэлтэй байна.'})
-
-    if not email:
-        return JsonResponse({'success': False, 'errors': 'Email хаяг хоосон байна'})
-
-    try:
-        user = request.user
-        user.email = email
-        user.save()
-        rsp = {
-            'success': True,
-            'info': 'Амжилттай'
-        }
-
-        return JsonResponse(rsp)
-
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': 'Email хаяг солиход алдаа гарлаа.'})

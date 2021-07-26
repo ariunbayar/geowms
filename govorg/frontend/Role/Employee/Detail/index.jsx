@@ -336,6 +336,7 @@ export class Detail extends Component {
                                     dontDid={true}
                                     org_roles={is_inspire_role_null ? org_roles : roles}
                                     emp_perms={perms}
+                                    role_perm={perms}
                                     is_inspire_role_null={is_inspire_role_null}
                                 />
                             : null

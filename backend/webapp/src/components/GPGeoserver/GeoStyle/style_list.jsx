@@ -189,6 +189,7 @@ export class StyleList extends Component {
                     <GSPaginate
                         paginate={ this.paginate }
                         item_list={ style_list }
+                        total_items={style_list}
                         search_query={ search_query }
                         per_page={ stylePerPage }
                         page={ currentPage }

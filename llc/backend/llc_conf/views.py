@@ -20,15 +20,13 @@ HEADERS = {
 
 @llc_required(lambda u: u)
 def llc_frontend(request, content):
+    content = {"company_name": content.get('company_name').upper() or ''}
     return render(request, 'llc/index.html', content)
 
 
 #llc-ийг шууд дуудаж үзэх
 def llc_frontend_test(request):
-    content = {
-        'dsfs': ''
-    }
-    return render(request, 'llc/dan_user.html', content)
+    return render(request, 'llc/dan_user.html')
 
 
 @require_GET
@@ -48,12 +46,14 @@ def get_tool_datas(request, content):
         rsp_bagaj = requests.post(bagaj_url, headers=HEADERS, verify=False)
         tool_datas = rsp_bagaj.json()
         tool_datas = json_load(tool_datas)
-        for tool_data in tool_datas:
-            expired_date = datetime.strptime(tool_data['expired_date'], "%Y-%m-%d %H:%M:%S")
-            confirmed_date = datetime.strptime(tool_data['confirmed_date'], "%Y-%m-%d %H:%M:%S")
-            tool_data['expired_date'] = datetime_to_string(expired_date)
-            tool_data['confirmed_date'] = datetime_to_string(confirmed_date)
+        if tool_datas:
+            for tool_data in tool_datas:
+                expired_date = datetime.strptime(tool_data['expired_date'], "%Y-%m-%d %H:%M:%S")
+                confirmed_date = datetime.strptime(tool_data['confirmed_date'], "%Y-%m-%d %H:%M:%S")
+                tool_data['expired_date'] = datetime_to_string(expired_date)
+                tool_data['confirmed_date'] = datetime_to_string(confirmed_date)
 
     return JsonResponse({
         'tool_datas': tool_datas
     })
+

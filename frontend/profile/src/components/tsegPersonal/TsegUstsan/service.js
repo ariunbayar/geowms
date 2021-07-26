@@ -1,7 +1,6 @@
-import {handleResponse, getPostOptions, getGetOptions} from '../../service'
+import { handleResponse, getGetOptions, getPostOptions } from "@helpUtils/handleRequest"
 
-
-const prefix = '/a/tseg-ustsan'
+const prefix = '/profile/api/tseg-ustsan'
 
 export const service = {
     tsegustsanEdit,

@@ -10,7 +10,6 @@ export const service = {
     setEmail
 }
 
-
 function payment(purchase_all){
     const requestOptions = {...getPostOptions(),
         body: JSON.stringify({purchase_all})}
@@ -34,7 +33,7 @@ function downloadPurchase(id) {
 
 function getDetails(id){
     const requestOptions = {...getGetOptions()}
-    return fetch(`/a/${id}/get-details/`, requestOptions).then(handleResponse)
+    return fetch(`/profile/api/${id}/get-details/`, requestOptions).then(handleResponse)
 }
 
 function paginatedList(page, per_page) {
@@ -42,12 +41,12 @@ function paginatedList(page, per_page) {
         ...getPostOptions(),
     body: JSON.stringify({ page, per_page }),
     }
-    return fetch(`/a/all/`, requestOptions).then(handleResponse)
+    return fetch(`/profile/api/all/`, requestOptions).then(handleResponse)
 }
 
 function userEmailCheck(id){
     const requestOptions = {...getGetOptions()}
-    return fetch(`/a/check-email/`, requestOptions).then(handleResponse)
+    return fetch(`/profile/api/check-email/`, requestOptions).then(handleResponse)
 }
 
 function setEmail(email) {
@@ -55,5 +54,5 @@ function setEmail(email) {
         ...getPostOptions(),
     body: JSON.stringify({ email }),
     }
-    return fetch(`/a/set-email/`, requestOptions).then(handleResponse)
+    return fetch(`/profile/api/set-email/`, requestOptions).then(handleResponse)
 }

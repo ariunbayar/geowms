@@ -36,6 +36,7 @@ export default class SideBar extends Component {
             cache_type: 'seed',
             number_of_cache: 2,
             image_format: 'png',
+            files: []
         }
         this.handleInput = this.handleInput.bind(this)
         this.getTileCacheValue = this.getTileCacheValue.bind(this)
@@ -67,7 +68,7 @@ export default class SideBar extends Component {
 
     handleSave() {
         const { fid, tid } = this.props
-        const { id_list, view, tile_cache_check, zoom_start, open_datas, file } = this.state
+        const { id_list, view, open_datas, files } = this.state
         let values
         values = this.getValuesFromState()
 
@@ -81,14 +82,15 @@ export default class SideBar extends Component {
         if (view){
             form_datas.append('view_id', view.id)
         }
-
-        if (file['name']){
-            form_datas.append('files', file, file.name)
+        if (files && files.length > 0){
+            form_datas.append('files', files[0])
         }
         form_datas.append('values',  JSON.stringify({values}))
+        this.setState({ is_loading: true })
         service
             .setPropertyFields(form_datas)
             .then(({ success, msg }) => {
+                this.setState({ save_is_load: false, is_loading: false})
                 if(success) {
                     this.props.getAll()
                     this.modalChange(
@@ -116,7 +118,6 @@ export default class SideBar extends Component {
                         null,
                     )
                 }
-                this.setState({ save_is_load: false, is_loading: false})
             })
     }
 
@@ -155,9 +156,13 @@ export default class SideBar extends Component {
             })
         }
 
-        if(pP.file != this.props.file){
-            const file = this.props.file
-            this.setState({file})
+        if(pP.files != this.props.files){
+            const props_files = this.props.files
+            let files = props_files
+            if (!files) {
+                files = []
+            }
+            this.setState({ files })
         }
 
         if (pP.view?.view_name != this.props.view?.view_name){
@@ -169,7 +174,7 @@ export default class SideBar extends Component {
 
         if(pP.fields !== this.props.fields){
             const fields = this.props.fields
-            this.setState({ fields })
+            this.setState({ fields, files: this.props.files })
         }
 
         if(pP.id_list !== this.props.id_list){
@@ -209,7 +214,7 @@ export default class SideBar extends Component {
         if(pP.fid !== this.props.fid){
             this.setState({
                 tile_cache_check: false,
-                file: '',
+                files: [],
                 is_open: false,
             })
         }
@@ -263,7 +268,7 @@ export default class SideBar extends Component {
     async makeView() {
         const props = this.props
         const { fid, tid } = props
-        const { view, style_name, file } = this.state
+        const { view, style_name, files } = this.state
 
         const values = this.getValuesFromState()
 
@@ -272,8 +277,8 @@ export default class SideBar extends Component {
         form_datas.append('fid', fid)
         form_datas.append('tid', tid)
         form_datas.append('view_id', view.id)
-        if (file) {
-            form_datas.append('files', file, file.name)
+        if ( files && files.length > 0 ) {
+            form_datas.append('files', files[0])
         }
         form_datas.append('values',  JSON.stringify({values}))
 
@@ -345,18 +350,17 @@ export default class SideBar extends Component {
         )
     }
 
-    getFile(e){
-        const uploaded_file = e.target.files[0]
-        this.setState({ file: uploaded_file })
+    getFile(files) {
+        this.setState({ files })
     }
 
     render() {
-        const { fields, fid, fname, has_view, file } = this.props
+        const { fields, fname } = this.props
         const { is_loading, id_list, check_list, check_open, open_datas } = this.state
         const state = this.state
         return (
             <Fragment>
-                <Loader is_loading={is_loading} text={state.load_text ? state.load_text : "Хүсэлтийг уншиж байна."}/>
+                <Loader is_loading={is_loading} text={state.load_text ? state.load_text : "Уншиж байна."}/>
                 <div className={`card col-md-6 mb-1 bundle-view-right-scroll`} style={{left:"10px"}}>
                     <div className="card-header">
                         <h4 className="text-center">{fname}</h4>
@@ -366,7 +370,7 @@ export default class SideBar extends Component {
                             fname
                             &&
                                 <div>
-                                    <ImportTemplate {...this.state} fid={fid} getFile={this.getFile}/>
+                                    <ImportTemplate {...this.state} getFile={this.getFile}/>
                                     <SetTileCache {...this.state} getTileCacheValue={this.getTileCacheValue}/>
                                     <ChooseStyle {...this.props} {...this.state} getStyleName={this.getStyleName}/>
                                 </div>

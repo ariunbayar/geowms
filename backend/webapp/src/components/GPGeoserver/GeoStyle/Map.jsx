@@ -47,7 +47,7 @@ export default class StyleMap extends Component {
             this.loadMap = this.loadMap.bind(this)
             this.handleZoom = this.handleZoom.bind(this)
             this.handleZoomIn = this.handleZoomIn.bind(this)
-            this.StyleFunction = this.StyleFunction.bind(this)
+            this.styleFunction = this.styleFunction.bind(this)
 
         }
 
@@ -131,7 +131,7 @@ export default class StyleMap extends Component {
         this.map = map
     }
 
-    StyleFunction(style_type, values) {
+    styleFunction(style_type, values) {
         const {
             style_color, style_size,
             fill_color, dashed_line_gap,
@@ -255,7 +255,7 @@ export default class StyleMap extends Component {
     handleZoomIn(current_zoom, curren_scale) {
         const { style_datas } = this.state
         var len_of_datas = Object.keys(style_datas).length
-        var styles = this.StyleFunction
+        var styles = this.styleFunction
         if (0 <= current_zoom && current_zoom <=21) {
             if (style_datas && len_of_datas > 0) {
                 var scale_number_1 = style_datas[0].max_range
@@ -307,7 +307,6 @@ export default class StyleMap extends Component {
             dataProjection, featureProjection, geom_type, style_datas
         } = this.state
         var state_data = this.state
-        var style_done = this.StyleFunction
         this.setState({is_loading: true})
         service.getStyleData(geom_type).then(({data}) =>
             {
@@ -328,8 +327,8 @@ export default class StyleMap extends Component {
                         const vector_layer = new VectorLayer({
                             source: vectorSource,
                             style: Object.keys(style_datas).length >0 ? new Style({}) : function(feature, resolution){
-                                var hoho = feature.getGeometry().getType();
-                                var style_of_map = style_done(hoho, state_data)
+                                var geom_type = feature.getGeometry().getType();
+                                var style_of_map = this.styleFunction(geom_type, state_data)
                                 return style_of_map
                             },
                             id: 'style_layer'
