@@ -24,7 +24,7 @@ export class LogForm extends Component {
             ],
             хувьсах_талбарууд: [
                 {"field": "user_firstname", "action": (values) => this.go_link(values)},
-                {"field": "is_success", "action":this.set_success_icon, "action_type":true},
+                {"field": "is_success", "action": this.setSuccessIcon, "action_type":true},
                 {"field": "total_amount",  "text": ""},
                 {"field": "description",  "text": ""},
                 {"field": "code",  "text": ""},
@@ -37,15 +37,14 @@ export class LogForm extends Component {
         }
     }
 
-
     go_link(values){
         this.props.history.push(`/back/user/${values.user_id}/дэлгэрэнгүй/`)
     }
 
 
-    set_success_icon(values){
+    setSuccessIcon(is_success){
         var icon
-        if(values) {
+        if(is_success) {
             return icon = "text-success fa fa-check-circle-o"
         } else {
             return icon = "text-danger fa fa-times"
