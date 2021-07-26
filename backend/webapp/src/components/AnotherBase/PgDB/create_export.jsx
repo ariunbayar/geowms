@@ -75,7 +75,7 @@ export default class  ExportCreate extends Component {
                 },
                 {
                     'id': 5,
-                    'name': '1 удаа Select хийх өгөгдлийн тоогоор ',
+                    'name': '1 удаа "Select" хийх өгөгдлийн тоогоор ',
                     'eng_name': 'limit',
                     'keys': [4]
                 },
