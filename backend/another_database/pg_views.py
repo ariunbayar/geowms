@@ -1057,7 +1057,7 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
         failed_count += 1
         pass
 
-    return success_count, failed_count, count, limit_count
+    return success_count, failed_count, count
 
 
 def _insert_single_table(ano_db, ano_db_table_pg, cursor):
@@ -1067,20 +1067,18 @@ def _insert_single_table(ano_db, ano_db_table_pg, cursor):
     columns = utils.json_load(field_config)
     feature_code = ano_db_table_pg.feature_code
     feature = LFeatures.objects.filter(feature_code=feature_code).first()
-    success_count, failed_count, total_count, limit_count= _insert_to_geo_db(ano_db, ano_db_table_pg, table_name, cursor, columns, feature)
+    success_count, failed_count, total_count= _insert_to_geo_db(ano_db, ano_db_table_pg, table_name, cursor, columns, feature)
     table_info_text = '''
         {table_name} хүснэгт
         нийт {total_count} мөр дата-наас
         "{feature_name}" feature-д
-        амжилттай орсон {success_count}, {limit_count}
-        амжилтгүй {failed_count}
+        амжилттай орсон {success_count}
         '''.format(
             table_name=table_name,
             total_count=total_count,
             success_count=success_count,
             failed_count=failed_count,
             feature_name=feature.feature_name,
-            limit_count=limit_count
         )
 
     table_info.append(table_info_text)
