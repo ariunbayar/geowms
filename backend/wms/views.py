@@ -382,22 +382,22 @@ def delete(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def paginated_list(request, payload):
-    оруулах_талбарууд = ['id', 'name', 'url', 'created_at', 'is_active']
+
+    wms_name = ''
     nsdi_geoserver = 'geo.nsdi.gov.mn'
+    оруулах_талбарууд = ['id', 'name', 'url', 'created_at', 'is_active']
 
     geoserver_host = get_object_or_404(Config, name='geoserver_host').value
-    wms = WMS.objects
-    wms_list = wms.values('name', 'url', 'id')
+    wms_objects = WMS.objects
+    wms_list = wms_objects.values('name', 'url', 'id')
     geoserver_layer_group = geoserver.get_layer_groups()
     geoserver_ws_list = geoserver.get_ws_list()
     geoserver_detail = geoserver_layer_group + geoserver_ws_list
 
     for wms in wms_list:
         if geoserver_host or nsdi_geoserver in wms['url']:
-            wms_name = wms['name']
-            theme = LThemes.objects.filter(theme_name=wms['name']).first()
-            if theme:
-                wms_name = 'gp_' + theme.theme_code
+            wms_name = wms['url'].split('/')[-2]
+        if wms_name:
             search_item = next((item for item in geoserver_detail if item['name'] == wms_name), None)
             if not search_item:
                 delete_layers = WMSLayer.objects.filter(wms_id=wms['id'])
@@ -405,7 +405,7 @@ def paginated_list(request, payload):
                     PaymentLayer.objects.filter(wms_layer=layer).delete()
                     BundleLayer.objects.filter(layer=layer).delete()
                 delete_layers.delete()
-                wms.filter(pk=wms['id']).delete()
+                wms_objects.filter(pk=wms['id']).delete()
 
     datatable = Datatable(
         model=WMS,
@@ -508,6 +508,7 @@ def save_geo(request, payload):
     rsp = {
         'success': True
     }
+
     return JsonResponse(rsp)
 
 
