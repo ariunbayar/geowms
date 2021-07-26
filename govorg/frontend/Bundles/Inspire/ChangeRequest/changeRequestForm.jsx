@@ -9,19 +9,19 @@ export default class ChangeRequestForm extends Component {
     constructor(props) {
         super(props)
         this.state={
-            org_request:[]
+            org_request: []
         }
         this.getAll = this.getAll.bind(this)
     }
 
-    componentDidMount(){
+    componentDidMount() {
         this.getAll()
     }
 
-    getAll(){
+    getAll() {
         service
             .getAll()
-            .then(({ success ,org_request }) => {
+            .then(({ success, org_request }) => {
                 if(success) {
                     this.setState({ org_request })
                 }

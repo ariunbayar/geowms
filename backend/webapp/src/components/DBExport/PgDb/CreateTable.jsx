@@ -263,24 +263,6 @@ export default class  PgForm extends Component {
                         default_text={'feature-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
-                    {/* <SelectField
-                        title_name='theme'
-                        data_list={themes}
-                        defualt_value={theme_name}
-                        setSelect={this.handleChange}
-                    />
-                    <SelectField
-                        title_name='package'
-                        data_list={selected_packages}
-                        defualt_value={package_name}
-                        setSelect={this.handleChange}
-                    />
-                    <SelectField
-                        title_name='feature'
-                        data_list={selected_features}
-                        defualt_value={feature_name}
-                        setSelect={this.handleChange}
-                    /> */}
                 </div>
                 {
                     feature_name &&

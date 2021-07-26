@@ -1,6 +1,8 @@
 import React, { Component } from "react"
-import {service} from './service'
+
 // import { Timer } from './timeCount'
+
+import { service } from './service'
 
 export class QPay extends Component {
 
@@ -9,7 +11,7 @@ export class QPay extends Component {
         this.state = {
             qPay_QRimage: '',
             purchase_id: props.purchase_id,
-            qpay_open: false,
+            qpay_open: props.qpay_open,
             msg: '',
             minutes: 5,
             seconds: 0,
@@ -31,7 +33,7 @@ export class QPay extends Component {
         {
             if(this.props.qpay_open)
             {
-                this.setState({minutes: 5, seconds:0, qPay_QRimage: ''})
+                this.setState({minutes: 5, seconds: 0, qPay_QRimage: ''})
                 this.HandleCreateQpay()
             }
             else{
@@ -40,22 +42,21 @@ export class QPay extends Component {
         }
     }
 
-    HandleCreateQpay(){
+    HandleCreateQpay() {
         const { purchase_id } = this.state
         service
             .handleCreateQpay(purchase_id)
             .then(({ qPay_QRimage, success, error, error_message }) => {
-                if(success)
-                {
+                if(success) {
                     this.props.history(`/payment/history/api/details/${purchase_id}/`)
                 }
-                else
-                {
-                    if(error_message){
-                        this.props.addNotif('danger', error_message, 'times')
+                else {
+
+                    if(error_message) {
+                        global.NOTIF('danger', error_message, 'times')
                     }
 
-                    if(qPay_QRimage){
+                    if(qPay_QRimage) {
                         this.setState({ qPay_QRimage })
                         this.timerRemaining()
                         this.payCheck(this.props.qpay_open)
@@ -63,31 +64,35 @@ export class QPay extends Component {
 
                 }
                 if (error) {
-                    this.props.addNotif('danger', error_message, 'times')
+                    global.NOTIF('danger', error_message, 'times')
                 }
             })
 
     }
 
-    payCheck(check){
+    payCheck(check) {
         const { purchase_id } = this.state
-        if(check){
-            service.check(purchase_id).then(({success, msg}) => {
-                if(success) //Amjilttai boloh uyd
-                {
-                    this.props.handleClose(true)
-                }
-                else{
-                    setTimeout(() => {
-                        this.payCheck(this.props.qpay_open)
-                    }, 5000)
-                }
-            })
-            .catch(() => this.props.addNotif('danger', 'Алдаа гарсан байна', 'times'))
+        if(check) {
+            service
+                .check(purchase_id)
+                .then(({ success, msg }) => {
+                    if(success) //Amjilttai boloh uyd
+                    {
+                        this.props.handleClose(true)
+                    }
+                    else{
+                        setTimeout(() => {
+                            this.payCheck(this.props.qpay_open)
+                        }, 5000)
+                    }
+                })
+                .catch(() =>
+                    global.NOTIF('danger', 'Алдаа гарсан байна', 'times')
+                )
         }
     }
 
-    timerRemaining(){
+    timerRemaining() {
         this.myInterval = setInterval(() => {
             const { seconds, minutes } = this.state
             if (seconds > 0) {
@@ -132,7 +137,7 @@ export class QPay extends Component {
                 {
                     qPay_QRimage != []
                     ?
-                        <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," +  qPay_QRimage} />
+                        <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," + qPay_QRimage} />
                     :
                         <div className="my-5">
                             <div className="spinner-border gp-text-primary my-5" role="status">

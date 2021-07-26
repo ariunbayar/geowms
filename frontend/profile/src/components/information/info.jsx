@@ -1,54 +1,54 @@
-import React, {Component} from "react";
+import React, { Component } from 'react'
+import { service } from './service'
 
+export class Info extends Component {
+    constructor(props) {
+        super(props)
 
-export  class Info extends Component {
-  constructor(props) {
-    super(props);
-  }
+        this.state = {
+            user_detail: [],
+        }
+    }
 
-  render() {
+    componentDidMount() {
+        service
+            .userInfo()
+            .then(({ user_detail }) => {
+                this.setState({ user_detail })
+            })
+    }
 
-    return (
-      <div className="container">
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-row">
-              <div className="form-group col-md-8">
-                <label htmlFor="password">Хуучин нууц үг:</label>
-                  <input
-                      type="password"
-                      className="form-control"
-                      id="password"
-                      placeholder="Одоогийн нууц үг оруулах"
-                  />
-              </div>
+    render() {
+        const { last_name, first_name, email,  username } = this.state.user_detail
+        return (
+            <div className="card">
+                <div className="card-header d-flex align-items-center">
+                    <h5>Хэрэглэгчийн мэдээлэл</h5>
+                </div>
+                <div className="card-body">
+                    <div className="row" >
+                        <div className="col-sm-6">
+                            <label className="col-form-label font-weight-bold">Хэрэглэгчийн нэр: </label>
+                            <span className="input-group-text">{username}</span>
+                        </div>
+                        <div className="col-sm-6">
+                            <label className="col-form-label font-weight-bold">Цахим хаяг: </label>
+                            <span className="input-group-text">{email}</span>
+                        </div>
+                        <div className="col-sm-6">
+                            <label className="col-form-label font-weight-bold">Овог: </label>
+                            <span className="input-group-text">{last_name}</span>
+                        </div>
+                        <div className="col-sm-6 mt-4">
+                            <button className="btn btn-primary" onClick={() => this.props.history.push(`/profile/info/update-mail/`)}>Цахим хаяг шинэчлэх</button>
+                        </div>
+                        <div className="col-sm-6">
+                            <label className="col-form-label font-weight-bold">Нэр: </label>
+                            <span className="input-group-text">{first_name}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div className="form-row">
-              <div className="form-group col-md-8">
-                <label htmlFor="re_password">Шинэ нууц үг:</label>
-                  <input
-                      type="password"
-                      className="form-control"
-                      id="new_password"
-                      placeholder="Шинэ нууц үг оруулах"
-                  />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group col-md-8">
-                <label htmlFor="re_password">Шинэ нууц үг дахин оруулах:</label>
-                  <input
-                      type="password"
-                      className="form-control"
-                      id="re_new_password"
-                      placeholder="Шинэ нууц үг дахин оруулах"
-                  />
-              </div>
-            </div>
-            <button className="btn gp-btn-primary">Хадгалах</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+        )
+    }
 }

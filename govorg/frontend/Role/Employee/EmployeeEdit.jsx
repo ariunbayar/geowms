@@ -389,9 +389,9 @@ export class EmployeeEdit extends Component {
     getGeom(geo_id) {
         service
             .getGeom(geo_id)
-            .then(({ feature }) => {
-                if (feature) {
-                    this.setState({ feature, last_geo_id: geo_id })
+            .then(({ data }) => {
+                if (data) {
+                    this.setState({ feature: data, last_geo_id: geo_id })
                 }
             })
     }

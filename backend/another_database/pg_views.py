@@ -306,6 +306,7 @@ def table__detail(request, id, table_id):
         'pk_start_index': store_field_config.get('pk_start_index') or '',
         'pk_field_count': store_field_config.get('pk_field_count') or '',
         'pk_field_max_range': store_field_config.get('pk_field_max_range') or '',
+        'pk_field_limit_count': store_field_config.get('pk_field_limit_count') or '',
     }
 
     return JsonResponse({
@@ -1010,11 +1011,15 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
         pk_field_type = pk_field_config.get('pk_field_type') or ""
         count = pk_field_config.get('pk_field_count') or ''
         pk_field_max_range = pk_field_config.get('pk_field_max_range') or ''
-        if count and int(count) >1:
+        limit_count = pk_field_config.get('pk_field_limit_count') or ''
+
+        if count and int(count) >0:
             count = count
         else:
             count = _get_count_of_table(cursor, table_name, pk_field_max_range, start_data, pk_field_type, pk_field_name)
 
+        if limit_count and int(limit_count) >= 0:
+            SELECTCOUNT = int(limit_count)
         count = int(count)
         current_data_counts = 0
         current_geo_id = last_geo_id
@@ -1068,7 +1073,6 @@ def _insert_single_table(ano_db, ano_db_table_pg, cursor):
         нийт {total_count} мөр дата-наас
         "{feature_name}" feature-д
         амжилттай орсон {success_count}
-        амжилтгүй {failed_count}
         '''.format(
             table_name=table_name,
             total_count=total_count,

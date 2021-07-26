@@ -1,37 +1,38 @@
-
-
-
 import os
-import re
-from django.conf import settings
-from django.http import HttpResponse, Http404
 from itertools import groupby
 
+from django.conf import settings
 from django.http import JsonResponse
-from django.shortcuts import redirect, render, reverse, get_object_or_404
+from django.http import HttpResponse, Http404
+from django.shortcuts import render, reverse, get_object_or_404
+from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_GET, require_POST
 from django.core.cache import cache
+from django.db import connections
 
-from main.decorators import ajax_required
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
-from django.db import connections
-from backend.inspire.models import LThemes, LPackages, LFeatures, LFeatureConfigs, MDatas, MDatas
-from main import utils
+from backend.inspire.models import LThemes, MDatas, MGeoDatas
 from backend.geoserver.models import WmtsCacheConfig
-from backend.config.models import Config
-from geoportal_app.models import User
 
-from django.contrib.postgres.search import SearchVector
+from main import utils
+from main.decorators import ajax_required
+
+from api.utils import (
+    calc_radius,
+    get_buffer_of_point,
+)
+
+
+CACHE_TIMEOUT = 30
 
 
 def all(request):
     context_list = []
 
-    bundles = Bundle.objects.all()
+    bundles = Bundle.objects.prefetch_related('ltheme')
     for bundle in bundles:
-        bundle_list = []
-        theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
+        theme = bundle.ltheme
         bundle_list = {
             'pk': bundle.id,
             'icon': bundle.icon,
@@ -54,12 +55,9 @@ def _not_hesegchlen_hudaldan_awalt():
 
 def detail(request, pk):
 
-    can_draw = True
-
     bundle = get_object_or_404(Bundle, pk=pk)
     theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
-    if theme.theme_code in _not_hesegchlen_hudaldan_awalt():
-        can_draw = False
+    is_point = theme.theme_code in _not_hesegchlen_hudaldan_awalt()
 
     bundle_layers = BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()
 
@@ -71,7 +69,7 @@ def detail(request, pk):
             (WMS.objects.get(pk=wms[0]).name)
             for wms in bundle_layers
         ],
-        'can_draw': can_draw,
+        'is_point': is_point,
     }
 
     context = {
@@ -147,9 +145,14 @@ def wms_layers(request, pk):
                 url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
                 chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
 
+            proxy_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
+            proxy_cache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
+
             wms_data = {
                 'name': wms.name,
                 'url': url,
+                "proxy_url": proxy_url,
+                "proxy_chache_url": proxy_cache_url,
                 'chache_url': chache_url,
                 'layers': [_layer_to_display(layer) for layer in layers],
                 'wms_or_cache_ur': True if wms.cache_url else False,
@@ -176,21 +179,24 @@ def get_user(request):
 
 
 @require_GET
+@cache_page(60 * CACHE_TIMEOUT)
 @ajax_required
 def aimag(request):
 
-    admin_levels = utils.get_administrative_levels()
+    admin_levels = utils.geo_cache('admin_levels', '', utils.get_administrative_levels(), 1800)
     if admin_levels:
         success = True
-        info = admin_levels
+        data = admin_levels
+
     else:
         success = False
-        info = "Уучлаарай ямар нэгэн мэдээлэл олдсонгүй"
+        data = "Уучлаарай ямар нэгэн мэдээлэл олдсонгүй"
 
+    first_au_level_geo_id = utils.geo_cache('first_au_level_geo_id', '', utils.get_1stOrder_geo_id(), 1800)
     rsp = {
         'success': success,
-        'info': info,
-        'firstOrder_geom': utils.get_1stOrder_geo_id(),
+        'info': data,
+        'firstOrder_geom': first_au_level_geo_id,
     }
     return JsonResponse(rsp)
 
@@ -226,50 +232,114 @@ def sumfind(request, payload):
 
 @require_POST
 @ajax_required
-def get_search_value(request, payload):
-    id = payload.get('id')
-    search_value = payload.get('value')
-    pk = cache.get('pk')
-    if pk != id:
-        cache.set('pk', id, 300)
-        theme = get_object_or_404(LThemes, pk=id)
-        theme_id = theme.theme_id
-
-        qs_packages = LPackages.objects
-        qs_packages = qs_packages.filter(theme_id=theme_id)
-        package_ids = list(qs_packages.values_list('package_id', flat=True))
-        qs_features = LFeatures.objects
-        qs_features = qs_features.filter(package_id__in=package_ids)
-        feature_ids = list(qs_features.values_list('feature_id', flat=True))
-
-        qs_feature_configs = LFeatureConfigs.objects
-        qs_feature_configs = qs_feature_configs.filter(feature_id__in=feature_ids)
-        feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
-        cache.set('feature_config_ids', feature_config_ids, 300)
-    else:
-        feature_config_ids = cache.get('feature_config_ids')
-
-    qs_datas = MDatas.objects
-    qs_datas = qs_datas.annotate(search=SearchVector('value_text'))
-    qs_datas = qs_datas.filter(feature_config_id__in=feature_config_ids, search__icontains=search_value)
-    first_5_datas = list(qs_datas.order_by('geo_id')[:5])
-
-    datas = list()
-    for obj in first_5_datas:
-        data = dict()
-        data['id'] = obj.id
-        data['geo_id'] = obj.geo_id
-        data['name'] = obj.value_text
-        datas.append(data)
+def findPoints(request, payload):
 
     rsp = {
-        'datas': datas,
+        'success': False,
+        'data': [],
+        'error': '',
     }
+
+    point_id = payload.get("point_id")
+    if not point_id:
+        rsp['error'] = 'Цэгийн дугаарыг оруулна уу'
+        return JsonResponse(rsp)
+
+    point_id = str(point_id)
+    theme_code = 'gnp'
+
+    feature_ids = utils.geo_cache(
+        'feature_ids_of_theme_code',
+        theme_code,
+        utils.get_feature_ids_of_theme(theme_code),
+        30000
+    )
+
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.filter(
+        geo_id=point_id,
+        feature_id__in=feature_ids
+    )
+
+    if not mgeo_qs:
+        rsp['error'] = 'Цэг олдсонгүй'
+        return JsonResponse(rsp)
+
+    mgeo = mgeo_qs.first()
+    geo_json = mgeo.geo_data.json
+    geo_json = utils.json_load(geo_json)
+
+    data = geo_json['coordinates']
+    if 'Multi' in geo_json['type']:
+        data = data[0]
+
+    rsp['success'] = True
+    rsp['data'] = data
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def get_search_value(request, payload):
+    bundle_id = payload.get('bundle_id')
+    search_value = payload.get('value')
+
+    rsp = {
+        'success': False,
+        'data': [],
+        'error': ""
+    }
+
+    if not search_value:
+        rsp['error'] = 'Хайх утгаа оруулна уу'
+        return JsonResponse(rsp)
+
+    bundle_pk_cache_key = 'bundle_{}'.format(bundle_id)
+    geo_ids_cache_key = 'bundle_{}_geo_ids'.format(bundle_id)
+    cache_time = 3000
+
+    pk = cache.get(bundle_pk_cache_key)
+    if pk != bundle_id:
+        cache.set(bundle_pk_cache_key, bundle_id, cache_time)
+        bundle = get_object_or_404(Bundle, pk=bundle_id)
+        theme_code = bundle.ltheme.theme_code
+
+        feature_ids = utils.get_feature_ids_of_theme(theme_code)
+        mgeo_qs = MGeoDatas.objects
+        mgeo_qs = mgeo_qs.filter(feature_id__in=feature_ids)
+        geo_ids = list(mgeo_qs.values_list('geo_id', flat=True))
+
+        cache.set(geo_ids_cache_key, geo_ids, cache_time)
+    else:
+        geo_ids = cache.get(geo_ids_cache_key)
+
+    qs_datas = MDatas.objects
+    qs_datas = qs_datas.filter(
+        geo_id__in=geo_ids,
+    )
+    qs_datas = qs_datas.filter(
+        value_text__icontains=search_value
+    )
+    qs_datas = qs_datas.extra(
+        select={
+            'name': 'value_text'
+        }
+    )  # select value_text as name
+    qs_datas = qs_datas.order_by('geo_id')[:5]
+    datas = list(qs_datas.values('geo_id', 'name'))
+
+    if not datas:
+        rsp['error'] = 'Мэдээлэл олдсонгүй'
+        return JsonResponse(rsp)
+
+    rsp['success'] = True
+    rsp['data'] = datas
+
     return JsonResponse(rsp)
 
 
 def download_ppt(request):
-    path = ''
     file_path = os.path.join(settings.MEDIA_ROOT, 'geoportal.pptx')
     if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:
@@ -277,3 +347,21 @@ def download_ppt(request):
             response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
             return response
     raise Http404
+
+
+@require_POST
+@ajax_required
+def get_point_buffer_geom(request, payload):
+    center = payload.get('center')
+    scale = payload.get('scale')
+
+    radius = calc_radius(scale)
+    buffer = get_buffer_of_point(center, radius)
+    feature = utils.get_feature_from_geojson(buffer.json)
+
+    rsp = {
+        'success': True,
+        'data': feature
+    }
+
+    return JsonResponse(rsp)

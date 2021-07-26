@@ -4,6 +4,7 @@ from django.conf import settings
 
 from django.db import connections
 from django.forms.models import model_to_dict
+from django.db.models import ManyToOneRel
 from django.forms.utils import flatatt
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -311,8 +312,12 @@ def getFields(request, payload):
     for i in Model._meta.get_fields():
         field_name = i.name
         data = ''
+        foreign_key_field = ""
         type_name = i.get_internal_type()
-        if not field_name == 'created_on' and not field_name == 'created_by' and not field_name == 'modified_on' and not field_name == 'modified_by' and field_name != 'bundle':
+        if not field_name == 'created_on' and not field_name == 'created_by' and not field_name == 'modified_on' and not field_name == 'modified_by' and field_name != 'bundle' and not isinstance(i, ManyToOneRel):
+            if type_name == 'ForeignKey':
+                foreign_key_field = field_name
+                field_name = field_name + "_id"
             field = dict()
             if type_name == "CharField":
                 type_name = 'text'
@@ -351,6 +356,8 @@ def getFields(request, payload):
                     datas = Model.objects.filter(pk=id)
                     for data in datas:
                         data_obj = model_to_dict(data)
+                        if foreign_key_field:
+                            data_obj[field_name] = data_obj.pop(foreign_key_field)
                         dat = data_obj[field_name]
 
                         if type(dat) == 'bool' and not 1 and dat:
@@ -427,9 +434,13 @@ def propertyFields(request, tid, fid):
         id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view.id)]
         url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
 
-        style_name = geoserver.get_layer_style('gp_layer_' + view_name)
-        if ':' in style_name:
-            style_name = style_name.split(':')[1]
+        style_name = ''
+        style = geoserver.get_layer_style('gp_layer_' + view_name)
+        if style:
+            if ':' in style:
+                style_name = style.split(':')[1]
+            else:
+                style_name = style
 
         rsp = {
             'success': True,
@@ -623,6 +634,30 @@ def _str_to_bool(str):
     return False
 
 
+def _rsp_validation(data, datas, model_name):
+    info = ''
+    keys = ['connect_feature_id', 'connect_feature_property_id', 'is_connect_to_feature']
+    if model_name == 'feature_config':
+        if 'has_class' in datas:
+            has_class = datas['has_class']
+            if has_class == True:
+                rem_data = utils.key_remove_of_dict(datas, keys)
+                for check_data in rem_data:
+                    if not rem_data[check_data]:
+                        info = 'false'
+                        return info
+                info = 'true'
+                return info
+            else:
+                if not data['data']:
+                    info = 'false'
+                    return info
+    else:
+        if not data['data']:
+            info = 'false'
+            return info
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -645,6 +680,11 @@ def save(request, payload):
         #     datas[data['field_name']] = order_no
         else:
             datas[data['field_name']] = data['data']
+            info = _rsp_validation(data, datas, model_name)
+            if info == 'true':
+                rsp = {'success': True}
+            elif info == 'false':
+                return JsonResponse({'success': False, 'info': 'Хоосон байна, утга оруулна уу!'})
 
     model_qs = Model.objects
 
@@ -676,7 +716,7 @@ def save(request, payload):
         model_qs.filter(**model_filter).update(**datas)
     rsp = {
         'success': True,
-        'info': 'Амжилттай'
+        'info': 'Амжилттай хадгаллаа'
     }
 
     return JsonResponse(rsp)
@@ -892,12 +932,12 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
     wms_layer = wms.wmslayer_set.filter(code=layer_name).first()
     if not wms_layer:
         wms_layer = WMSLayer.objects.create(
-                        name=layer_title,
-                        code=layer_name,
-                        wms=wms,
-                        title=layer_title,
-                        feature_price=0,
-                    )
+            name=layer_title,
+            code=layer_name,
+            wms=wms,
+            title=layer_title,
+            feature_price=0,
+        )
 
     bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer.id).first()
     bundle_id = theme.bundle.id

@@ -38,7 +38,7 @@ from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
 
 from main.utils import get_geoJson
-from main.decorators import ajax_required
+from main.decorators import ajax_required, gov_required
 from main.utils import check_form_json
 from main.utils import dict_fetchall
 from main.utils import get_config
@@ -966,6 +966,15 @@ def _check_perm(employee, feature_id, geo_json):
     return success, info, request_kind
 
 
+def _check_type(val, geo_json_list):
+    geo_json = val.geom.json
+    geo_type = utils.json_dumps(geo_json)
+    geo_json_load = utils.json_load(geo_type)
+    geo_type = geo_json_load['type']
+    geo_json_list.append(geo_type)
+    return geo_json_list
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -1030,11 +1039,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     for val in layer:
                         values = dict()
                         for name in range(0, len(layer.fields)):
-                            geo_json = val.geom.json
-                            geo_type = utils.json_dumps(geo_json)
-                            geo_json_load = utils.json_load(geo_type)
-                            geo_type = geo_json_load['type']
-                            geo_json_list.append(geo_type)
+                            geo_json_list = _check_type(val, geo_json_list)
 
                         if all(geom_type in item for item in geo_json_list):
                             for name in range(0, len(layer.fields)):
@@ -1097,7 +1102,84 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                         'success': success,
                         'info': info
                     }
+            else:
+                with transaction.atomic():
+                    Sid = transaction.savepoint()
+                    val = layer[0]
+                    values = dict()
+                    for name in range(0, len(layer.fields)):
+                        geo_json_list = _check_type(val, geo_json_list)
 
+                    if all(geom_type in item for item in geo_json_list):
+                        for name in range(0, len(layer.fields)):
+                            field_name = val[name].name  # field name
+                            value = val.get(name)  # value ni
+
+                            if name == 0:
+
+                                # geo_id = _make_geo_id(feature_id)
+                                geo_json = val.geom.json  # goemetry json
+
+                                if geo_json:
+                                    success, info, request_kind = _check_perm(
+                                        employee,
+                                        feature_id,
+                                        geo_json
+                                    )
+
+                                    if not success:
+                                        _delete_file(for_delete_items, Sid)
+                                        rsp = {
+                                            'success': success,
+                                            'info': info,
+                                        }
+                                        return JsonResponse(rsp)
+
+                                else:
+                                    _delete_file(for_delete_items, Sid)
+                                    rsp = {
+                                        'success': False,
+                                        'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
+                                    }
+                                    return JsonResponse(rsp)
+
+                            values[field_name] = value
+
+                        request_values = {
+                            'theme_id': tid,
+                            'package_id': pid,
+                            'feature_id': fid,
+                            'employee': employee,
+                            'geo_json': geo_json,
+                            'kind': request_kind,
+                            'order_at': order_at,
+                            'order_no': order_no,
+                            'group_id': main_request_id,
+                        }
+                        success, info = _make_request(values, request_values)
+                        if not success:
+                            _delete_file(for_delete_items, Sid)
+                            rsp = {
+                                'success': success,
+                                'info': info,
+                            }
+                            return JsonResponse(rsp)
+                        rsp = {
+                            'success': success,
+                            'info': info
+                        }
+                    else:
+                        _delete_file(for_delete_items, Sid)
+                        rsp = {
+                            'success': False,
+                            'info': "Геометр өгөгдлийн төрөл нь тухайн feature-ийн төрөлтэй таарахгүй байна!!!."
+                        }
+                        return JsonResponse(rsp)
+        else:
+            rsp = {
+                'success': False,
+                'info': "Дата байхгүй байна."
+            }
     else:
         rsp = {
             'success': False,
@@ -1136,4 +1218,43 @@ def get_api_url(request):
             'select': request.build_absolute_uri(reverse('api:inspire:select'))
         }
     }
+    return JsonResponse(rsp)
+
+
+def _make_layer_code(feature):
+    feature_code = feature.feature_code
+    theme_code = feature_code.split('-')[0]
+    code = 'gp_' + theme_code + ':' + utils.make_layer_name(utils.make_view_name(feature))
+
+    return code
+
+
+@require_GET
+@ajax_required
+@gov_required
+@login_required(login_url='/gov/secure/login/')
+def get_layers(request, fid):
+    user = request.user
+    employee = get_object_or_404(Employee, user=user)
+    perm = employee.empperm_set.first()
+    feature_ids = perm.empperminspire_set.distinct('feature_id').values_list('feature_id', flat=True)
+    feature_ids = feature_ids.filter(~Q(feature_id=fid))
+    layer_choices = list()
+
+    qs_feature = LFeatures.objects
+    qs_feature =qs_feature.filter(feature_id__in=feature_ids)
+    qs_feature = qs_feature.order_by('feature_id')
+
+    for feature in qs_feature:
+        data = dict()
+        data['name'] = feature.feature_name
+        data['code'] = _make_layer_code(feature)
+        data['url'] = request.build_absolute_uri(reverse('api:qgis:qgis-proxy', args=[employee.token, feature.feature_id]))
+        layer_choices.append(data)
+
+    rsp = {
+        "success": True,
+        "layer_choices": layer_choices,
+    }
+
     return JsonResponse(rsp)

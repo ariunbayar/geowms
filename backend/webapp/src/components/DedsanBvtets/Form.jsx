@@ -32,13 +32,26 @@ export default class Forms extends Component {
         this.setState({ is_loading: true })
         const { values, model_name, code, model_id, edit_name } = this.state
         service.save(values, model_name, model_id, edit_name).then(({ success, info }) => {
+            this.setState({ is_loading: false, info })
             if (success) {
-                this.setState({ is_loading: false, info })
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: "fa fa-check-circle",
+                    icon_color: 'success',
+                    title: info,
+                }
+                global.MODAL(modal)
                 if (code !== '') this.props.refresh(code)
                 else this.props.refresh()
             }
-            else{
-                alert(info)
+            else {
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: "fa fa-times-circle",
+                    icon_color: 'danger',
+                    title: info,
+                }
+                global.MODAL(modal)
             }
         })
     }
@@ -65,20 +78,27 @@ export default class Forms extends Component {
     }
 
     connectedFields(value_obj, idx) {
-
+        var type = getOposite(value_obj.data)
         function getOposite(data) {
             if (data == 'true') return 'false'
             if (data == 'false') return 'true'
         }
 
         if (value_obj.field_name == 'is_connect_to_feature') {
-            this.state.values[idx - 3].data = getOposite(value_obj.data)
-            this.setState({ values: this.state.values })
+            this.state.values[idx - 3].data = type
+            if (type == 'true') {
+                this.state.values[idx + 1].data = ''
+                this.state.values[idx + 2].data = ''
+            }
         }
         if (value_obj.field_name == 'has_class') {
-            this.state.values[idx + 3].data = getOposite(value_obj.data)
-            this.setState({ values: this.state.values })
+            this.state.values[idx + 3].data = type
+            if (type == 'false') {
+                this.state.values[idx + 4].data = ''
+                this.state.values[idx + 5].data = ''
+            }
         }
+        this.setState({ values: this.state.values })
     }
 
     getValue(data, idx) {
@@ -88,20 +108,19 @@ export default class Forms extends Component {
     }
 
     componentDidUpdate(pP) {
-        const {model_id, model_name, edit_name} = this.props
-        if(pP.model_id !== model_id){
+        const { model_id, model_name, edit_name } = this.props
+        if(pP.model_id !== model_id) {
             this.getFields(model_name, model_id, edit_name)
             this.setState({ before_id: pP.model_id, before_name: pP.model_name, before_edit_name: pP.edit_name })
         }
-        if(pP.model_name !== model_name || pP.edit_name !== edit_name)
-        {
-            this.setState({model_id, model_name, edit_name})
+        if(pP.model_name !== model_name || pP.edit_name !== edit_name) {
+            this.setState({ model_id, model_name, edit_name })
             this.getFields(model_name, model_id, edit_name)
         }
     }
 
     componentDidMount() {
-        const {model_id, model_name, edit_name} = this.props
+        const { model_id, model_name, edit_name } = this.props
         this.setState({ model_id, model_name, edit_name })
         this.getFields(model_name, model_id, edit_name)
     }
@@ -111,15 +130,14 @@ export default class Forms extends Component {
         service
             .getFields(model_name, model_id, edit_name)
             .then(({ success, fields }) => {
-                if(success)
-                {
+                if(success) {
                     let has_class_idx
                     let is_connected_to_feature_idx
                     fields.map((field, idx) => {
                         if (field.field_name == 'has_class') has_class_idx = idx
                         if (field.field_name == 'is_connect_to_feature') is_connected_to_feature_idx = idx
                     })
-                    this.setState({values: fields, is_loading: false, model_id, model_name, has_class_idx, is_connected_to_feature_idx })
+                    this.setState({ values: fields, is_loading: false, model_id, model_name, has_class_idx, is_connected_to_feature_idx })
                 }
             })
     }
@@ -137,9 +155,9 @@ export default class Forms extends Component {
         }
     }
 
-    backToForm(){
+    backToForm() {
         const { before_id , before_name, before_edit_name } = this.state
-        if (before_edit_name !== ''){
+        if (before_edit_name !== '') {
             this.props.handleFormLeft(before_name, before_id, before_edit_name)
         }
         else {
@@ -260,7 +278,7 @@ export default class Forms extends Component {
                         }
                         <button
                             type="button"
-                            onClick={() => this.openModal('check-circle text-success', btn_name, `Та ${edit_name ? `${prop_edit_name} - нэртэй` : ''} ${prop_name}-г ${btn_name.toLowerCase()}даа итгэлтэй байна уу ?`, this.onSubmit)}
+                            onClick={() => this.openModal('exclamation-circle text-warning', btn_name, `Та ${edit_name ? `${prop_edit_name} - нэртэй` : ''} ${prop_name}-г ${btn_name.toLowerCase()}даа итгэлтэй байна уу ?`, this.onSubmit)}
                             className={`btn ${edit_name ? 'col-md-7' : 'btn-block'} gp-btn-primary`}
                         >
                             {btn_name}
@@ -276,12 +294,15 @@ function Select(props) {
 
     const [value, setValue] = useState(props.data)
 
+    useEffect(() => {
+        setValue(props.data)
+    }, [props.data])
+
     const handleOnChange = (e) => {
         let val = e.target.value
         setValue(val)
         props.setValue(val, props.index)
     }
-
     return (
         <select
             className='form-control'
@@ -315,6 +336,10 @@ function Input(props) {
 
     const [value, setValue] = useState(props.data)
 
+    useEffect(() => {
+        setValue(props.data)
+    }, [props.data])
+
     const handleOnChange = (e) => {
         let val = e.target.value
         setValue(val)
@@ -326,7 +351,7 @@ function Input(props) {
             type={props.field_type}
             placeholder={props.field_name}
             onChange={handleOnChange}
-            value={value}
+            value={value || ''}
             className={'form-control'}
             disabled={props.data && props.field_name.includes("id") && !(props.field_name == props.model_name + "_id") ? 'disabled' : ''}
         />
@@ -353,7 +378,8 @@ function RadioInputs(props) {
                     type="radio"
                     id={`${props.field_name}-true`}
                     name={props.field_name}
-                    checked={value == 'true' ? true : false} value={`true`}
+                    checked={value == 'true' ? true : false}
+                    value={`true`}
                     onChange={handleOnchange}
                 />
                 &nbsp;

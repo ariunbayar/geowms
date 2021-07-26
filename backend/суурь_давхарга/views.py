@@ -3,7 +3,7 @@ import requests
 
 from django.contrib.auth.decorators import user_passes_test
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, reverse
 from main.utils import resize_b64_to_sizes
 from .models import BaseLayer

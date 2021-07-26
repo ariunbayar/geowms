@@ -22,8 +22,9 @@ export class OrgForm extends Component {
         this.getGeom = this.getGeom.bind(this)
     }
 
-    getGeom() {
-        const level = this.props.match.params.level
+    getGeom(new_level) {
+        let level = this.props.match.params.level
+        if (new_level) level = new_level
         const org_id = this.props.match.params.id
         service
             .orgAll(level, org_id)
