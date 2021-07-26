@@ -1163,7 +1163,8 @@ export default class BarilgaSuurinGazar extends Component{
 
     SideBarBtn(){
       this.setInActiveButtonStyle('side')
-      service.getLayers(this.state.emp_perm_prefix).then((layer_choices) => {
+      service
+        .getLayers().then(({success, layer_choices}) => {
         this.setState({layer_choices})
         this.WmsTile(layer_choices)
       })
@@ -1173,7 +1174,7 @@ export default class BarilgaSuurinGazar extends Component{
       const map = this.map
       const wms_map_list = {
             name: "Таны харах эрхтэй давхаргууд",
-            layers: layer_choices.slice(1, layer_choices.length).map((layer) => {
+            layers: layer_choices.map((layer) => {
               return {
                 ...layer,
                 tile: new Image({

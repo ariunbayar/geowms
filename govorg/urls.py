@@ -81,6 +81,7 @@ urlpatterns = [
             path('qpi-url/', govorg_inspire_views.get_api_url),
             path('control-to-approve/', govorg_inspire_views.control_to_approve),
             path('control-to-remove/', govorg_inspire_views.control_to_remove),
+            path('get-layers/', govorg_inspire_views.get_layers),
         ], 'inspire'))),
 
         path('org-request/', include(([

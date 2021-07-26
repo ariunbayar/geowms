@@ -38,7 +38,7 @@ from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
 
 from main.utils import get_geoJson
-from main.decorators import ajax_required
+from main.decorators import ajax_required, gov_required
 from main.utils import check_form_json
 from main.utils import dict_fetchall
 from main.utils import get_config
@@ -1218,4 +1218,41 @@ def get_api_url(request):
             'select': request.build_absolute_uri(reverse('api:inspire:select'))
         }
     }
+    return JsonResponse(rsp)
+
+
+def _make_layer_code(feature):
+    feature_code = feature.feature_code
+    theme_code = feature_code.split('-')[0]
+    code = 'gp_' + theme_code + ':' + utils.make_layer_name(utils.make_view_name(feature))
+
+    return code
+
+
+@require_GET
+@ajax_required
+@gov_required
+@login_required(login_url='/gov/secure/login/')
+def get_layers(request):
+    user = request.user
+    employee = get_object_or_404(Employee, user=user)
+    perm = employee.empperm_set.first()
+    feature_ids = perm.empperminspire_set.distinct('feature_id').values_list('feature_id', flat=True)
+    layer_choices = list()
+
+    qs_feature = LFeatures.objects
+    qs_feature =qs_feature.filter(feature_id__in=feature_ids)
+    qs_feature = qs_feature.order_by('feature_id')
+
+    for feature in qs_feature:
+        data = dict()
+        data['name'] = feature.feature_name
+        data['code'] = _make_layer_code(feature)
+        layer_choices.append(data)
+
+    rsp = {
+        "success": True,
+        "layer_choices": layer_choices,
+    }
+
     return JsonResponse(rsp)
