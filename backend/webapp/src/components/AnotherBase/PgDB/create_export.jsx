@@ -58,13 +58,13 @@ export default class  ExportCreate extends Component {
                 {
                     'id': 2,
                     'name': 'Эхлэх эхний утгаар',
-                    'eng_name': 'since one of data',
+                    'eng_name': '',
                     'keys': [1]
                 },
                 {
                     'id': 3,
                     'name': 'Төгсөх сүүлийн утгаар',
-                    'eng_name': 'until one of data',
+                    'eng_name': '',
                     'keys': [2]
                 },
                 {
@@ -75,7 +75,7 @@ export default class  ExportCreate extends Component {
                 },
                 {
                     'id': 5,
-                    'name': '1 удаа "Select" хийх өгөгдлийн тоогоор ',
+                    'name': '1 удаа "SELECT" хийх өгөгдлийн тоогоор ',
                     'eng_name': 'limit',
                     'keys': [4]
                 },
@@ -100,7 +100,7 @@ export default class  ExportCreate extends Component {
                     'value': '',
                 },
                 {
-                    'name': '1 удаа Select хийх өгөгдлийн тоо ',
+                    'name': '1 удаа "SELECT" хийх өгөгдлийн тоо ',
                     'eng_name': 'pk_field_limit_count',
                     'key': 4,
                     'value': '',
