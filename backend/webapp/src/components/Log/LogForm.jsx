@@ -41,7 +41,6 @@ export class LogForm extends Component {
         this.props.history.push(`/back/user/${values.user_id}/дэлгэрэнгүй/`)
     }
 
-
     setSuccessIcon(is_success){
         var icon
         if(is_success) {
