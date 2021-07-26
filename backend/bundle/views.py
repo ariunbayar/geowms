@@ -1,7 +1,9 @@
 from itertools import groupby
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models.query import Prefetch
 from django.http import JsonResponse
+from django.http.response import Http404
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import user_passes_test
@@ -13,28 +15,29 @@ from geoportal_app.models import Role
 
 from .forms import BundleForm
 from .models import Bundle, BundleLayer
-from backend.inspire.models import LThemes
+
 
 def _layer_visible(layers):
-    check = False
     for layer in layers:
-        if BundleLayer.objects.filter(layer_id = layer['id']):
-            check = True
-            break
-    return check
+        if len(layer.bundlelayer_set.all()) > 0:
+            return True
+    return False
 
 
 def _get_bundle_options():
 
     form_options = []
+    wms_qs = WMS.objects.all()
+    wms_qs = wms_qs.prefetch_related(Prefetch('wmslayer_set', queryset=WMSLayer.objects.order_by('sort_order')))
+    wms_qs = wms_qs.prefetch_related('wmslayer_set__bundlelayer_set')
 
-    for wms in WMS.objects.all():
-        layers = list(WMSLayer.objects.filter(wms=wms).values('id', 'name').order_by('sort_order'))
+    for wms in wms_qs:
+        layers = wms.wmslayer_set.all()
         wms_display = {
             'name': wms.name,
             'is_active': wms.is_active,
             'layer_visible': _layer_visible(layers),
-            'layers': layers,
+            'layers': [{"id": layer.id, "name": layer.name} for layer in layers],
         }
         form_options.append(wms_display)
 
@@ -140,8 +143,8 @@ def _get_wms_list(bundle):
     return wms_list
 
 
-def _get_bundle_display(bundle):
-    # roles = _get_form_check_options(bundle.id)
+def _get_bundle_display(bundle, has_role=True):
+    roles = _get_form_check_options(bundle.id) if has_role else ''
     wms_list = _get_wms_list(bundle)
     return {
         'id': bundle.id,
@@ -154,7 +157,7 @@ def _get_bundle_display(bundle):
         'icon_url': bundle.icon.url if bundle.icon else '',
         'is_removeable': bundle.is_removeable,
         'wms_list': wms_list,
-        # 'roles': roles
+        'roles': roles
     }
 
 
@@ -169,7 +172,7 @@ def all(request):
     qs = qs.select_related('ltheme')
 
     bundle_list = [
-        _get_bundle_display(bundle)
+        _get_bundle_display(bundle, has_role=False)
         for bundle in qs
     ]
 
@@ -183,7 +186,15 @@ def all(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def detail(request, pk):
-    bundle = get_object_or_404(Bundle, pk=pk)
+    bundle_qs = Bundle.objects.filter(pk=pk)
+    if not bundle_qs:
+        raise Http404
+
+    bundle_qs = bundle_qs.prefetch_related('bundlelayer_set__layer__wms')
+    bundle_qs = bundle_qs.prefetch_related('layers')
+    bundle_qs = bundle_qs.select_related('ltheme')
+    bundle = bundle_qs.first()
+
     bundle_list = _get_bundle_display(bundle)
     rsp = {
         'bundle_list': bundle_list,
