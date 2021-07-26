@@ -106,6 +106,7 @@ export default class BarilgaSuurinGazar extends Component{
           wfs_url: '',
           api_links: {},
           is_delete_request: false,
+          is_first: true
       }
 
       this.controls = {
@@ -274,7 +275,7 @@ export default class BarilgaSuurinGazar extends Component{
       })}
 
       this.setState({map_wms})
-      map_wms.tile.setZIndex(2)
+      map_wms.tile.setZIndex(1000) // TODO үндсэн давхарга хамгийн наана харагдана
       this.map.addLayer(map_wms.tile);
 
       const Mongolia_feaure = (new GeoJSON().readFeatures(Mongolia_boundary, {
@@ -1161,18 +1162,22 @@ export default class BarilgaSuurinGazar extends Component{
       this.setState({ showUpload: false })
     }
 
-    SideBarBtn(){
+    async SideBarBtn(){
       this.setInActiveButtonStyle('side')
-      service
-        .getLayers().then(({success, layer_choices}) => {
-          if (success) {
-            this.setState({layer_choices})
-            this.WmsTile(layer_choices)
-          }
-      })
+      const { is_first, fid } = this.state
+      if (is_first) {
+        await service
+          .getLayers(fid).then(({ success, layer_choices }) => {
+            if (success) {
+              this.setState({ layer_choices, is_first: false })
+            }
+          })
+      }
+      this.WmsTile()
     }
 
-    WmsTile(layer_choices){
+    WmsTile(){
+      const layer_choices = this.state.layer_choices
       const map = this.map
       const wms_map_list = {
             name: "Таны харах эрхтэй давхаргууд",

@@ -183,11 +183,11 @@ function deleteMeta(pk) {
     return fetch(`${meta_prefix}/${pk}/delete/`, requestOptions).then(handleResponse)
 }
 
-function getLayers() {
+function getLayers(fid) {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch(`${prefix}/get-layers/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/get-layers/${fid}/`, requestOptions).then(handleResponse)
 }
 function qgisGetUrl(fid) {
     const requestOptions = getGetOptions()

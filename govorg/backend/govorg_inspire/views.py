@@ -1233,11 +1233,12 @@ def _make_layer_code(feature):
 @ajax_required
 @gov_required
 @login_required(login_url='/gov/secure/login/')
-def get_layers(request):
+def get_layers(request, fid):
     user = request.user
     employee = get_object_or_404(Employee, user=user)
     perm = employee.empperm_set.first()
     feature_ids = perm.empperminspire_set.distinct('feature_id').values_list('feature_id', flat=True)
+    feature_ids = feature_ids.filter(~Q(feature_id=fid))
     layer_choices = list()
 
     qs_feature = LFeatures.objects
