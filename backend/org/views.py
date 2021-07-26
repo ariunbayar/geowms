@@ -19,7 +19,7 @@ from django.conf import settings
 from django.forms.models import model_to_dict
 
 from backend.govorg.models import GovOrg
-from backend.inspire.models import LDataTypes, LFeatureConfigs, LPackages, LThemes
+from backend.inspire.models import LThemes
 from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
 from backend.inspire.models import EmpPerm
@@ -639,44 +639,6 @@ def remove_role(request, pk):
 
     return JsonResponse(rsp)
 
-# start = utils.start_time()
-# themes = LThemes.objects
-# themes = themes.order_by('theme_id')
-# themes = themes.prefetch_related('lpackages_set__lfeatures_set__lfeatureconfigs_set__data_type__ldatatypeconfigs_set__property')
-# for theme in themes:
-#     packages = theme.lpackages_set.all()
-#     for pack in packages:
-#         features = pack.lfeatures_set.all()
-#         for feature in features:
-#             feature_configs = feature.lfeatureconfigs_set.all()
-#             for feature_config in feature_configs:
-#                 data_type = feature_config.data_type
-#                 if data_type:
-#                     data_type_configs = data_type.ldatatypeconfigs_set.all()
-#                     for data_type_config in data_type_configs:
-#                         prop = data_type_config.property
-#                         if prop:
-#                             print(prop.property_code)
-# utils.end_time(start, '>hahaha')
-# data_type = LDataTypes.objects.filter(data_type_id=602022).values().first()
-# LDataTypes.objects.using('local').create(**data_type)
-# feature_id = 30101
-# start = utils.start_time()
-# gov_role_qs = GovRole.objects.filter(pk=7)
-# gov_role_qs = gov_role_qs.prefetch_related('govroleinspire_set__data_type')
-# gov_role_qs = gov_role_qs.prefetch_related('govroleinspire_set__feature')
-# gov_role_qs = gov_role_qs.prefetch_related('govroleinspire_set__property')
-# gov_role = gov_role_qs.first()
-# role_inspire_perms = gov_role.govroleinspire_set.all()
-# for inspire_perm in role_inspire_perms:
-#     if inspire_perm.feature_id == feature_id:
-#         data_type = inspire_perm.data_type
-#         if data_type:
-#             print(data_type.data_type_code)
-#         prop = inspire_perm.property
-#         if prop:
-#             print("> prop", prop.property_code)
-# utils.end_time(start, "> test")
 
 @require_GET
 @ajax_required
@@ -690,9 +652,6 @@ def get_inspire_roles(request, pk):
     if not gov_role_qs:
         raise Http404
 
-    gov_role_qs = gov_role_qs.prefetch_related('govroleinspire_set__data_type')
-    gov_role_qs = gov_role_qs.prefetch_related('govroleinspire_set__feature')
-    gov_role_qs = gov_role_qs.prefetch_related('govroleinspire_set__property')
     gov_role = gov_role_qs.first()
 
     themes_qs = LThemes.objects
@@ -701,7 +660,7 @@ def get_inspire_roles(request, pk):
     role_inspire_perms = gov_role.govroleinspire_set.all()
 
     perm_count_qs = role_inspire_perms.filter(geom=True)
-    perm_count_qs = role_inspire_perms.values('perm_kind', 'feature_id')
+    perm_count_qs = perm_count_qs.values('perm_kind', 'feature_id')
     perm_count_qs = list(perm_count_qs.annotate(perm_count=Count('perm_kind')))
 
     for theme in themes_qs:
@@ -722,17 +681,10 @@ def get_inspire_roles(request, pk):
             }
         )
 
-    for datas in role_inspire_perms:
-        roles.append(
-            {
-                'perm_kind': datas.perm_kind,
-                'feature_id': datas.feature_id,
-                'data_type_id': datas.data_type_id,
-                'property_id': datas.property_id,
-                'geom': datas.geom,
-            }
-        )
+    startrole = utils.start_time()
+    roles = list(role_inspire_perms.values('perm_kind', 'feature_id', 'data_type_id', 'property_id', 'geom'))
 
+    utils.end_time(startrole, '> role')
     utils.end_time(start, '> total')
 
     return JsonResponse({

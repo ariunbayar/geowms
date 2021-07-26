@@ -235,7 +235,6 @@ def get_theme_packages_gov(theme, role_inspire_perms, perm_count_qs):
 
 
 def get_feature_property_gov(feature, role_inspire_perms, perm_count_qs):
-    start = utils.start_time()
     data_type_list = []
     feature_configs_qs = feature.lfeatureconfigs_set.all()
     feature_id = feature.feature_id
@@ -246,7 +245,9 @@ def get_feature_property_gov(feature, role_inspire_perms, perm_count_qs):
     perm_update = 0
     perm_approve = 0
     perm_revoke = 0
-    # inspire_qs = role_inspire_perms.filter(feature_id=feature_id)
+
+    inspire_qs = role_inspire_perms.filter(feature_id=feature_id)
+    inspire_perms = list(inspire_qs)
 
     for feature_config in feature_configs_qs:
         data_type = feature_config.data_type
@@ -274,8 +275,8 @@ def get_feature_property_gov(feature, role_inspire_perms, perm_count_qs):
                         'perm_approve': 0,
                         'perm_revoke': 0,
                     }
-                    for gov_role_inspire in role_inspire_perms:
-                        if (prop.property_id == gov_role_inspire.property_id) and feature_id == gov_role_inspire.feature_id and gov_role_inspire.data_type_id == data_type.data_type_id:
+                    for gov_role_inspire in inspire_perms:
+                        if (prop.property_id == gov_role_inspire.property_id) and gov_role_inspire.data_type_id == data_type.data_type_id:
                             if gov_role_inspire.perm_kind == GovRoleInspire.PERM_VIEW:
                                 perm_view = perm_view + 1
                                 property_obj['perm_view'] = property_obj['perm_view'] + 1
@@ -311,8 +312,6 @@ def get_feature_property_gov(feature, role_inspire_perms, perm_count_qs):
                 perm_approve = perm_approve + perm['perm_count']
             if perm['perm_kind'] == GovRoleInspire.PERM_REVOKE:
                 perm_revoke = perm_revoke + perm['perm_count']
-
-    # utils.end_time(start, '> proper')
 
     return data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke
 
