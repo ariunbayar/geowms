@@ -1,39 +1,31 @@
 import React, { Component } from "react"
-import {service} from '../service'
-import {QPay} from '../QPay/Qpay'
-import Modal from '@utils/Modal/Modal'
-import EmailModalForm from './EmailModalForm'
-import {Notif} from '@utils/Notification'
 
+import EmailModalForm from './EmailModalForm'
+import { QPay } from '../QPay/Qpay'
+
+import { service } from '../service'
 
 export class PolygonPurchase extends Component {
 
     constructor(props) {
         super(props)
 
-        this.too = 0
         this.state = {
             payment_id: this.props.match.params.id,
             items: {},
-            points: [],
             polygon: [],
             layers: [],
 
             purchase_all: [],
             qpay_modal_is: false,
-            is_modal_open: 'closed',
+            is_work_mn_bank: false,
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
-            email_modal_status: 'closed'
         }
 
         this.qPayClose = this.qPayClose.bind(this)
-        this.alertOver = this.alertOver.bind(this)
-        this.alertOut = this.alertOut.bind(this)
-        this.addNotif = this.addNotif.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
         this.handleUserEmailCheck = this.handleUserEmailCheck.bind(this)
         this.modalChange = this.modalChange.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     componentDidMount(){
@@ -46,21 +38,26 @@ export class PolygonPurchase extends Component {
               this.setState({ polygon, layers })
             }
             else {
-                this.addNotif('warning', info, 'exclamation')
+                global.NOTIF('warning', info, 'exclamation')
             }
-        }).catch(error => this.addNotif('danger', 'Алдаа гарсан', 'times'))
+        }).catch(error => global.NOTIF('danger', 'Алдаа гарсан', 'times'))
     }
 
-    modalChange(modal_icon, icon_color, title, text, has_button, modalClose) {
-        this.setState({
+    modalChange(modal_icon, icon_color, title, text, has_button, modalClose, modalAction, actionBtnName) {
+        const modal = {
+            modal_status: "open",
             modal_icon: modal_icon,
+            modal_bg: "",
             icon_color: icon_color,
             title: title,
             text: text,
             has_button: has_button,
-            modalClose: modalClose,
-        })
-        this.handleModalOpen()
+            actionNameBack: "Буцах",
+            actionNameDelete: actionBtnName,
+            modalAction: modalAction,
+            modalClose: modalClose
+        }
+        global.MODAL(modal)
     }
 
     successModal(info) {
@@ -74,58 +71,51 @@ export class PolygonPurchase extends Component {
         this.handleModalOpen()
     }
 
-    handleModalOpen() {
-        this.setState({ is_modal_open: 'open' }, () => {
-            this.setState({ is_modal_open: 'initial' })
-        })
-    }
-
-    addNotif(style, msg, icon){
-        this.too ++
-        this.setState({ show: true, style: style, msg: msg, icon: icon })
-        const time = setInterval(() => {
-            this.too --
-            this.setState({ show: true })
-            clearInterval(time)
-        }, 2000);
-    }
-
-    handlePayment (){
+    handlePayment () {
         const purchase_id = this.props.match.params.id
-        const {purchase_all} = this.state
-        service
-            .payment(purchase_all)
-            .then(({ success }) => {
-                if (success) {
-                    this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
-                } else {
-                    this.props.history.push(`/payment/failed/${purchase_id}/`)
-                }
-            })
-    }
-
-    handleFormModalOpen(){
-        this.setState({ email_modal_status: 'open' })
-    }
-
-    handleFormModalClose(){
-        this.setState({ email_modal_status: 'closed' })
+        const { purchase_all, is_work_mn_bank } = this.state
+        if (is_work_mn_bank) {
+            service
+                .payment(purchase_all)
+                .then(({ success }) => {
+                    if (success) {
+                        this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
+                    } else {
+                        this.props.history.push(`/payment/failed/${purchase_id}/`)
+                    }
+                })
+        }
     }
 
     handleUserEmailCheck(){
-        service.userEmailCheck().then(({success}) => {
-            if (success) {
-                this.modalChange(
-                    'fa fa-exclamation-circle',
-                    "warning",
-                    'Анхааруулга',
-                    'QPay-ээр төлбөр төлөхөд шимтгэл авахыг анхаарна уу!',
-                    true
-                )
-                this.handleModalOpen()
-            }
-            else this.handleFormModalOpen()
-        })
+        service
+            .userEmailCheck()
+            .then(({ success }) => {
+                if (success) {
+                    this.modalChange(
+                        'fa fa-exclamation-circle',
+                        "warning",
+                        'Анхааруулга',
+                        'QPay-ээр төлбөр төлөхөд шимтгэл авахыг анхаарна уу!',
+                        true,
+                        null,
+                        () => this.handleQpay(),
+                        'Үргэлжлүүлэх'
+                    )
+                }
+                else {
+                    this.modalChange(
+                        '',
+                        "",
+                        '',
+                        <EmailModalForm
+                            modalAction={(info) => this.successModal(info)}
+                            modalClose={() => this.handleFormModalClose()}
+                        />,
+                        false
+                    )
+                }
+            })
     }
 
     handleModalApproveClose() {
@@ -136,37 +126,35 @@ export class PolygonPurchase extends Component {
         this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
     }
 
-    handleQpay(){
+    handleQpay() {
         this.setState(prevState => ({
-            is_modal_open: 'closed',
             qpay_modal_is: !prevState.qpay_modal_is,
         }))
     }
 
-    qPayClose(is_success){
-        this.modalChange(
-            'fa fa-check-circle',
-            "success",
-            'Худалдан авалтын мэдээлэл',
-            'Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.',
-            false,
-            () => this.handleModalApproveClose()
-        )
-        this.setState({ qpay_modal_is: false, is_modal_open: 'open' })
+    qPayClose(is_success) {
+        if (is_success) {
+            this.modalChange(
+                'fa fa-check-circle',
+                "success",
+                'Худалдан авалтын мэдээлэл',
+                'Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.',
+                false,
+                () => this.handleModalApproveClose(),
+                null,
+                'Үргэлжлүүлэх',
+            )
+        }
+        this.setState({ qpay_modal_is: false })
     }
 
-    alertOver(){
-        this.setState({ alert_msg: "Засвартай байгаа" })
-    }
-
-    alertOut(){
-        this.setState({ alert_msg: "Монгол Банкаар төлбөр төлөх" })
+    setAlert(alert_msg) {
+        this.setState({ alert_msg })
     }
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { alert_msg, is_modal_open } = this.state
-        const { items, layers, email_modal_status} = this.state
+        const { items, layers, is_work_mn_bank, alert_msg } = this.state
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
@@ -180,26 +168,26 @@ export class PolygonPurchase extends Component {
                                     Худалдан авалтын мэдээлэл
                                 </th>
                             </tr>
-
                             <tr className="text-center">
-                              <th>
-                                  Бүтээгдэхүүний нэр
-                              </th>
-                              <th>
-                                  Үнэ
-                              </th>
+                                <th>
+                                    Бүтээгдэхүүний нэр
+                                </th>
+                                <th>
+                                    Үнэ
+                                </th>
                             </tr>
                             {
-                              layers.map((value, key) =>
-                                <tr key={key}>
-                                    <td>
-                                        {value.name}
-                                    </td>
-                                    <td>
-                                        {value.amount}₮
-                                    </td>
-                                </tr>
-                            )}
+                                layers.map((value, key) =>
+                                    <tr key={key}>
+                                        <td>
+                                            {value.name}
+                                        </td>
+                                        <td>
+                                            {value.amount}₮
+                                        </td>
+                                    </tr>
+                                )
+                            }
                             <tr>
                                 <td><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Гүйлгээний дугаар</td>
                                 <td>{items.geo_unique_number}</td>
@@ -214,36 +202,19 @@ export class PolygonPurchase extends Component {
                         <div className="col-md-6">
                             <button style={{width:'80%'}}
                                 className="btn gp-btn-primary text-center btn-lg mt-3"
-                                disabled
-                                onMouseOut={() => this.alertOut()}
-                                onMouseOver={() => this.alertOver()}
+                                disabled={!is_work_mn_bank}
+                                onMouseOut={() => this.setAlert("Монгол Банкаар төлбөр төлөх")}
+                                onMouseOver={() => this.setAlert("Засвартай байгаа")}
                                 onClick={() => this.handlePayment()}
                             >
-                                <h4 className="text-succes p-3">{alert_msg}</h4>
+                                <h4 className="text-succes p-3 text-white">{alert_msg}</h4>
                             </button>
                         </div>
                         <div className="col-md-6">
                             <button type="button" data-toggle="modal" style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleUserEmailCheck()}>
-                                <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
+                                <h4 className="text-succes p-3 text-white">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
-                        <Modal
-                            modalAction={() => this.handleQpay()}
-                            actionNameDelete="Үргэлжлүүлэх"
-                            model_type_icon="warning"
-                            modal_status={is_modal_open}
-                            modal_icon={this.state.modal_icon}
-                            icon_color={this.state.icon_color}
-                            title={this.state.title}
-                            text={this.state.text}
-                            has_button={this.state.has_button}
-                            modalClose={this.state.modalClose}
-                        />
-                        <EmailModalForm
-                            modalAction={(info) => this.successModal(info)}
-                            modalClose={() => this.handleFormModalClose()}
-                            status={email_modal_status}
-                        />
                     </div>
                 </div>
             </div>
@@ -255,7 +226,6 @@ export class PolygonPurchase extends Component {
                             qpay_open={this.state.qpay_modal_is}
                             handleClose={this.qPayClose}
                             history={this.props.history.push}
-                            addNotif={this.addNotif}
                         />
                         <button type="button" data-toggle="modal" className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
                             <a className="text-succes ">Гарах</a>
@@ -264,7 +234,6 @@ export class PolygonPurchase extends Component {
                 </div>
             </div>
             <div className={this.state.qpay_modal_is ? 'modal-backdrop fade show' : 'd-none'}></div>
-            <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
         </div>
         )
     }

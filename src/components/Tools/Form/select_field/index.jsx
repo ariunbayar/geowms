@@ -2,14 +2,15 @@ import React, { Component } from 'react';
 
 // <SelectField
 //     state_name='feature'
-//     data_list={selected_features}                       //сонголтын жагсаалт
+//     data_list={selected_features}                  //сонголтын жагсаалт
 //     default_value={feature_name}
-//     name_key                                           // data_list датанаас грүппын нэрийг агуулсан key
-//     opt_key                                            // data_list датанаас тухайн грүппийн сонголтын агуулсан key
-//     option_name                                        // сонголтын нэр
-//     option_key                                        // сонголтын value
-//     className={"comd-4"}                             // Класс өгч болно
-//     default_text={'feature-ийн нэр сонгоно уу'}     // select input - ийг сонгоогүй үед харагдах анхны утга
+//     name_key                                       // data_list датанаас грүппын нэрийг агуулсан key
+//     opt_key                                        // data_list датанаас тухайн грүппийн сонголтын агуулсан key
+//     option_name                                    // сонголтын нэр
+//     option_key                                     // сонголтын value
+//     errors                                         // validition алдаануудыг харуулна
+//     className={"comd-4"}                           // Класс өгч болно
+//     default_text={'feature-ийн нэр сонгоно уу'}    // select input - ийг сонгоогүй үед харагдах анхны утга
 //     handleSelectField={this.handleChange}          // сонголт буцаах функц
 // />
 
@@ -24,6 +25,7 @@ import React, { Component } from 'react';
     state_name='package'
     option_name = "name"
     option_key = "code"
+    errors = {"feild_name": "TODO", "errors": ['error1, 'error2']}
     data_list={selected_packages}
     default_value={package_name}
     className={"col-md-4"}
@@ -43,7 +45,7 @@ export default class SelectField extends Component {
         this.dataSelection = this.dataSelection.bind(this)
     }
 
-    dataSelection(e){
+    dataSelection(e) {
         const selection_value = e.target.value
         const { data_list,
                 state_name, name_key,
@@ -51,15 +53,15 @@ export default class SelectField extends Component {
         } = this.props
 
         data_list.map((row, idx) => {
-            if (name_key){
+            if (name_key) {
                 row[opt_key].map((data, idx) => {
-                    if(selection_value == data[option_key]){
+                    if(selection_value == data[option_key]) {
                         this.props.handleSelectField(state_name, data, e)
                     }
                 })
             }
             else {
-                if (selection_value == row[option_key]){
+                if (selection_value == row[option_key]) {
                     this.props.handleSelectField(state_name, row, e)
                 }
             }
@@ -68,7 +70,7 @@ export default class SelectField extends Component {
     }
 
     render() {
-        const { default_value, label,
+        const { default_value, label, errors, state_name,
                 default_text, option_key, option_name,
                 opt_key, name_key, className, data_list,
                 option_text, disabled, option_name_2, display_mode,
@@ -88,34 +90,47 @@ export default class SelectField extends Component {
                 >
                     <option value=''>---{default_text ? default_text : ''} ---</option>
                     {
-                    name_key
-                    ?
-                        data_list.map((data, idx) =>
-                            <optgroup
-                                key={idx}
-                                label={ data[name_key] }
-                                value={default_value}
-                            >
-                            {
-                                    OptionComp (data[opt_key], option_key, option_name, option_name_2, option_text, display_mode)
-                            }
-                            </optgroup>
-                        )
-                    :
-                        OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode)
-                }
+                        name_key
+                        ?
+                            data_list.map((data, idx) =>
+                                <optgroup
+                                    key={idx}
+                                    label={data[name_key]}
+                                    value={default_value}
+                                >
+                                    {OptionComp (data[opt_key], option_key, option_name, option_name_2, option_text, display_mode)}
+                                </optgroup>
+                            )
+                        :
+                            OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode)
+                    }
                 </select>
-                </div>
+                {/* TODO Алдааны message өгөхөд ашиглана */}
+                {
+                    errors &&
+                        errors.map((row) =>
+                            row['field_name'] === state_name
+                            &&
+                                row['errors'].map((error, idx) =>
+                                    <div key={idx} className='form-group-row'>
+                                        <small className="text-danger">
+                                            {error}
+                                        </small>
+                                    </div>
+                                )
+                        )
+                }
+            </div>
         );
     }
 }
 
 
-function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode){
+function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode) {
     var option_data = option_name
     if (option_text) option_data = option_text
     const options =
-        (options_data && options_data.length >0)
+        (options_data && options_data.length > 0)
         &&
             options_data.map((row, idx) =>
                 <option
@@ -125,7 +140,6 @@ function OptionComp (options_data,  option_key, option_name, option_name_2, opti
                 >
                     {
                         display_mode
-
                         ?
                             row[option_data]  + "   (   " + row[option_name_2] + "   )   "
                         :

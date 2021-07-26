@@ -17,7 +17,6 @@ export class LLCDetail extends Component {
             vector_datas: [],
             disabled: true,
             aimag_name: '',
-            values: [],
             selected_tools: [],
             modal_status: 'closed',
         }
@@ -50,9 +49,8 @@ export class LLCDetail extends Component {
     handleModalOpen(values) {
         this.modalChange(
             'Багажны мэдээлэл',
-            DetailModal,
+            <DetailModal values={values}/>,
             this.modalChange,
-            values
         )
     }
 
@@ -66,12 +64,11 @@ export class LLCDetail extends Component {
         this.setState({ modal_status: 'closed' })
     }
 
-    modalChange(title, text, modalClose, values) {
+    modalChange(title, text, modalClose) {
         this.setState({
             title: title,
             text: text,
             modalClose: modalClose,
-            values
         })
         this.modalOpen()
     }
@@ -214,7 +211,6 @@ export class LLCDetail extends Component {
                     modal_status={modal_status}
                     title={title}
                     text={text}
-                    {...this.state}
                     modalClose={this.modalClose}
                 />
             </div>

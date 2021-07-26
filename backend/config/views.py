@@ -16,16 +16,19 @@ from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.utils.timezone import localtime
+
 from backend.bundle.models import Bundle
 from backend.inspire.models import LCodeLists, LProperties, LThemes
 from .models import Config
 from backend.inspire.models import LValueTypes
 from backend.org.models import Org
 from backend.config.models import Error500
+
 from main.decorators import ajax_required
 from main import geoserver, utils
 
-CACHE_TIMEOUT_DISK_INFO = 5
+
+CACHE_TIMEOUT_DISK_INFO = 10
 
 
 def _get_disk_info():
@@ -631,9 +634,6 @@ def check_qgis_path(request):
         file_detail['name'] = file_name
         file_detail['size'] = os.path.getsize(file_path)
         file_list.append(file_detail)
-    print("hoho")
-    print("hoho")
-    print("hoho",  file_list)
     return JsonResponse ({
         'files': file_list
     })

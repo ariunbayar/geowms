@@ -10,7 +10,7 @@ export class List extends Component {
         super(props)
 
         this.state = {
-            list_all:[],
+            list_all: [],
             feature_lists: [],
             check: '',
             form_is_laod: true,
@@ -54,14 +54,14 @@ export class List extends Component {
                     this.getProperties(code, feature_id)
                     this.setState({ hideRight: true })
                 }
-                if ( formLorR == 'left') this.setState({ hideRight: false })
+                if (formLorR == 'left') this.setState({ hideRight: false })
             })
     }
 
     getProperties(code, feature_id) {
         this.setState({ form_is_laod: true })
         service.getprop(code).then(rsp => {
-            if(rsp.success){
+            if(rsp.success) {
                 this.setState({
                     feature_lists: rsp.feature_lists,
                     check: rsp.check,
@@ -79,7 +79,6 @@ export class List extends Component {
         }
         else {
             this.setState({ form_is_laod: false, model_name, model_id, edit_name: '', hideRight: true })
-
         }
     }
 
@@ -92,27 +91,27 @@ export class List extends Component {
         }
     }
 
-    done(){
-        this.setState({form_is_laod_left: true})
+    done() {
+        this.setState({ form_is_laod_left: true })
     }
 
-    isDelete(){
+    isDelete() {
         this.setState({ is_delete: !this.state.is_delete })
     }
 
     remove(model_name, model_id, name, formLorR) {
         const modal = {
             modal_status: "open",
-            modal_icon: modal_icon,
-            modal_bg: modal_bg,
-            icon_color: icon_color,
-            title: title,
-            text: text,
-            has_button: has_button,
-            actionNameBack: actionNameBack,
-            actionNameDelete: actionNameDelete,
-            modalAction: modalAction,
-            modalClose: modalClose
+            modal_icon: "fa fa-exclamation-circle",
+            modal_bg: '',
+            icon_color: 'warning',
+            title: 'Устгах',
+            text: `Та "${name}" нэртэй "${model_name}"-г устгахдаа итгэлтэй байна уу?`,
+            has_button: true,
+            actionNameBack: 'Үгүй',
+            actionNameDelete: 'Тийм',
+            modalAction: () => this.deleteAndRemove(model_name, model_id),
+            modalClose: null
         }
         global.MODAL(modal)
         this.setState({ model_name, model_id, name, formLorR })
@@ -121,11 +120,24 @@ export class List extends Component {
     deleteAndRemove(model_name, model_id){
         service.remove(model_name, model_id).then(({ success, info }) => {
             if (success) {
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: "fa fa-check-circle",
+                    icon_color: "success",
+                    title: info,
+                }
+                global.MODAL(modal)
                 this.setState({ hideRight: false })
                 this.getAll();
             }
             else {
-                alert(info)
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: "fa fa-times-circle",
+                    icon_color: "danger",
+                    title: info,
+                }
+                global.MODAL(modal)
             }
             this.setState({ info, top_id: '' })
         })
@@ -295,8 +307,6 @@ export class List extends Component {
                                     />
                                 </div>
                         }
-
-
                     </div>
                 </div>
                 <div className="card col-md-8" style={{left:"10px"}}>

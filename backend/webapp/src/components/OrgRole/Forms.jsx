@@ -1,8 +1,6 @@
 import React, { Component } from "react"
-import {NavLink} from "react-router-dom"
-import { Formik, Form, Field, ErrorMessage, validateYupSchema} from 'formik'
+import { Formik, Form, Field, ErrorMessage } from 'formik'
 import {validationSchema} from './validationSchema'
-import Modal from "@utils/Modal/Modal"
 import {service} from "./service"
 
 
@@ -21,12 +19,15 @@ export class Forms extends Component {
     }
 
     componentDidMount() {
-        this.getDetail()
+        const id = this.props.match.params.id
+        if (id) {
+            this.getDetail(id)
+        }
     }
 
-    getDetail() {
+    getDetail(id) {
         service
-            .getDetailRole(this.props.match.params.id)
+            .getDetailRole(id)
             .then(({ success, name, description }) => {
                 if (success) {
                     this.setState({
@@ -73,13 +74,6 @@ export class Forms extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="text-left">
-                        <NavLink to={`/back/org-role/`}>
-                            <p className="btn gp-outline-primary">
-                                <i className="fa fa-angle-double-left"> Буцах</i>
-                            </p>
-                        </NavLink>
-                    </div>
                     <div className="row">
                         <div className="col-md-4">
                             <Formik

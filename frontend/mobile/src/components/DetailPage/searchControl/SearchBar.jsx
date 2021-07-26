@@ -115,9 +115,9 @@ export class SearchBarComponent extends Component {
     getGeom(geo_id) {
         service
             .getGeom(geo_id)
-            .then(({ feature }) => {
-                if (feature) {
-                    this.props.setFeatureOnMap(feature)
+            .then(({ data }) => {
+                if (data) {
+                    this.props.setFeatureOnMap(data)
                 }
             })
             .catch((error) => alert("Алдаа гарсан байна"))

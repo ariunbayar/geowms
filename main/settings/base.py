@@ -84,7 +84,6 @@ INSTALLED_APPS = [
     'govorg.backend.system.apps.SystemConfig',
     'govorg.backend.govorg_inspire.apps.InspireConfig',
     'govorg.backend.org_request.apps.OrgRequestConfig',
-    'govorg.backend.zipcode.apps.ZipcodeConfig',
     'govorg.backend.forms.apps.FormsConfig',
     'govorg.backend.meta_data.apps.MetaDataConfig',
     'govorg.backend.revoke_request.apps.RevokeRequestConfig',

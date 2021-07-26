@@ -37,7 +37,7 @@ class Position(models.Model):
         db_table = "backend_org_position"
 
     name = models.CharField(max_length=250, verbose_name='Албан тушаалын нэр')
-    org = models.ForeignKey(Org, on_delete=models.PROTECT, default=1)
+    org = models.ForeignKey(Org, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)

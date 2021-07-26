@@ -34,6 +34,9 @@ function DisplayModal(props) {
                 setModalStatus(modal_status)
             }, 150);
         }
+        else {
+            setModalStatus(modal_status)
+        }
     }
 
     const setModal = (modal_info) => {
