@@ -1524,7 +1524,6 @@ def get_popup_info(request, payload):
     radius = int(payload.get('scale_value'))
     radius = _radius_formula(radius)
 
-    infos = list()
     send_features = list()
     views_qs = ViewNames.objects
     views_qs = views_qs.filter(
@@ -1583,7 +1582,6 @@ def get_popup_info(request, payload):
         content = utils.json_load(content)
         features = content['features']
         for feature in features:
-            send_feature = dict()
             ps = feature['properties']
             ps[geo_id] = ps[gs_geo_id]
             del ps[gs_geo_id]
@@ -1591,18 +1589,16 @@ def get_popup_info(request, payload):
             datas = list()
             datas.append(layer_code)
             datas.append(list())
+            datas.append(utils.get_feature_from_geojson(feature['geometry']))
             for key, value in ps.items():
                 if key == geo_id:
                     datas[1].append([key, value, key])
                 for prop in properties:
                     if prop['property_code'].lower() == key and value:
                         datas[1].append([prop['property_name'], str(value), key])
-            if datas:
-                infos.append(datas)
 
-            send_feature['properties'] = datas
-            send_feature['geometry'] = utils.get_feature_from_geojson(feature['geometry'])
-            send_features.append(send_feature)
+            if datas:
+                send_features.append(datas)
 
     rsp = {
         'datas': send_features,
