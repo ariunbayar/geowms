@@ -56,20 +56,21 @@ export default class SelectField extends Component {
         const selection_value = e.target.value
         const { data_list,
                 state_name, name_key,
-                opt_key, option_key
+                opt_key, option_key,
+                bracket_options
         } = this.props
 
         data_list.map((row, idx) => {
             if (name_key) {
                 row[opt_key].map((data, idx) => {
                     if(selection_value == data[option_key]) {
-                        this.props.handleSelectField(state_name, data, e)
+                        this.props.handleSelectField(state_name, bracket_options, data, e)
                     }
                 })
             }
             else {
                 if (selection_value == row[option_key]) {
-                    this.props.handleSelectField(state_name, row, e)
+                    this.props.handleSelectField(state_name, bracket_options,row, e)
                 }
             }
         })
@@ -81,6 +82,7 @@ export default class SelectField extends Component {
                 default_text, option_key, option_name,
                 opt_key, name_key, className, data_list,
                 option_text, disabled, option_name_2, display_mode,
+                bracket_option,
         } = this.props
         const state = this.state
         var { bracket_options } = this.state
@@ -106,11 +108,11 @@ export default class SelectField extends Component {
                                     label={data[name_key]}
                                     value={default_value}
                                 >
-                                    {OptionComp (data[opt_key], option_key, option_name, option_name_2, option_text, display_mode)}
+                                    {OptionComp (data[opt_key], option_key, option_name, option_name_2, option_text, display_mode, bracket_option, bracket_options)}
                                 </optgroup>
                             )
                         :
-                            OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode)
+                            OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode, bracket_option, bracket_options)
                     }
                 </select>
                 {/* TODO Алдааны message өгөхөд ашиглана */}
@@ -134,7 +136,7 @@ export default class SelectField extends Component {
 }
 
 
-function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode, bracket_options) {
+function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode, bracket_option, bracket_options) {
     var option_data = option_name
     if (option_text) option_data = option_text
     const options =
@@ -145,11 +147,12 @@ function OptionComp (options_data,  option_key, option_name, option_name_2, opti
                     key={idx}
                     name={row[option_name]}
                     value={row[option_key]}
+                    bracket_options={bracket_options[bracket_option]}
                 >
                     {
                         display_mode
                         ?
-                            row[option_data]  + bracket_option[bracket_options.open] + row[option_name_2] + bracket_option[bracket_options.close]
+                            row[option_data]  + bracket_options[bracket_option].open + row[option_name_2] + bracket_options[bracket_option].close
                         :
                             row[option_data]
                     }
