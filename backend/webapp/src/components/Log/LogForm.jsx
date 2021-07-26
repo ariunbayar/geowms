@@ -50,7 +50,6 @@ export class LogForm extends Component {
         }
     }
 
-
     render() {
         const {
             refresh,
