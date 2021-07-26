@@ -47,6 +47,8 @@ export class LogForm extends Component {
         var icon
         if(values) {
             return icon = "text-success fa fa-check-circle-o"
+        } else {
+            return icon = "text-danger fa fa-times"
         }
     }
 
