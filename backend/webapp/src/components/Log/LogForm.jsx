@@ -12,7 +12,7 @@ export class LogForm extends Component {
             custom_query: {},
             талбарууд: [
                 {'field': 'user_firstname', "title": 'Хэрэглэгч', 'has_action': true},
-                {'field': 'is_success', "title": 'Төлөв', 'has_action':true},
+                {'field': 'is_success', "title": 'Төлөв', 'has_action': true},
                 {'field': 'total_amount', "title": 'Нийт дүн'},
                 {'field': 'description', "title": 'Тодорхойлолт'},
                 {'field': 'code', "title": 'Код'},
