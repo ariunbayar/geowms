@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import user_passes_test
 from main.decorators import ajax_required
-from main.utils import resize_b64_to_sizes
+from main.utils import end_time, resize_b64_to_sizes, start_time
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import Role
@@ -122,18 +122,39 @@ def _get_form_check_options(bundleId):
     return roleOptions
 
 
+def _get_wms_list(bundle):
+    wms_list = list()
+    wms_ids = list()
+    bundle_layers = bundle.bundlelayer_set.all()
+    for bundle_layer in bundle_layers:
+        wms_id = bundle_layer.layer.wms.id
+        if wms_id not in wms_ids:
+            wms_list.append(
+                {
+                    'name': (bundle_layer.layer.wms.name),
+                    'is_active': (
+                        bundle_layer.layer.wms.is_active)
+                }
+            )
+        wms_ids.append(wms_id)
+    return wms_list
+
+
 def _get_bundle_display(bundle):
-    roles = _get_form_check_options(bundle.id)
-    theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
+    # roles = _get_form_check_options(bundle.id)
+    wms_list = _get_wms_list(bundle)
     return {
         'id': bundle.id,
-        'name': theme.theme_name if theme else '',
-        'layers': list(bundle.layers.all().values_list('id', flat=True)),
+        'name': bundle.ltheme.theme_name if bundle.ltheme else '',
+        'layers': [
+            layer.id
+            for layer in bundle.layers.all()
+        ],
         'icon': '',
         'icon_url': bundle.icon.url if bundle.icon else '',
         'is_removeable': bundle.is_removeable,
-        'wms_list': [{'name': (WMS.objects.get(pk=wms[0]).name), 'is_active':(WMS.objects.get(pk=wms[0]).is_active)} for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
-        'roles': roles
+        'wms_list': wms_list,
+        # 'roles': roles
     }
 
 
@@ -141,7 +162,17 @@ def _get_bundle_display(bundle):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def all(request):
-    bundle_list = [_get_bundle_display(bundle) for bundle in Bundle.objects.all().order_by('sort_order')]
+
+    qs = Bundle.objects.order_by('sort_order')
+    qs = qs.prefetch_related('bundlelayer_set__layer__wms')
+    qs = qs.prefetch_related('layers')
+    qs = qs.select_related('ltheme')
+
+    bundle_list = [
+        _get_bundle_display(bundle)
+        for bundle in qs
+    ]
+
     rsp = {
         'bundle_list': bundle_list,
     }
