@@ -1096,6 +1096,7 @@ def create_index(model_name, field):
 
 def unzip(path_zip_file, extract_path):
     is_unzipped = False
+
     with zipfile.ZipFile(path_zip_file, 'r') as zip_ref:
         is_unzipped = True
         zip_ref.extractall(extract_path)
