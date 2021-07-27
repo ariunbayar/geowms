@@ -45,7 +45,7 @@ export default class SelectField extends Component {
             selected_value: '',
             bracket_options:[
                 {open: '(', close: ')'},
-                {open:"'", close: "'"},
+                {open: '"', close: '"'},
                 {open:"/", close:"/"}
             ]
         }
@@ -152,7 +152,7 @@ function OptionComp (options_data,  option_key, option_name, option_name_2, opti
                     {
                         display_mode
                         ?
-                            row[option_data]  + bracket_style.open + row[option_name_2] + bracket_style.close
+                            row[option_data]  + " " + bracket_style.open + row[option_name_2] + bracket_style.close
                         :
                             row[option_data]
                     }
