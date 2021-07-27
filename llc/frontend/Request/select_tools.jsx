@@ -9,7 +9,6 @@ export default class UsedTools extends Component {
     constructor(props) {
         super(props)
         this.state = {
-
             modal_status: 'closed',
             selected_tools: [],
         }
@@ -46,7 +45,7 @@ export default class UsedTools extends Component {
         this.modalChange(
             'Эрх бүхий багажны жагсаалт',
             <ModelSelectTools
-                list_of_datas={values}
+                list_of_datas={ values }
                 modal_comp_props={{
                     handleSelectedTool: this.handleSelectedTool
                 }}
@@ -70,7 +69,7 @@ export default class UsedTools extends Component {
         this.modalOpen()
     }
 
-    render (){
+    render() {
         const {
             tool_datas, info, state, selected_tools
         } = this.props.values

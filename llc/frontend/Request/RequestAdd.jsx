@@ -17,7 +17,7 @@ class SubmitClass extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
     }
 
-    componentDidUpdate(pP, pS){
+    componentDidUpdate(pP, pS) {
         const { valid_request, values } = this.props
         var forms = document.getElementsByClassName('form-control')
         if (valid_request.length == forms.length ) {
@@ -49,7 +49,7 @@ class SubmitClass extends Component {
         if (id) {
             if (!file_state) {
                 const obj = file
-                blob = new Blob([JSON.stringify(obj, null, 2)], {type : 'application/vnd.rar'})
+                blob = new Blob([JSON.stringify(obj, null, 2)], { type : 'application/vnd.rar' })
             }
             else blob = file
         }
@@ -129,11 +129,11 @@ export class RequestAdd extends Component {
             object_count: '',
             hurungu_oruulalt: 1,
             zahialagch: '',
-            modal_status:'closed',
+            modal_status: 'closed',
             vector_datas: [],
             tool_datas: [],
             selected_tools: [],
-            file_name:'',
+            file_name: '',
             state: '',
             file_state: false,
             aimag_name: '',
@@ -189,7 +189,7 @@ export class RequestAdd extends Component {
         service
             .getToolDatas()
             .then(({ tool_datas }) => {
-                this.setState({tool_datas})
+                this.setState({ tool_datas })
             })
     }
 
@@ -213,7 +213,7 @@ export class RequestAdd extends Component {
         this.setState({ [name]: value })
     }
 
-    getFile(files){
+    getFile(files) {
         const { id } = this.props.match.params
         var { file_name, file_state } = this.state
         const file = files[0]
@@ -226,7 +226,7 @@ export class RequestAdd extends Component {
         this.setState({ files, file_name, file_state })
     }
 
-    validationForm (){
+    validationForm() {
         var forms = document.getElementsByClassName('form-control')
         for (var i = 0; i < forms.length; i++) {
             let form = forms[i]
@@ -249,7 +249,7 @@ export class RequestAdd extends Component {
         this.setState({ modal_status: 'closed' })
     }
 
-    handleModalOpen(){
+    handleModalOpen() {
         this.setState({ modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
         })
@@ -310,9 +310,11 @@ export class RequestAdd extends Component {
         })
         this.handleModalOpen()
     }
-    enableLoader(state){
+
+    enableLoader(state) {
         this.setState({ is_loading: state })
     }
+
     render (){
         const { id, info } = this.props.match.params
         return (

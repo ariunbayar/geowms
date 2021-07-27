@@ -3,7 +3,7 @@ import Loader from "@utils/Loader"
 import SelectField from '@utils/Tools/Form/select_field'
 import FileUpload from '@utils/Tools/FileUpload'
 
-import {LLCMap} from '../LLCMap'
+import { LLCMap } from '../LLCMap'
 import UsedTools from './select_tools'
 
 export default class RequestDetail extends Component {
@@ -20,10 +20,10 @@ export default class RequestDetail extends Component {
             form_checked: false,
             hide_file: false,
             investment_status: [
-                {id:1, name: "Төсөл, хөтөлбөрийн"},
-                {id:2, name: "Орон нутгийн"},
-                {id:3, name: "Улсын төсвийн"},
-                {id:4, name: "Хувийн"},
+                {id: 1, name: "Төсөл, хөтөлбөрийн"},
+                {id: 2, name: "Орон нутгийн"},
+                {id: 3, name: "Улсын төсвийн"},
+                {id: 4, name: "Хувийн"},
             ]
         }
         this.handleLoaderActive = this.handleLoaderActive.bind(this)
@@ -49,8 +49,8 @@ export default class RequestDetail extends Component {
             }
         }
 
-        if(pP.geo_id !== geo_id){
-            if( geo_id == '496'){
+        if(pP.geo_id !== geo_id) {
+            if( geo_id == '496') {
                 this.setState({ form_checked: true })
             }
             else {
@@ -63,17 +63,16 @@ export default class RequestDetail extends Component {
         this.setState({ is_loading: status })
     }
 
-    getValueCheckbox(e){
+    getValueCheckbox(e) {
         const { geo_id } = this.props
         const checked = e.target.checked
-        if (checked == true){
+        if (checked == true) {
             this.setState({
                 nationwide: '496',
                 form_checked: true
             })
         }
         else{
-
             this.setState({
                 nationwide: geo_id,
                 form_checked: false

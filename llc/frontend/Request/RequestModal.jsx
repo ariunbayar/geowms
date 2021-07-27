@@ -7,130 +7,131 @@ import Loader from "@utils/Loader"
 
 class ActionClass extends Component {
     constructor(props) {
-            super(props)
-            this.state = {
-                url: "/llc/llc-request/",
-                modal_status: 'closed',
-                is_loading:false,
-            }
-            this.handleSubmit = this.handleSubmit.bind(this)
-            this.modalClose = this.modalClose.bind(this)
-            this.modalOpen = this.modalOpen.bind(this)
-            this.handleModalOpen = this.handleModalOpen.bind(this)
+        super(props)
+        this.state = {
+            url: "/llc/llc-request/",
+            modal_status: 'closed',
+            is_loading: false,
         }
-
-        handleModalOpen(){
-            this.modalChange(
-                'fa fa-info-circle',
-                'warning',
-                'Хүсэлт илгээхдээ итгэлтэй байна уу?',
-                '',
-                true,
-                'Үгүй',
-                'Тийм',
-            )
-        }
-
-        handleSubmit(){
-            const {id} =this.props.values
-            const {mergejilten} = this.props
-            this.props.loader(true)
-            service.sendRequest(id, mergejilten).then(({ success, info}) =>{
-                if(success){
-                    this.props.loader(false)
-                    this.modalChange(
-                        'fa fa-check-circle',
-                        'success',
-                        'Амжилттай',
-                        info,
-                        false,
-                        '',
-                        '',
-                        null,
-                    )
-                }
-                else {
-                    this.modalChange(
-                        'fa fa-times-circle',
-                        'danger',
-                        'Алдаа гарлаа',
-                        info,
-                        false,
-                        '',
-                        '',
-                        null,
-                    )
-                }
-
-            })
-        }
-        modalClose() {
-            const { values } = this.props
-            this.setState({ modal_status: 'closed' })
-            values.closeRequestMap()
-        }
-
-        modalOpen(){
-            this.setState({ modal_status: 'open' }, () => {
-                this.setState({ modal_status: 'initial' })
-            })
-        }
-
-        modalChange(modal_icon, icon_color, title, text, has_button, actionNameBack, actionNameDelete) {
-            this.setState({
-                modal_icon,
-                icon_color,
-                title,
-                text,
-                has_button,
-                actionNameBack,
-                actionNameDelete,
-            }, () => {
-                this.modalOpen()
-            })
-        }
-
-        render (){
-            const {values} = this.props
-            const {url, is_loading } = this.state
-            return (
-                    <div className='row ml-2 my-4'>
-                        <p
-                            className="btn btn-secondary"
-                            onClick ={()=> this.modalClose()}>
-                                Буцах
-                        </p>
-                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-
-                        <p
-                            className="btn btn-primary"
-                            onClick ={()=> this.handleModalOpen()}
-                        >
-                            <i className="fa"> Хүсэлт илгээх</i>
-                        </p>
-                    <Modal
-                        modal_status={ this.state.modal_status }
-                        modal_icon={ this.state.modal_icon }
-                        modal_bg={ this.state.modal_bg }
-                        icon_color={ this.state.icon_color }
-                        title={ this.state.title }
-                        text={ this.state.text }
-                        has_button={ this.state.has_button }
-                        actionNameBack={ this.state.actionNameBack }
-                        actionNameDelete={ this.state.actionNameDelete }
-                        modalAction={ this.handleSubmit}
-                        modalClose={ this.modalClose}
-                    />
-                    </div>
-            )
-        }
+        this.handleSubmit = this.handleSubmit.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalOpen = this.modalOpen.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
+
+    handleModalOpen() {
+        this.modalChange(
+            'fa fa-info-circle',
+            'warning',
+            'Хүсэлт илгээхдээ итгэлтэй байна уу?',
+            '',
+            true,
+            'Үгүй',
+            'Тийм',
+        )
+    }
+
+    handleSubmit() {
+        const { id } =this.props.values
+        const { mergejilten } = this.props
+        this.props.loader(true)
+        service.sendRequest(id, mergejilten).then(({ success, info }) =>{
+            if(success) {
+                this.props.loader(false)
+                this.modalChange(
+                    'fa fa-check-circle',
+                    'success',
+                    'Амжилттай',
+                    info,
+                    false,
+                    '',
+                    '',
+                    null,
+                )
+            }
+            else {
+                this.modalChange(
+                    'fa fa-times-circle',
+                    'danger',
+                    'Алдаа гарлаа',
+                    info,
+                    false,
+                    '',
+                    '',
+                    null,
+                )
+            }
+
+        })
+    }
+
+    modalClose() {
+        const { values } = this.props
+        this.setState({ modal_status: 'closed' })
+        values.closeRequestMap()
+    }
+
+    modalOpen(){
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, icon_color, title, text, has_button, actionNameBack, actionNameDelete) {
+        this.setState({
+            modal_icon,
+            icon_color,
+            title,
+            text,
+            has_button,
+            actionNameBack,
+            actionNameDelete,
+        }, () => {
+            this.modalOpen()
+        })
+    }
+
+    render() {
+        const { values } = this.props
+        const { url, is_loading } = this.state
+        return (
+                <div className='row ml-2 my-4'>
+                    <p
+                        className="btn btn-secondary"
+                        onClick ={()=> this.modalClose()}>
+                            Буцах
+                    </p>
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+
+                    <p
+                        className="btn btn-primary"
+                        onClick ={()=> this.handleModalOpen()}
+                    >
+                        <i className="fa"> Хүсэлт илгээх</i>
+                    </p>
+                <Modal
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    text={ this.state.text }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.handleSubmit}
+                    modalClose={ this.modalClose}
+                />
+                </div>
+        )
+    }
+}
 
 class SendModal extends Component{
     constructor(props) {
         super(props)
         this.state = {
-            files:[],
+            files: [],
             project_name: '',
             object_type: '',
             object_count: '',
@@ -145,12 +146,13 @@ class SendModal extends Component{
         }
         this.handleOnChange = this.handleOnChange.bind(this)
     }
-    componentDidMount(){
+
+    componentDidMount() {
         const values = this.props.values
         const {id} = values.field
         this.setState({ is_loading: true })
-        service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom}) =>{
-            if (form_field){
+        service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom }) =>{
+            if (form_field) {
                 this.setState({
                     files: form_field['file_path'],
                     zahialagch: form_field['client_org'],
@@ -174,8 +176,8 @@ class SendModal extends Component{
         this.setState({mergejilten: selection.user_id})
     }
 
-    render (){
-        const {id} = this.props.values.field
+    render() {
+        const { id } = this.props.values.field
         const {
         } = this.state
         return (
@@ -202,23 +204,23 @@ export default class RequestModal extends Component {
         super(props)
         this.state = {
             values: props.values,
-            icon : this.props.icon,
-            modal_status:'closed',
+            icon: this.props.icon,
+            modal_status: 'closed',
             state: props.values.state,
-            kind : props.values.kind,
-            invis : false
+            kind: props.values.kind,
+            invis: false
         }
         this.openRequestModal = this.openRequestModal.bind(this)
         this.closeRequestMap = this.closeRequestMap.bind(this)
     }
 
-    componentDidMount(){
+    componentDidMount() {
         if(this.state.kind == 'ЦУЦЛАСАН')
-            this.setState({invis: true})
+            this.setState({ invis: true })
     }
 
-    openRequestModal(){
-        this.setState({modal_status:'open'})
+    openRequestModal() {
+        this.setState({ modal_status:'open' })
     }
 
     closeRequestMap() {
@@ -227,7 +229,7 @@ export default class RequestModal extends Component {
     }
 
     render() {
-        const {values, modal_status, state, kind, invis} = this.state
+        const { values, modal_status, state, kind, invis } = this.state
         return (
             <div className="col-md-12 ">
                 {
