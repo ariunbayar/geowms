@@ -16,22 +16,18 @@ export default class SelectOption extends Component {
     }
 
     handleCheckData(e){
-        let check_ids = this.state.check_ids
+        var { data_list } = this.props
+        let is_between = ['pk_start_index', 'pk_field_max_range']
+
         const value = parseInt(e.target.value)
-        if (e.target.checked) {
-            check_ids.push(value)
-        } else {
-            check_ids = check_ids.filter((oid) => oid != value)
-        }
+        data_list[value]['checked'] = e.target.checked
 
-        this.props.setSelectedOptions(check_ids, e)
-        this.setState({check_ids})
-
+        this.props.setSelectedOptions(data_list)
+        this.setState({ data_list })
     }
 
     render() {
         const { data_list } = this.props
-        const { check_ids } = this.state
         return (
             <div className="row d-flex justify-content-center">
                 <label className="text-center col-md-12">шүүлтүүрийн төрлүүдийг сонгоно уу !!!</label>
@@ -43,18 +39,15 @@ export default class SelectOption extends Component {
                                 className="icheck-primary  col-md-12 d-flex justify-content-between"
                             >
                                 <input
+                                    id={key}
                                     name={data.name}
-                                    id={data.id}
                                     type="checkbox"
+                                    value={key}
+                                    checked={data.checked}
                                     onChange={(e) => { this.handleCheckData(e)}}
-                                    checked={check_ids.indexOf(data.id) > -1}
-                                    value={data.id}
                                 />
-                                <label
-                                    className="mx-4 px-3"
-                                    htmlFor={data.id}
-                                >
-                                    {data.name} {data.eng_name && `(${data.eng_name})`}
+                                <label htmlFor={key} >
+                                    {data.name} {data.config_code && `(${data.config_code})`}
                                 </label>
                             </div>
                         )
