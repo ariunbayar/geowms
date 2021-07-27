@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { PortalDataTable } from "@utils/DataTable/index"
 import {NavLink} from "react-router-dom"
+import { addEquivalentTransforms } from "ol/proj"
 
 
 export class EmployeeForm extends Component {
@@ -16,7 +17,7 @@ export class EmployeeForm extends Component {
             талбарууд: [
                 {'field': 'user__first_name', "title": 'Нэр', 'has_action': true},
                 {'field': 'user__email', "title": 'Цахим шуудан'},
-                {'field': 'user_state', "title": 'Төлөв'},
+                {'field': 'user_state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'position', "title": 'Албан тушаал'},
                 {'field': 'role_name', "title": 'Role', "is_sort": true},
                 {'field': 'is_admin', "title": 'Админ', 'has_action': true, "is_center": true},
@@ -24,7 +25,7 @@ export class EmployeeForm extends Component {
             хувьсах_талбарууд: [
                 {"field": "user__first_name", "action": (values) => this.go_link(values)},
                 {"field": "user__email", "text": ""},
-                {"field": "user_state", "text": ""},
+                {"field": "user_state", "action": this.setStateColor, "action_type": true},
                 {"field": "position", "text": ""},
                 {"field": "is_admin", "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
             ],
@@ -42,6 +43,22 @@ export class EmployeeForm extends Component {
         else {icon = "fa fa-times-circle-o text-danger fa-lg"}
 
         return icon
+    }
+
+    setStateColor(user_state){
+        var color
+        if(user_state == 'Ажиллаж байгаа'){
+            color = "text-success"
+        }
+        else if(user_state == 'Чөлөөтэй'){
+            color = "text-secondary"
+        }
+        else if(user_state == 'Чөлөөлөгдсөн'){
+            color = "text-danger"
+        } else {
+            color = "text-warning"
+        } return color
+        
     }
 
     go_link(values) {
