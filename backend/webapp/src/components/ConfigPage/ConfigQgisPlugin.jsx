@@ -84,16 +84,16 @@ export default class ConfigSystem extends Component {
                     </div>
                 </div>
                 <div className="card-body">
-                    <div className="form-group alert alert-secondary">
-                    <label></label>
+                    <div className="form-group">
                         <FileUpload
                             files={files}
-                            className="d-flex justify-content-between ps-2"
+                            className="d-flex justify-content-between ps-2 "
                             default_text="Файлаа оруулна уу"
                             getFile={this.getFile}
                             accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
                             onChange={(e) => fileAction(e, 'files')}
                             disabled={is_editing ? true : ''}
+                            className_2={is_editing ? "change_bg" : ''}
                         />
                     </div>
                 </div>

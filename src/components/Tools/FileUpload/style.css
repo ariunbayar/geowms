@@ -20,7 +20,7 @@
   border-bottom-right-radius: 0.5em;
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
-  border-left: 1px solid #008cff;;
+  border-left: 1px solid #008cff;
   border-color: #e9ecef;
   font-style: italic;
   padding: 0;
@@ -41,6 +41,18 @@
   font-size: 9px;
   margin: auto;
   width: 100%;
+}
+
+.change_bg {
+  background-color: #e9ecef;
+  border-left: 1px solid #e9ecef;
+}
+
+.change_bg > div {
+  background-color: #acb0b3;
+  border-left: 1px solid #acb0b3;
+  border-color: #e9ecef;
+
 }
 
 
