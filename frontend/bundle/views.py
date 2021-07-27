@@ -371,6 +371,7 @@ def get_point_buffer_geom(request, payload):
 @ajax_required
 def get_search_property_value(request, payload):
     search_value = payload.get('value')
+    datas = list()
 
     rsp = {
         'success': False,
@@ -382,53 +383,69 @@ def get_search_property_value(request, payload):
         rsp['error'] = 'Хайх утгаа оруулна уу'
         return JsonResponse(rsp)
 
-    datas = list()
-
     bundle_qs = Bundle.objects
-    bundle_qs = bundle_qs.prefetch_related('ltheme__lpackages_set__lfeatures_set')
+    bundle_qs = bundle_qs.prefetch_related('ltheme__lpackages_set__lfeatures_set__viewnames_set__viewproperties_set')
+    bundle_qs = bundle_qs.prefetch_related('ltheme__lpackages_set__lfeatures_set__lfeatureconfigs_set__data_type__ldatatypeconfigs_set__property')
+    bundle_qs = bundle_qs.prefetch_related('ltheme__lpackages_set__lfeatures_set__mgeodatas_set')
     bundle_qs = bundle_qs.order_by('sort_order')
 
-    cache_time = 3000
-
     for bundle in bundle_qs:
-
-        geo_ids_cache_key = 'bundle_{}_geo_ids'.format(bundle.id)
-
-        print(geo_ids_cache_key)
-
-        feature_ids = list()
         pack_qs = bundle.ltheme.lpackages_set.all()
+        data = dict()
+        data['bundle_name'] = bundle.ltheme.theme_name
+        data['values'] = list()
         for pack in pack_qs:
             features_qs = pack.lfeatures_set.all()
             for feature in features_qs:
-                feature_ids.append(feature.feature_id)
+                view_names = feature.viewnames_set.all()
+                for view in view_names:
+                    view_properties = view.viewproperties_set.all()
+                    if not view_properties:
+                        continue
+                    property_ids = [
+                        view_property.property_id
+                        for view_property in view_properties
+                    ]
 
-        geo_ids = cache.get(geo_ids_cache_key)
-        if not geo_ids:
-            print("new geo ids")
-            mgeo_qs = MGeoDatas.objects
-            mgeo_qs = mgeo_qs.filter(feature_id__in=feature_ids)
-            geo_ids = list(mgeo_qs.values_list('geo_id', flat=True))
-            cache.set(geo_ids_cache_key, geo_ids, cache_time)
+                    search_inspire_dicts = list()
+                    feature_configs = feature.lfeatureconfigs_set.all()
+                    for feature_config in feature_configs:
+                        data_type = feature_config.data_type
+                        if not data_type:
+                            continue
+                        data_type_configs = data_type.ldatatypeconfigs_set.all()
+                        for data_type_config in data_type_configs:
+                            if data_type_config.property_id in property_ids:
+                                search_inspire = dict()
+                                search_inspire['property_id'] = data_type_config.property_id
+                                search_inspire['data_type_id'] = data_type.data_type_id
+                                search_inspire['feature_config_id'] = feature_config.feature_config_id
+                                search_inspire_dicts.append(search_inspire)
 
-        print(len(geo_ids))
+                    mgeo_datas = feature.mgeodatas_set.all()
+                    if not mgeo_datas:
+                        continue
+                    geo_ids = [
+                        mgeo.geo_id
+                        for mgeo in mgeo_datas
+                    ]
 
-        if geo_ids:
-            start = utils.start_time()
-            qs_datas = MDatas.objects
-            qs_datas = qs_datas.filter(geo_id__in=geo_ids)
-            qs_datas = qs_datas.filter(value_text__isnull=False, value_text__icontains=search_value)
+                    mdatas_qs = MDatas.objects
+                    mdatas_qs = mdatas_qs.filter(geo_id__in=geo_ids)
+                    for search_inspire_dict in search_inspire_dicts:
+                        searched_qs = mdatas_qs.filter(**search_inspire_dict)
+                        searched_qs = searched_qs.filter(value_text__icontains=search_value)
+                        if searched_qs:
+                            for mdata in list(searched_qs)[:5]:
+                                data['values'].append({
+                                    "id": mdata.geo_id,
+                                    "name": mdata.value_text,
+                                })
 
-            if qs_datas:
-                qs_datas = qs_datas.extra(select={'name': 'value_text'})  # select value_text as name
-                qs_datas = qs_datas.order_by('geo_id')[:5]
-                datas.append({
-                    "name": bundle.ltheme.theme_name,
-                    "id": bundle.id,
-                    "datas": list(qs_datas.values('geo_id', 'name'))
-                })
+                    if not data['values']:
+                        continue
 
-            utils.end_time(start, '> mddata')
+                    datas.append(data)
 
     if not datas:
         rsp['error'] = 'Мэдээлэл олдсонгүй'
