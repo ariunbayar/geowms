@@ -815,10 +815,14 @@ def _check_and_make_form_json(feature_id, employee, values):
         form_json['data'] = ''
 
         for p_code, value in values.items():
-            if p_code.lower() in prop_qs.property_name.lower():
+            if p_code.lower() in prop_qs.property_code.lower():
                 form_json['data'] = value
-                if prop_qs.value_type_id == 'date':
+                if prop_qs.value_type_id == 'date' and value:
                     form_json['data'] = utils.date_fix_format(value)
+                if prop_qs.value_type_id == 'single-select' and value:
+                    code_list = LCodeLists.objects.filter(code_list_name__iexact=value).first()
+                    value = code_list.code_list_id
+                form_json['data'] = value
 
         form_json_list.append(form_json)
 
