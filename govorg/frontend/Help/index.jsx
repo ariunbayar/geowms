@@ -50,7 +50,7 @@ export default class Help extends Component {
                         <span className='col-md-12 h4'>Plugin <label className="h4">суулгах заавар</label></span>
                             <ol className="my-2">
                                 <li>
-                                    <LinkExternal href="/static/assets/qgis_plugin/qgis_plugin.zip" text={'Qgis plugin татах'}/>
+                                    <LinkExternal href="/static/assets/qgis_plugin.zip" text={'Qgis plugin татах'}/>
                                  </li>
                                  <li>
                                     <strong >Plugins{"->"} Manage and Install Plugins {"->"} Install from ZIP {"->"}ZIP file татаж авсан замыг заана {"->"} Install Plugin</strong>

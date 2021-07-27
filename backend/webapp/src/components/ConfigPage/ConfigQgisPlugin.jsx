@@ -50,15 +50,10 @@ export default class ConfigSystem extends Component {
 
     handleSubmit(values) {
         const { files} = this.state
-        var blob = []
         const file = files[0]
-        if (file) {
-                const obj = file
-                blob = new Blob([JSON.stringify(obj)])
-            }
-        else blob = file
         var form_datas = new FormData()
-        form_datas.append('files', blob, file.name)
+        if (file.size>0) {
+        form_datas.append('files', file, file.name)
         service.config.qgis_plugin
             .save(form_datas)
             .then(({success}) => {
@@ -66,6 +61,8 @@ export default class ConfigSystem extends Component {
                     this.setState({ values })
                 }
             })
+        }
+        else file
     }
 
     getFile(files) {
@@ -87,11 +84,11 @@ export default class ConfigSystem extends Component {
                     </div>
                 </div>
                 <div className="card-body">
-                    <div className="form-group ">
-                    <label>.zip өргөтгөлтэй файл оруулна уу</label>
+                    <div className="form-group alert alert-secondary">
+                    <label></label>
                         <FileUpload
                             files={files}
-                            className="d-flex justify-content-between pr-4"
+                            className="d-flex justify-content-between ps-2"
                             default_text="Файлаа оруулна уу"
                             getFile={this.getFile}
                             accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
@@ -104,5 +101,3 @@ export default class ConfigSystem extends Component {
         )
     }
 }
-
-// modal fade show d-block
