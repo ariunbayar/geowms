@@ -392,7 +392,8 @@ def get_search_property_value(request, payload):
     for bundle in bundle_qs:
         pack_qs = bundle.ltheme.lpackages_set.all()
         data = dict()
-        data['bundle_name'] = bundle.ltheme.theme_name
+        data['name'] = bundle.ltheme.theme_name
+        data['id'] = bundle.id
         data['values'] = list()
         for pack in pack_qs:
             features_qs = pack.lfeatures_set.all()

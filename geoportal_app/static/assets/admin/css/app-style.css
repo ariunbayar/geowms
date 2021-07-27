@@ -5104,3 +5104,31 @@ table.grid td {
 .navbar-dark .navbar-nav .nav-link {
     color: white!important;
 }
+
+/* олон нийтэд харагдах талд байгаа хайх хэсгийн сонголт */
+.search-value-box {
+    position: absolute;
+    width: 100%;
+    padding: 0px 5px 0px 5px;
+    border: 1px solid black;
+    z-index: 2;
+    background-color: #fff;
+    margin-top: 5px;
+    border-radius: 3px;
+}
+
+.value-group-box .value-group-box-label {
+    text-transform: uppercase;
+}
+.value-group-box .value-box {
+    margin: 0px 10px 0px 10px;
+    padding: 0px 5px 0px 5px;
+    border-top: 1px solid black;
+}
+
+.value-group-box .value-box .value:hover {
+    padding: 0;
+    background-color: hsl(212, 96%, 32%);
+    cursor: pointer;
+    color: #fff;
+}
