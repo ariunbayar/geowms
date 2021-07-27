@@ -1,7 +1,8 @@
+from backend.dedsanbutets.models import ViewNames
 import os
 import json
 import datetime
-from geojson import FeatureCollection
+from geojson import FeatureCollection, feature
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -52,6 +53,7 @@ from main.utils import (
     convert_3d_with_srid,
     datetime_to_string,
     get_feature,
+    start_time,
 )
 from main import utils
 
@@ -173,7 +175,8 @@ def _get_org_request(ob, employee):
         'org': employee.org.name,
         'order_no': ob.order_no,
         'order_at': ob.order_at.strftime('%Y-%m-%d') if ob.order_at else '',
-        'project_name': project_name
+        'project_name': project_name,
+        'description': ob.description
     }
 
 
@@ -1137,9 +1140,12 @@ def _get_file_name(kind, item):
     return file_path
 
 
-def _get_ann_name(kind, item):
-    file = RequestFiles.objects.filter(id=item['file_id']).first()
-    return file.name
+def _get_ann_name(items):
+    qs = RequestFiles.objects
+    for item in items:
+        request_file = qs.filter(id=item['file_id']).first()
+        item['name'] = request_file.name if request_file else ''
+    return items
 
 
 @require_POST
@@ -1159,7 +1165,6 @@ def get_llc_list(request, payload):
             {"field": "state", "action": _get_state, "new_field": "state"},
             {"field": "kind", "action": _get_kind, "new_field": "kind"},
             {"field": "created_at", "action": _get_file_name, "new_field": "file_path"},
-            {"field": "description", "action": _get_ann_name, "new_field": "name"}
         ]
 
         datatable = Datatable(
@@ -1170,8 +1175,9 @@ def get_llc_list(request, payload):
             хувьсах_талбарууд=хувьсах_талбарууд,
         )
         items, total_page, start_index = datatable.get()
+        new_items = _get_ann_name(items)
         rsp = {
-            'items': items,
+            'items': new_items,
             'total_page': total_page,
             'start_index': start_index
         }
@@ -1529,6 +1535,28 @@ def llc_request_approve(request, request_id):
     return JsonResponse(rsp)
 
 
+def _get_geom_type_from_feature(feature_id):
+    feature = LFeatures.objects.filter(feature_id=feature_id).first()
+    view_name = utils.make_view_name(feature)
+    has_view_name = utils.has_materialized_view(view_name)
+    if has_view_name:
+        cursor = connections['default'].cursor()
+        sql = '''
+            SELECT
+                ST_GeometryType(geo_data) as field_type
+            FROM
+                {view_name}
+        '''.format(view_name=view_name)
+        data = utils.get_sql_execute(sql, cursor, 'one')[0]
+        geom_type = utils.remove_text_from_str(data, 'ST_')
+        return geom_type
+    else:
+        m_datas = MGeoDatas.objects.filter(feature_id=feature_id).first()
+        if m_datas:
+            g_type = m_datas.geo_data.geom_type
+        return g_type
+
+
 @require_POST
 @ajax_required
 def inspire_save(request, payload):
@@ -1536,10 +1564,21 @@ def inspire_save(request, payload):
     id = values.get('id')
     order_no = values.get('order_no')
     order_at = values.get('order_at')
+    order_at = utils.date_to_timezone(order_at)
 
     theme_id = values.get('theme').get('id') or None
     feature_id = values.get('feature').get('id') or None
     package_id = values.get('package').get('id') or None
+    geom_type = values.get('geom_type')
+
+    valid_geom_type = _get_geom_type_from_feature(feature_id)
+    if valid_geom_type and  geom_type not in valid_geom_type:
+        feature_id = None
+        success = False
+        info = 'Feature-ийн төрөл таарахгүй байна'
+    else:
+        success = True
+        info = 'Амжилттай'
 
     RequestFilesShape.objects.filter(id=id).update(
         theme_id=theme_id,
@@ -1550,7 +1589,8 @@ def inspire_save(request, payload):
     )
 
     return JsonResponse({
-        'success': True,
+        "success": success,
+        "info": info
     })
 
 

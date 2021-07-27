@@ -1,10 +1,9 @@
 
 import React, { Component } from "react"
-import { HistoryTable } from './historyTable'
+import { HistoryTable } from './components/historyTable'
 import { Pagination } from "../../../../pagination/pagination"
 
 import { service } from '../service'
-
 
 export default class HistoryForm extends Component {
 

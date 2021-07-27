@@ -1,7 +1,9 @@
 from itertools import groupby
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models.query import Prefetch
 from django.http import JsonResponse
+from django.http.response import Http404
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import user_passes_test
@@ -13,28 +15,29 @@ from geoportal_app.models import Role
 
 from .forms import BundleForm
 from .models import Bundle, BundleLayer
-from backend.inspire.models import LThemes
+
 
 def _layer_visible(layers):
-    check = False
     for layer in layers:
-        if BundleLayer.objects.filter(layer_id = layer['id']):
-            check = True
-            break
-    return check
+        if len(layer.bundlelayer_set.all()) > 0:
+            return True
+    return False
 
 
 def _get_bundle_options():
 
     form_options = []
+    wms_qs = WMS.objects.all()
+    wms_qs = wms_qs.prefetch_related(Prefetch('wmslayer_set', queryset=WMSLayer.objects.order_by('sort_order')))
+    wms_qs = wms_qs.prefetch_related('wmslayer_set__bundlelayer_set')
 
-    for wms in WMS.objects.all():
-        layers = list(WMSLayer.objects.filter(wms=wms).values('id', 'name').order_by('sort_order'))
+    for wms in wms_qs:
+        layers = wms.wmslayer_set.all()
         wms_display = {
             'name': wms.name,
             'is_active': wms.is_active,
             'layer_visible': _layer_visible(layers),
-            'layers': layers,
+            'layers': [{"id": layer.id, "name": layer.name} for layer in layers],
         }
         form_options.append(wms_display)
 
@@ -119,17 +122,38 @@ def _get_form_check_options(bundle_id):
     return roleOptions
 
 
-def _get_bundle_display(bundle):
-    roles = _get_form_check_options(bundle.id)
-    theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
+def _get_wms_list(bundle):
+    wms_list = list()
+    wms_ids = list()
+    bundle_layers = bundle.bundlelayer_set.all()
+    for bundle_layer in bundle_layers:
+        wms_id = bundle_layer.layer.wms.id
+        if wms_id not in wms_ids:
+            wms_list.append(
+                {
+                    'name': (bundle_layer.layer.wms.name),
+                    'is_active': (
+                        bundle_layer.layer.wms.is_active)
+                }
+            )
+        wms_ids.append(wms_id)
+    return wms_list
+
+
+def _get_bundle_display(bundle, has_role=True):
+    roles = _get_form_check_options(bundle.id) if has_role else ''
+    wms_list = _get_wms_list(bundle)
     return {
         'id': bundle.id,
-        'name': theme.theme_name if theme else '',
-        'layers': list(bundle.layers.all().values_list('id', flat=True)),
+        'name': bundle.ltheme.theme_name if bundle.ltheme else '',
+        'layers': [
+            layer.id
+            for layer in bundle.layers.all()
+        ],
         'icon': '',
         'icon_url': bundle.icon.url if bundle.icon else '',
         'is_removeable': bundle.is_removeable,
-        'wms_list': [{'name': (WMS.objects.get(pk=wms[0]).name), 'is_active':(WMS.objects.get(pk=wms[0]).is_active)} for wms in BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()],
+        'wms_list': wms_list,
         'roles': roles
     }
 
@@ -138,7 +162,17 @@ def _get_bundle_display(bundle):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def all(request):
-    bundle_list = [_get_bundle_display(bundle) for bundle in Bundle.objects.all().order_by('ltheme_id')]
+
+    qs = Bundle.objects.order_by('sort_order')
+    qs = qs.prefetch_related('bundlelayer_set__layer__wms')
+    qs = qs.prefetch_related('layers')
+    qs = qs.select_related('ltheme')
+
+    bundle_list = [
+        _get_bundle_display(bundle, has_role=False)
+        for bundle in qs
+    ]
+
     rsp = {
         'bundle_list': bundle_list,
     }
@@ -149,7 +183,15 @@ def all(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def detail(request, pk):
-    bundle = get_object_or_404(Bundle, pk=pk)
+    bundle_qs = Bundle.objects.filter(pk=pk)
+    if not bundle_qs:
+        raise Http404
+
+    bundle_qs = bundle_qs.prefetch_related('bundlelayer_set__layer__wms')
+    bundle_qs = bundle_qs.prefetch_related('layers')
+    bundle_qs = bundle_qs.select_related('ltheme')
+    bundle = bundle_qs.first()
+
     bundle_list = _get_bundle_display(bundle)
     rsp = {
         'bundle_list': bundle_list,

@@ -78,6 +78,7 @@ def _get_employee_display(employee):
         'gender': user.gender,
         'register': user.register,
         'is_user': user.is_user,
+        'is_active': user.is_active,
 
         'role_name': role,
 

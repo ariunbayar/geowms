@@ -1,16 +1,20 @@
 import React, { Component } from "react"
-import { service } from "../service"
 import { NavLink } from "react-router-dom"
-import { Notif } from '@utils/Notification/index'
+
 import Loader from '@utils/Loader'
 
+import PointDetail from './components/PointDetail'
+import PolygonDetail from './components/PolygonDetail'
+import TransactionState from './components/TransactionState'
+import QpayGen from './components/QpayGen'
+
+import { service } from "../service"
 
 export class Details extends Component {
 
     constructor(props) {
         super(props)
 
-        this.too = 0
         this.state = {
             items: {},
             points: [],
@@ -19,35 +23,32 @@ export class Details extends Component {
             is_loading: true,
             payment_id: this.props.match.params.id,
         }
-        this.addNotif = this.addNotif.bind(this)
+        this.getDetails = this.getDetails.bind(this)
     }
 
-    componentDidMount(){
+    componentDidMount() {
+        this.getDetails()
+    }
+
+    getDetails() {
         const id = this.state.payment_id
-        service.getDetails(id).then(({success, items, points, polygon, layers, info}) => {
-            if(success){
-                items.map(( items ) =>
-                    this.setState({items})
-                )
-                this.setState({ points, polygon, layers, is_loading: false })
-            }
-            else {
-                this.setState({ is_loading: false })
-                this.addNotif('warning', info, 'exclamation')
-            }
-        }).catch(error => {
-            this.addNotif('danger', 'Алдаа гарсан байна', 'times')
-        })
-    }
-
-    addNotif(style, msg, icon){
-        this.too ++
-        this.setState({ show: true, style: style, msg: msg, icon: icon })
-        const time = setInterval(() => {
-            this.too --
-            this.setState({ show: true })
-            clearInterval(time)
-        }, 2000);
+        service
+            .getDetails(id)
+            .then(({ success, items, points, polygon, layers, info }) => {
+                if(success) {
+                    items.map(( items ) =>
+                        this.setState({items})
+                    )
+                    this.setState({ points, polygon, layers, is_loading: false })
+                }
+                else {
+                    this.setState({ is_loading: false })
+                    global.NOTIF('warning', info, 'exclamation')
+                }
+            })
+            .catch(error => {
+                global.NOTIF('danger', 'Алдаа гарсан байна', 'times')
+            })
     }
 
     render() {
@@ -61,7 +62,6 @@ export class Details extends Component {
                         </NavLink>
                         <br></br>
 
-                        <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                         <Loader is_loading={is_loading} />
 
                         <div id="container">
@@ -69,215 +69,47 @@ export class Details extends Component {
                                 {
                                     polygon && polygon.length > 0
                                     ?
-                                    'Хэсэгчлэн худалдан авалт'
-                                    : 'Лавлах'
+                                        'Хэсэгчлэн худалдан авалт'
+                                    :
+                                        'Лавлах'
                                 }
                             </h4>
                             <br></br>
                             {
-                                points ?
-                                    <table className="table table-bordered">
-                                        <tbody>
-                                            <tr className="text-center">
-                                                <th
-                                                    colSpan={items.is_success ? "7" : "6"}
-                                                    scope="rowgroup"
-                                                >
-                                                    <h4>
-                                                        <i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>
-                                                        Цэгийн мэдээлэл
-                                                    </h4>
-                                                </th>
-                                            </tr>
-                                            <tr className="text-center">
-                                                <th style={{width: "5%"}}>
-                                                    Д/д
-                                                </th>
-                                                <th>
-                                                    Цэгийн нэр
-                                                </th>
-                                                <th style={{width: "20%"}}>
-                                                    Аймаг
-                                                </th>
-                                                <th>
-                                                    Сум
-                                                </th>
-                                                <th>
-                                                    Өндөр
-                                                </th>
-                                                <th>
-                                                    <i className="fa fa-money mr-2" aria-hidden="true"></i>
-                                                    Төлбөр
-                                                </th>
-                                                {
-                                                    items.is_success
-                                                    ?
-                                                        <th>
-                                                            Файл
-                                                        </th>
-                                                    : null
-                                                }
-                                            </tr>
-                                            {
-                                                points.length > 0
-                                                ?
-                                                    points.map((value, key) =>
-                                                        <tr className="text-center" key={key}>
-                                                            <th>
-                                                                {key + 1}
-                                                            </th>
-                                                            <td>
-                                                                {value['Pointid']}
-                                                            </td>
-                                                            <td scope="">
-                                                                {value['aimag']}
-                                                            </td>
-                                                            <td scope="">
-                                                                {value['sum']}
-                                                            </td>
-                                                            <td scope="">
-                                                                {value['ellipsoidheight'] || "Хоосон"}
-                                                            </td>
-                                                            <td>
-                                                                {value.amount}₮
-                                                            </td>
-                                                            {
-                                                                items.is_success
-                                                                ?
-                                                                    <td scope="">
-                                                                        {value['Pointname'] && items.export_file &&
-                                                                            <a className="text-info" href={`/payment/download-pdf/${payment_id}/${value['Pointname']}/`}>
-                                                                                файл
-                                                                            </a>
-                                                                        }
-                                                                    </td>
-                                                                :
-                                                                null
-                                                            }
-                                                        </tr>
-                                                    )
-                                                :
-                                                    <tr className="text-center">
-                                                        <th colSpan={items.is_success ? "7" : "6"}>
-                                                            Мэдээлэл байхгүй байна
-                                                        </th>
-                                                    </tr>
-                                            }
-                                            <tr className="text-center">
-                                                <th colSpan="2"><i className="fa fa-calendar-o mr-2" aria-hidden="true"></i>Үүссэн огноо:</th>
-                                                <td colSpan={items.is_success ? "5" : "4"}>{items.created_at}</td>
-                                            </tr>
-                                            {
-                                                items.is_success && items.export_file
-                                                ?
-                                                    <tr className="text-center">
-                                                        <th colSpan="2">
-                                                            Лавлагаа
-                                                        </th>
-                                                        <td colSpan={items.is_success ? "5" : "4"}>
-                                                            <a className="text-info" href={`/payment/download-zip/${payment_id}/`}>
-                                                                Лавлагааг татах
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                :
-                                                null
-                                            }
-                                        </tbody>
-                                    </table>
-                                : null
+                                points
+                                ?
+                                    <PointDetail
+                                        items={items}
+                                        points={points}
+                                        payment_id={payment_id}
+                                    />
+                                :
+                                    null
                             }
                             {
                                 items !== {} && polygon && polygon.length > 0
                                 ?
-                                    <table className="table table-bordered">
-                                        <tbody>
-                                            <tr>
-                                                <th className="text-center" colSpan="2" style={{fontSize: '20px'}}>
-                                                    <i className="fa fa-location-arrow mr-2" aria-hidden="true">
-                                                    </i>Давхаргын мэдээлэл
-                                                </th>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <i className="fa fa-map mr-2" aria-hidden="true"></i>Давхаргын нэр
-                                                </th>
-                                                <th>
-                                                    <i className="fa fa-money mr-2" aria-hidden="true"></i>Давхаргын үнэ
-                                                </th>
-                                            </tr>
-                                                {
-                                                    layers.map((value, key) =>
-                                                        <tr key={key}>
-                                                            <td>
-                                                                <label>{value.name}</label>
-                                                            </td>
-                                                            <td>
-                                                                <label>{value.amount}₮</label>
-                                                            </td>
-                                                        </tr>
-                                                    )
-                                                }
-                                            <tr>
-                                                <td><i className="fa fa-calendar-o mr-2" aria-hidden="true"></i>Огноо:</td>
-                                                <td>{items.created_at}</td>
-                                            </tr>
-                                            {
-                                                items.is_success && items.export_file !== null ?
-                                                    <tr>
-                                                        <td><i className="fa fa-download mr-2" aria-hidden="true"></i>Татах:</td>
-                                                        <td>
-                                                            <a className="text-info" href={`/payment/download-zip/${payment_id}/`}>
-                                                                Энд дарж татаж авна уу!
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                : null
-                                            }
-                                        </tbody>
-                                </table>
-                            :
-                                null
-                        }
+                                    <PolygonDetail
+                                        items={items}
+                                        layers={layers}
+                                        payment_id={payment_id}
+                                    />
+                                :
+                                    null
+                            }
                         </div>
                         {
                             !is_loading && (polygon && polygon.length > 0 || points && points.length > 0) &&
                             <div className="row py-3">
-                                <div className="col-md-6 py-0 my-3">
-                                    <div id="payment">
-                                        <h5 className="mb-3">Гүйлгээний төлөв</h5>
-                                        <ul className="list-unstyled">
-                                            <li className="f-nav-item mb-2">
-                                                Гүйлгээний дугаар | {items.geo_unique_number}
-                                            </li>
-                                            <li className="f-nav-item mb-2">
-                                                НИЙТ МӨНГӨН ДҮН | {items.total}₮
-                                            </li>
-                                            <li className="f-nav-item mb-2">
-                                                Үр дүн | {items.is_success ? <span className="text-success">Амжилттай</span> : <span className="text-danger">Амжилтгүй</span>}
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <button className="btn btn-primary" onClick={() => {
-                                        const mywindow = window.open('', 'PRINT', 'height=400, width=600');
-                                        mywindow.document.write('<html><body>');
-                                        mywindow.document.write(document.getElementById("container").innerHTML)
-                                        mywindow.document.write(document.getElementById("payment").innerHTML)
-                                        mywindow.document.write('</body></html>');
-                                        mywindow.document.close()
-                                        mywindow.focus()
-                                        mywindow.print()
-                                        mywindow.close();
-                                    }}>Хэвлэх</button>
-                                </div>
-                                {
-                                    !items.is_success ?
-                                    <div className="col-md-6 py-0 my-3">
-                                        <h5 className="mb-3">QR Code </h5>
-                                        <img src="/static/assets/image/lavlakh.png"></img>
-                                    </div>
-                                    : null
-                                }
+                                <TransactionState
+                                    items={items}
+                                />
+                                <QpayGen
+                                    items={items}
+                                    payment_id={payment_id}
+                                    history={this.props.history.push}
+                                    getDetails={this.getDetails}
+                                />
                             </div>
                         }
                     </div>

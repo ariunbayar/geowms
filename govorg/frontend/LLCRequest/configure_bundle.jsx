@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 
 import SelectField from '@utils/Tools/Form/select_field'
-import utils from "@helpUtils/functions"
+import * as utils from "@helpUtils/functions"
 
 import { LLCMap } from '../../../llc/frontend/LLCMap'
 

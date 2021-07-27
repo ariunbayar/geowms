@@ -321,7 +321,9 @@ export default class RequestModal extends Component {
             'fa fa-exclamation-circle',
             'warning',
             "Тохиргоог татгалзах",
-            DescInput,
+            <DescInput
+                getDesc={this.getDesc}
+            />,
             true,
             "татгалзах",
             null,
@@ -443,7 +445,9 @@ export default class RequestModal extends Component {
                                                                 'fa fa-exclamation-circle',
                                                                 'warning',
                                                                 "Цуцлах",
-                                                                DescInput,
+                                                                <DescInput
+                                                                    getDesc={this.getDesc}
+                                                                />,
                                                                 true,
                                                                 "цуцлах",
                                                                 null
@@ -459,7 +463,9 @@ export default class RequestModal extends Component {
                                                                 'fa fa-exclamation-circle',
                                                                 'warning',
                                                                 "Буцаах",
-                                                                DescInput,
+                                                                <DescInput
+                                                                    getDesc={this.getDesc}
+                                                                />,
                                                                 true,
                                                                 "буцаах",
                                                                 null
@@ -477,7 +483,11 @@ export default class RequestModal extends Component {
                                                     'fa fa-exclamation-circle',
                                                     'warning',
                                                     "Тохиргоог зөвшөөрөх",
-                                                    RefreshView,
+                                                    <RefreshView
+                                                        getRefViewStatus={this.getRefViewStatus}
+                                                        values={values}
+                                                        ref_in_direct={this.state.ref_in_direct}
+                                                    />,
                                                     true,
                                                     "зөвшөөрөх",
                                                     null
@@ -502,10 +512,6 @@ export default class RequestModal extends Component {
                         modalAction={this.state.modalAction}
                         actionNameDelete={this.state.action_name}
                         modalClose={this.state.modalClose}
-                        getDesc={this.getDesc}
-                        getRefViewStatus={this.getRefViewStatus}
-                        values = {values}
-                        ref_in_direct={this.state.ref_in_direct}
                     />
                 </div>
                 <div className={classNameBackdrop}></div>

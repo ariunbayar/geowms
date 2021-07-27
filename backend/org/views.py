@@ -7,6 +7,7 @@ import datetime
 from collections import Counter
 
 from django.contrib.auth.decorators import user_passes_test, login_required
+from django.views.decorators.cache import cache_page
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Count, Q
 from django.db import transaction
@@ -278,6 +279,15 @@ def _remove_user(user, employee):
         return True
 
 
+def _get_role_id(org):
+    org_role_id = -1
+    qs = org.govperm_set.first()
+    qs = qs.govperminspire_set.last()
+    if qs.gov_role_inspire:
+        org_role_id = qs.gov_role_inspire.gov_role.id
+    return org_role_id
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -300,11 +310,11 @@ def org_add(request, payload, level):
         org.level = org_level
         org.geo_id = geo_id
         org.save()
-        if int(role_id) > -1:
+        if int(role_id) > -1 and int(role_id) != _get_role_id(org):
             with transaction.atomic():
                 objs = list()
                 gov_role = org_role_filter
-                all_gov_role_perms = gov_role.govroleinspire_set.all()
+                all_gov_role_perms = org_role_filter.govroleinspire_set.prefetch_related('govperminspire_set')
                 gov_perm_qs = GovPerm.objects.filter(org=org_id)
                 gov_perm = gov_perm_qs.first()
                 has_role = gov_perm.gov_role
@@ -312,12 +322,12 @@ def org_add(request, payload, level):
                 gov_perm_qs.update(gov_role_id=role_id)
                 if has_role:
                     delete_ids = list()
-                    for role_perm in has_role.govroleinspire_set.all():
+                    for role_perm in has_role.govroleinspire_set.all().prefetch_related('govperminspire_set'):
                         gov_perm_role = role_perm.govperminspire_set.all()
                         if gov_perm_role:
                             for perm in gov_perm_role:
                                 delete_ids.append(perm.id)
-                        gov_perms_inspire.filter(id__in=delete_ids).delete()
+                    gov_perms_inspire.filter(id__in=delete_ids).delete()
 
                 for gov_role_inspire in all_gov_role_perms:
                     has_perm = False
@@ -343,6 +353,8 @@ def org_add(request, payload, level):
                             updated_by=gov_role_inspire.updated_by,
                         ))
                 GovPermInspire.objects.bulk_create(objs)
+            return JsonResponse({'success': True})
+        else:
             return JsonResponse({'success': True})
     # # Байгууллага шинээр үүсгэх
     else:
@@ -630,14 +642,29 @@ def get_inspire_roles(request, pk):
     roles = []
     data = []
     roles = []
-    govRole = get_object_or_404(GovRole, pk=pk)
-    for themes in LThemes.objects.order_by('theme_id'):
-        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = backend_org_utils.get_theme_packages_gov(themes.theme_id, govRole)
+    start = utils.start_time()
+    gov_role_qs = GovRole.objects.filter(pk=pk)
+    if not gov_role_qs:
+        raise Http404
+
+    gov_role = gov_role_qs.first()
+
+    themes_qs = LThemes.objects
+    themes_qs = themes_qs.order_by('theme_id')
+    themes_qs = themes_qs.prefetch_related('lpackages_set__lfeatures_set__lfeatureconfigs_set__data_type__ldatatypeconfigs_set__property')
+    role_inspire_perms = gov_role.govroleinspire_set.all()
+
+    perm_count_qs = role_inspire_perms.filter(geom=True)
+    perm_count_qs = perm_count_qs.values('perm_kind', 'feature_id')
+    perm_count_qs = list(perm_count_qs.annotate(perm_count=Count('perm_kind')))
+
+    for theme in themes_qs:
+        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = backend_org_utils.get_theme_packages_gov(theme, role_inspire_perms, perm_count_qs)
         data.append(
             {
-                'id': themes.theme_id,
-                'code': themes.theme_code,
-                'name': themes.theme_name,
+                'id': theme.theme_id,
+                'code': theme.theme_code,
+                'name': theme.theme_name,
                 'packages': package_data,
                 'perm_all': t_perm_all,
                 'perm_view': t_perm_view,
@@ -649,16 +676,11 @@ def get_inspire_roles(request, pk):
             }
         )
 
-    for datas in GovRoleInspire.objects.filter(gov_role=govRole):
-        roles.append(
-            {
-                'perm_kind': datas.perm_kind,
-                'feature_id': datas.feature_id,
-                'data_type_id': datas.data_type_id,
-                'property_id': datas.property_id,
-                'geom': datas.geom,
-            }
-        )
+    startrole = utils.start_time()
+    roles = list(role_inspire_perms.values('perm_kind', 'feature_id', 'data_type_id', 'property_id', 'geom'))
+
+    utils.end_time(startrole, '> role')
+    utils.end_time(start, '> total')
 
     return JsonResponse({
         'data': data,
@@ -839,24 +861,26 @@ def save_gov_roles(request, payload, level, pk):
 
 @require_GET
 @ajax_required
+@cache_page(60 * 5)
 @user_passes_test(lambda u: u.is_superuser)
 def form_options(request, option):
 
-    admin_levels = utils.get_administrative_levels()
+    admin_levels = utils.geo_cache('admin_levels', '', utils.get_administrative_levels(), 1800)
     roles = backend_org_utils.get_roles_display()
 
+    first_au_level_geo_id = utils.geo_cache('first_au_level_geo_id', '', utils.get_1stOrder_geo_id(), 1800)
     if option == 'second':
         rsp = {
             'success': True,
             'secondOrders': admin_levels,
-            'firstOrder_geom': utils.get_1stOrder_geo_id(),
+            'firstOrder_geom': first_au_level_geo_id,
         }
     else:
         rsp = {
             'success': True,
             'secondOrders': admin_levels,
             'roles': roles,
-            'firstOrder_geom': utils.get_1stOrder_geo_id(),
+            'firstOrder_geom': first_au_level_geo_id,
         }
 
     return JsonResponse(rsp)

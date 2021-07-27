@@ -106,6 +106,7 @@ export default class BarilgaSuurinGazar extends Component{
           wfs_url: '',
           api_links: {},
           is_delete_request: false,
+          is_first: true
       }
 
       this.controls = {
@@ -180,8 +181,9 @@ export default class BarilgaSuurinGazar extends Component{
       Promise.all([
         service.qgisGetUrl(fid),
         service.apiGetUrl(),
-      ]).then(([{ wms_url, wfs_url }, { api_links }]) => {
-        this.setState({ wms_url, wfs_url, api_links })
+        service.getLayers(fid),
+      ]).then(([{ wms_url, wfs_url }, { api_links }, { layer_choices }]) => {
+        this.setState({ wms_url, wfs_url, api_links, layer_choices })
       })
       this.geomType()
       this.loadMap()
@@ -274,7 +276,7 @@ export default class BarilgaSuurinGazar extends Component{
       })}
 
       this.setState({map_wms})
-      map_wms.tile.setZIndex(2)
+      map_wms.tile.setZIndex(1000) // TODO үндсэн давхарга хамгийн наана харагдана
       this.map.addLayer(map_wms.tile);
 
       const Mongolia_feaure = (new GeoJSON().readFeatures(Mongolia_boundary, {
@@ -286,8 +288,6 @@ export default class BarilgaSuurinGazar extends Component{
       this.setState({ Mongolia_feaure })
       this.getRole()
     }
-
-
 
     loadMap(){
       var resolutions = [0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125, 0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125, 0.001373291015625, 6.866455078125E-4, 3.4332275390625E-4, 1.71661376953125E-4, 8.58306884765625E-5, 4.291534423828125E-5, 2.1457672119140625E-5, 1.0728836059570312E-5, 5.364418029785156E-6, 2.682209014892578E-6, 1.341104507446289E-6, 6.705522537231445E-7, 3.3527612686157227E-7];
@@ -372,11 +372,16 @@ export default class BarilgaSuurinGazar extends Component{
             }),
             fill: new Fill({
                 color: 'rgba(100, 255, 0, 0.3)'
-            })
+            }),
+            image: new CircleStyle({
+              radius: 7,
+              fill: new Fill({
+                color: 'rgba(100, 255, 0, 1)',
+              }),
+            }),
         })
       })
       this.setState({vector_layer})
-      vector_layer.setZIndex(3)
 
       const vector = new VectorLayer({
         source: new VectorSource(),
@@ -1159,28 +1164,26 @@ export default class BarilgaSuurinGazar extends Component{
 
     SideBarBtn(){
       this.setInActiveButtonStyle('side')
-      service.getLayers(this.state.emp_perm_prefix).then((layer_choices) => {
-        this.setState({layer_choices})
-        this.WmsTile(layer_choices)
-      })
+      this.WmsTile()
     }
 
-    WmsTile(layer_choices){
+    WmsTile(){
+      const layer_choices = this.state.layer_choices
       const map = this.map
       const wms_map_list = {
             name: "Таны харах эрхтэй давхаргууд",
-            layers: layer_choices.slice(1, layer_choices.length).map((layer) => {
+            layers: layer_choices.map((layer) => {
               return {
                 ...layer,
                 tile: new Image({
                   source: new ImageWMS({
-                    url: this.state.emp_perm_prefix,
-                      params: {
-                        'LAYERS': layer.code,
-                        'FORMAT': 'image/png',
-                        'VERSION': '1.1.1',
-                        "STYLES": '',
-                        "exceptions": 'application/vnd.ogc.se_inimage',
+                    url: layer.url,
+                    params: {
+                      'LAYERS': layer.code,
+                      'FORMAT': 'image/png',
+                      'VERSION': '1.1.1',
+                      "STYLES": '',
+                      "exceptions": 'application/vnd.ogc.se_inimage',
                     },
                     serverType: 'geoserver',
                     transition: 0,
@@ -1434,6 +1437,7 @@ export default class BarilgaSuurinGazar extends Component{
 
     updateFromList(coord_list) {
 
+      const source = this.vector_layer.getSource()
       const id = coord_list.id
       const coords = coord_list.data.map(({geom, turning}) => {
         const conv_geom = transformCoordinate(geom, this.state.dataProjection, this.state.featureProjection)
@@ -1441,9 +1445,10 @@ export default class BarilgaSuurinGazar extends Component{
       })
       const {selected_feature} = this.state
       const feature_id = selected_feature.get('inspire_id')
+
       if (feature_id == id) {
         const getType = selected_feature.getGeometry().getType()
-        const geom_coordinate = selected_feature.getGeometry().getCoordinates()
+        let geom_coordinate = selected_feature.getGeometry().getCoordinates()
         if (getType.includes('MultiPolygon')) {
           geom_coordinate.map((geo, idx) => {
             geo.map((g, ix) => {
@@ -1474,6 +1479,24 @@ export default class BarilgaSuurinGazar extends Component{
           geometry: geom,
           id: feature_id
         })
+        source.addFeature(new_feature)
+
+        new_feature.setStyle(new Style({
+          fill: new Fill({
+            color: 'rgba(28, 159, 252, 0.2)',
+          }),
+          stroke: new Stroke({
+            color: 'rgba(28, 159, 252, 1)',
+            width: 2,
+          }),
+          image: new CircleStyle({
+            radius: 7,
+            fill: new Fill({
+              color: 'rgba(28, 159, 252, 1)',
+            }),
+          })
+        }))
+
         const changedJson = this.writeFeat(new_feature)
         this.setState({ changedJson, is_not_mongolia: false, update_geom_from_list: true, null_form_isload: false })
         this.FormButton()

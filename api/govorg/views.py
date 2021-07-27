@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
-from api.utils import filter_layers, replace_src_url, filter_layers_wfs
+from api.utils import filter_layers, replace_src_url, filter_layers_wfs, get_cql_filter
 from backend.govorg.models import GovOrg as System
 from backend.inspire.models import (
     LCodeLists,
@@ -22,12 +22,11 @@ from backend.inspire.models import (
     LCodeListConfigs,
     MDatas
 )
-from backend.org.models import Employee, Org
+from backend.org.models import Employee
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 from main.inspire import GEoIdGenerator
-from django.core.cache import cache
 from main.decorators import get_conf_geoserver_base_url
 
 
@@ -52,16 +51,14 @@ def _get_qgis_service_url(request, token, fid):
 
 
 def _get_perm_atts(system, code):
-    access = system.govorgwmslayer_set.first()
-    has_layer = False
-    if access.wms_layer.code == code:
-        has_layer = True
-    if has_layer:
-        access = system.govorgwmslayer_set.first()
+    wms_layer_qs = system.govorgwmslayer_set.filter(wms_layer__code=code)
+    if wms_layer_qs:
+        access = wms_layer_qs.first()
         atts = utils.json_load(access.attributes)
         atts.insert(0, 'geo_data')
         return atts
-    return False
+    else:
+        return []
 
 
 def _get_char(request):
@@ -400,16 +397,10 @@ def _get_layer_name(employee, fid):
     return allowed_layers
 
 
-def _get_cql_filter(geo_id):
-    cql_data = utils.get_2d_data(geo_id)
-    cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data=cql_data)
-    return cql_filter if cql_data else ''
-
-
 def _get_request_content(base_url, request, geo_id, headers):
     queryargs = request.GET
     if geo_id != utils.get_1stOrder_geo_id() and (request.GET.get('REQUEST') == 'GetMap' or request.GET.get('REQUEST') == 'GetFeature'):
-        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, get_cql_filter(geo_id), 20000)
         if request.GET.get('REQUEST') == 'GetMap':
             queryargs = {
                 **request.GET,
@@ -454,6 +445,14 @@ def _get_emp_perm_properties(token, fid):
     return perms_prop
 
 
+def _get_value_from_request(request, param_name):
+    if request.GET.get(param_name.upper()):
+        return request.GET.get(param_name.upper()).lower()
+    elif request.GET.get(param_name.lower()):
+        return request.GET.get(param_name.lower()).lower()
+    return ""
+
+
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def qgis_proxy(request, base_url, token, fid=''):
@@ -484,10 +483,7 @@ def qgis_proxy(request, base_url, token, fid=''):
         raise Http404
     allowed_props.insert(0, 'geo_data')
 
-    if request.GET.get('request'):
-        service_request = request.GET.get('request').lower()
-    elif request.GET.get('REQUEST'):
-        service_request = request.GET.get('REQUEST').lower()
+    service_request = _get_value_from_request(request, 'request')
 
     unneed_requests = ['getmap', 'getlegendgraphic']
     if service_request not in unneed_requests:
@@ -501,6 +497,18 @@ def qgis_proxy(request, base_url, token, fid=''):
         service_url = _get_qgis_service_url(request, token, fid)
         service_type = request.GET.get('SERVICE')
         content = replace_src_url(content, base_url, service_url, service_type)
+
+    elif service_request == 'getlegendgraphic':
+        request_layers = _get_value_from_request(request, 'layer')
+        request_layers = request_layers.split(":")[len(request_layers.split(":")) - 1]
+        if request_layers not in allowed_layers:
+            raise Http404
+
+    elif service_request == 'getmap':
+        request_layers = _get_value_from_request(request, 'layers')
+        request_layers = request_layers.split(":")[len(request_layers.split(":")) - 1]
+        if request_layers not in allowed_layers:
+            raise Http404
 
     qs_request = queryargs.get('REQUEST', 'no request')
 
