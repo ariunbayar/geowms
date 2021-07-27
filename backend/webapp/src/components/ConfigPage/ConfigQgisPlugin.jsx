@@ -31,7 +31,7 @@ export default class ConfigSystem extends Component {
     componentDidUpdate(pP, pS) {
         const {file_uploaded, is_editing, icon_name} = this.state
         if (pS.file_uploaded !== file_uploaded) {
-            this.handleSubmit()
+            if (!is_editing) this.handleSubmit()
         }
     }
 
@@ -58,7 +58,7 @@ export default class ConfigSystem extends Component {
             }
         else blob = file
         var form_datas = new FormData()
-        form_datas.append('files', blob, 'qgis_plugin.zip')
+        form_datas.append('files', blob, file.name)
         service.config.qgis_plugin
             .save(form_datas)
             .then(({success}) => {

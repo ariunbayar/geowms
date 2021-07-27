@@ -1076,13 +1076,8 @@ def save_file_to_storage(file, folder_name, file_full_name):
     fs = FileSystemStorage(
         location=path
     )
-    print("hoo")
-    print("hoo")
-    print("hoo", file.name)
     file = fs.save(file_full_name, file)
     fs.url(file)
-    print("file_path")
-    print("file_path", path)
     return path
 
 
@@ -1101,7 +1096,6 @@ def create_index(model_name, field):
 
 def unzip(path_zip_file, extract_path):
     is_unzipped = False
-
     with zipfile.ZipFile(path_zip_file, 'r') as zip_ref:
         is_unzipped = True
         zip_ref.extractall(extract_path)
