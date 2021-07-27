@@ -189,7 +189,6 @@ export default class RequestDetail extends Component {
                                 className="col-md-12 px-0 mx-0"
                                 data_list={investment_status}
                                 default_value={hurungu_oruulalt}
-                                bracket_option={1}
                                 default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
                                 handleSelectField={this.props.handleOnChange}
                                 disabled={disabled}
