@@ -96,7 +96,7 @@ export default class ConfigSystem extends Component {
                             getFile={this.getFile}
                             accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
                             onChange={(e) => fileAction(e, 'files')}
-                            disabled={!is_editing ? true : ''}
+                            disabled={is_editing ? true : ''}
                         />
                     </div>
                 </div>
