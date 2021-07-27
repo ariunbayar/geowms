@@ -95,14 +95,10 @@ class ActionClass extends Component {
             const {url, is_loading } = this.state
             return (
                     <div className='row ml-2 my-4'>
-                        <p className="btn btn-secondary">
-                            <i
-                                className="fa fa-angle-double-left"
-                                onClick ={()=> values.closeRequestMap()}
-
-                            >
+                        <p
+                            className="btn btn-secondary"
+                            onClick ={()=> this.modalClose()}>
                                 Буцах
-                            </i>
                         </p>
                         &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 
