@@ -10,6 +10,7 @@ import React, { Component } from 'react';
 //     option_key                                     // сонголтын value
 //     errors                                         // validition алдаануудыг харуулна
 //     className={"comd-4"}                           // Класс өгч болно
+//     bracket_option={ }                             // текстийн хаалтыг сонгох
 //     default_text={'feature-ийн нэр сонгоно уу'}    // select input - ийг сонгоогүй үед харагдах анхны утга
 //     handleSelectField={this.handleChange}          // сонголт буцаах функц
 // />
@@ -29,6 +30,7 @@ import React, { Component } from 'react';
     data_list={selected_packages}
     default_value={package_name}
     className={"col-md-4"}
+    bracket_option={ }
     default_text={'package-ийн нэр сонгоно уу'}
     handleSelectField={this.handleChange}
 /> */}
@@ -40,7 +42,12 @@ export default class SelectField extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selected_value: ''
+            selected_value: '',
+            bracket_options:[
+                {open: '(', close: ')'},
+                {open: '"', close: '"'},
+                {open:"/", close:"/"}
+            ]
         }
         this.dataSelection = this.dataSelection.bind(this)
     }
@@ -49,7 +56,8 @@ export default class SelectField extends Component {
         const selection_value = e.target.value
         const { data_list,
                 state_name, name_key,
-                opt_key, option_key
+                opt_key, option_key,
+                bracket_options
         } = this.props
 
         data_list.map((row, idx) => {
@@ -74,9 +82,12 @@ export default class SelectField extends Component {
                 default_text, option_key, option_name,
                 opt_key, name_key, className, data_list,
                 option_text, disabled, option_name_2, display_mode,
+                bracket_option,
         } = this.props
         const state = this.state
         let title = label ? label : ''
+        var bracket_style = state.bracket_options[bracket_option]
+    
         return (
             <div className={`form-group ${className ? className : "col-md-4"}`} >
                 <label id={title}>
@@ -98,11 +109,11 @@ export default class SelectField extends Component {
                                     label={data[name_key]}
                                     value={default_value}
                                 >
-                                    {OptionComp (data[opt_key], option_key, option_name, option_name_2, option_text, display_mode)}
+                                    {OptionComp (data[opt_key], option_key, option_name, option_name_2, option_text, display_mode, bracket_style)}
                                 </optgroup>
                             )
                         :
-                            OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode)
+                            OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode, bracket_style)
                     }
                 </select>
                 {/* TODO Алдааны message өгөхөд ашиглана */}
@@ -126,7 +137,7 @@ export default class SelectField extends Component {
 }
 
 
-function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode) {
+function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode, bracket_style) {
     var option_data = option_name
     if (option_text) option_data = option_text
     const options =
@@ -141,7 +152,7 @@ function OptionComp (options_data,  option_key, option_name, option_name_2, opti
                     {
                         display_mode
                         ?
-                            row[option_data]  + "   (   " + row[option_name_2] + "   )   "
+                            row[option_data]  + " " + bracket_style.open + row[option_name_2] + bracket_style.close
                         :
                             row[option_data]
                     }
