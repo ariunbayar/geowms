@@ -4,7 +4,6 @@ import subprocess
 import json
 
 from django.core.files.storage import FileSystemStorage
-from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
