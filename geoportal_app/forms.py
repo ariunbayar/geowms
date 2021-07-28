@@ -2,7 +2,6 @@ from django import forms
 from django.db.models.query_utils import Q
 
 from geoportal_app.models import User
-from backend.org.models import Employee
 
 
 class UserForm(forms.ModelForm):
