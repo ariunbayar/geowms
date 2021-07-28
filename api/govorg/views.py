@@ -10,7 +10,7 @@ from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
 from api.utils import filter_layers, replace_src_url, filter_layers_wfs, get_cql_filter
-from backend.govorg.models import GovOrg as System
+from backend.govorg.models import System
 from backend.inspire.models import (
     LCodeLists,
     LFeatureConfigs,

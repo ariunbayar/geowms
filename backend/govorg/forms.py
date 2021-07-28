@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import GovOrg as System
+from .models import System
 
 
 class SystemForm(forms.ModelForm):

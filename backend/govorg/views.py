@@ -1,3 +1,4 @@
+from platform import system
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.db import transaction
@@ -10,21 +11,21 @@ from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from main.decorators import ajax_required
 from main import utils
-from .models import GovOrg, GovOrgWMSLayer
+from .models import System, GovOrgWMSLayer
 from .forms import SystemForm
 from main.components import Datatable
 import json
 
 
-def _get_govorg_display(govorg):
+def _get_govorg_display(system):
 
-    layers = list(govorg.wms_layers.all().values_list('pk', flat=True))
+    layers = list(system.wms_layers.all().values_list('pk', flat=True))
     return {
-        'id': govorg.pk,
-        'name': govorg.name,
-        'token': govorg.token,
-        'website': govorg.website,
-        'created_at': govorg.created_at.strftime('%Y-%m-%d'),
+        'id': system.pk,
+        'name': system.name,
+        'token': system.token,
+        'website': system.website,
+        'created_at': system.created_at.strftime('%Y-%m-%d'),
         'layers': layers,
     }
 
@@ -50,7 +51,7 @@ def _system_validation(payload, system=None):
         if system.name != system_name:
             is_name_changed = True
     if is_name_changed or not system:
-        if GovOrg.objects.filter(name=system_name, deleted_by__isnull=True, org_id=org).first():
+        if System.objects.filter(name=system_name, deleted_by__isnull=True, org_id=org).first():
             errors['name'] = 'Системийн нэр бүртгэлтэй байна.'
 
     return errors
@@ -63,7 +64,7 @@ def хадгалах(request, payload, pk=None):
     accepted_props = payload.get('accepted_props')
 
     if pk:
-        system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
+        system = get_object_or_404(System, pk=pk, deleted_by__isnull=True)
         form = SystemForm(payload, instance=system)
         errors = _system_validation(payload, system)
     else:
@@ -114,11 +115,11 @@ def set_attributes(request, payload, pk):
     })
 
 
-def _get_govorg_detail_display(request, govorg):
+def _get_govorg_detail_display(request, system):
     wms_ids = []
     wms_detail_list = []
     govorg_layer_detail = []
-    govorg_id = govorg.id
+    govorg_id = system.id
     system_local_base_url = utils.get_config('system_local_base_url')
 
     govorg_layers = list(GovOrgWMSLayer.objects.filter(govorg_id=govorg_id).values('wms_layer_id', 'attributes'))
@@ -153,8 +154,8 @@ def _get_govorg_detail_display(request, govorg):
                     'code': wms_layer['code'],
                     'name': wms_layer['name'],
                     'title': wms_layer['title'],
-                    'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[govorg.token, wms_layer['code']])),
-                    'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[govorg.token, wms_layer['code']]),
+                    'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[system.token, wms_layer['code']])),
+                    'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[system.token, wms_layer['code']]),
                 }
                 wms_layers.append(layer_detail)
 
@@ -166,7 +167,7 @@ def _get_govorg_detail_display(request, govorg):
         wms_detail_list.append(wms_detail)
 
     return {
-        'detail': _get_govorg_display(govorg),
+        'detail': _get_govorg_display(system),
         'wms_list': wms_detail_list,
         'govorg_attributes': govorg_layer_detail
     }
@@ -177,12 +178,12 @@ def _get_govorg_detail_display(request, govorg):
 @user_passes_test(lambda u: u.is_superuser)
 def дэлгэрэнгүй(request, pk):
 
-    govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
+    system = get_object_or_404(System, pk=pk, deleted_by__isnull=True)
     system_local_base_url = utils.get_config('system_local_base_url')
     rsp = {
-        'govorg': _get_govorg_detail_display(request, govorg),
-        'public_url': request.build_absolute_uri(reverse('api:service:system_proxy', args=[govorg.token])),
-        'private_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[govorg.token]),
+        'govorg': _get_govorg_detail_display(request, system),
+        'public_url': request.build_absolute_uri(reverse('api:service:system_proxy', args=[system.token])),
+        'private_url': system_local_base_url + reverse('api:service:local_system_proxy', args=[system.token]),
         'success': True,
     }
 
@@ -194,9 +195,9 @@ def дэлгэрэнгүй(request, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def refresh_token(request, pk):
 
-    govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
-    govorg.token = TokenGeneratorSystem().get()
-    govorg.save()
+    system = get_object_or_404(System, pk=pk, deleted_by__isnull=True)
+    system.token = TokenGeneratorSystem().get()
+    system.save()
 
     rsp = {
         'success': True,
@@ -210,10 +211,10 @@ def refresh_token(request, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def устгах(request, pk):
 
-    govorg = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
-    govorg.deleted_by = request.user
-    govorg.deleted_at = localtime(now())
-    govorg.save()
+    system = get_object_or_404(System, pk=pk, deleted_by__isnull=True)
+    system.deleted_by = request.user
+    system.deleted_at = localtime(now())
+    system.save()
 
     rsp = {
         'success': True,
@@ -228,7 +229,7 @@ def устгах(request, pk):
 def тоо(request, pk):
 
     rsp = {
-        'count': GovOrg.objects.filter(org_id=pk, deleted_by__isnull=True).count(),
+        'count': System.objects.filter(org_id=pk, deleted_by__isnull=True).count(),
     }
 
     return JsonResponse(rsp)
@@ -238,7 +239,7 @@ def тоо(request, pk):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def govorgList(request, payload, org_id):
-    qs = GovOrg.objects.filter(org_id=org_id, deleted_by__isnull=True)
+    qs = System.objects.filter(org_id=org_id, deleted_by__isnull=True)
     оруулах_талбарууд = ['id', 'name', 'token', 'created_at', 'updated_at', 'org_id', 'website']
     items = []
     total_page = 1
@@ -246,7 +247,7 @@ def govorgList(request, payload, org_id):
 
     if qs:
         datatable = Datatable(
-            model=GovOrg,
+            model=System,
             payload=payload,
             оруулах_талбарууд=оруулах_талбарууд,
             initial_qs=qs
