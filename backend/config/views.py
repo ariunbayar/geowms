@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
 from django.db import connections
 from django.conf import settings
-from django.http import JsonResponse, HttpResponse, Http404
+from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.utils.timezone import localtime
