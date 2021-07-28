@@ -19,6 +19,7 @@ import Draw, { createBox } from 'ol/interaction/Draw';
 import { securedImageWMS, clearLocalData } from "@utils/Map/Helpers"
 import SideBar from "@utils/SideBar"
 import * as utils from "@helpUtils/ol"
+import * as fnUtils from "@helpUtils/functions"
 
 import { BaseMaps as СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'
@@ -107,6 +108,7 @@ export default class BundleMap extends Component {
         this.resetSearch = this.resetSearch.bind(this)
         this.getOpenLayers = this.getOpenLayers.bind(this)
         this.featureFromUrl = this.featureFromUrl.bind(this)
+        this.getGeom = this.getGeom.bind(this)
     }
 
     initMarker() {
@@ -415,6 +417,10 @@ export default class BundleMap extends Component {
         window.map = map
         this.setState({ vector_layer, base_layer_controls, map_wms_list })
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
+        const to_geo_id = fnUtils.getUrlParamValue(window.location.href, 'to')
+        if (to_geo_id) {
+            this.getGeom(to_geo_id, undefined, true)
+        }
     }
 
     onClickCloser(){
@@ -756,7 +762,12 @@ export default class BundleMap extends Component {
             }
         }
 
-        if (this.sendFeatureInfo.length > 0) this.is_empty = false
+        if (this.sendFeatureInfo.length > 0) {
+            this.is_empty = false
+            const pop_up_feature_id = this.pop_up_feature_id
+            const source = this.state.vector_layer.getSource()
+            utils.removeFeatureFromSource(pop_up_feature_id, source)
+        }
 
         this.controls.popup.getData(
             true,
@@ -1017,13 +1028,16 @@ export default class BundleMap extends Component {
         }
     }
 
-    setFeatureOnMap(feature, refreshLayerFn, is_feature=false) {
+    setFeatureOnMap(feature, refreshLayerFn, is_from_url, is_feature=false) {
         this.onClickCloser()
 
         if (feature) {
             const { vector_layer } = this.state
 
-            const id = this.au_search_layer_name
+            let id
+            id = this.au_search_layer_name
+            if (is_from_url) id = this.pop_up_feature_id
+
             const source = vector_layer.getSource()
             utils.removeFeatureFromSource(id, source)
 
@@ -1034,6 +1048,8 @@ export default class BundleMap extends Component {
                     featureProjection: utils.vars.feature_projection,
                 })[0];
             }
+
+            console.log(id);
 
             new_feature.setProperties({ id })
             source.addFeature(new_feature)
@@ -1058,6 +1074,34 @@ export default class BundleMap extends Component {
         }
     }
 
+    getGeom(geo_id, refreshLayerFn, is_from_url=false) {
+        const bundle_id = this.state.bundle.id
+
+        service
+            .getGeom(geo_id, bundle_id)
+            .then(({ success, data }) => {
+                if (success) {
+                    this.setFeatureOnMap(data, refreshLayerFn, is_from_url)
+                }
+                else {
+                    const modal = {
+                        modal_status: "open",
+                        modal_icon: 'fa fa-exclamation-circle',
+                        modal_bg: '',
+                        icon_color: 'warning',
+                        title: 'GEOM өгөгдөл байхгүй байна',
+                        text: '',
+                        has_button: false,
+                        actionNameBack: "",
+                        actionNameDelete: "",
+                        modalAction: "",
+                        modalClose: ""
+                    }
+                    global.MODAL(modal)
+                }
+            })
+    }
+
     render() {
 
         const Menu_comp = () => {
@@ -1079,13 +1123,14 @@ export default class BundleMap extends Component {
                 "is_not_visible_layers": this.is_not_visible_layers,
                 resetSearch: this.resetSearch,
                 "marker": this.marker.point,
-                'closePopUp': this.onClickCloser
+                'closePopUp': this.onClickCloser,
             }
 
             return (
                 <div>
                     <SearchBarComponent
                         setFeatureOnMap={this.setFeatureOnMap}
+                        getGeom={this.getGeom}
                         vector_layer={this.state.vector_layer}
                         map_wms_list={this.state.map_wms_list}
                         bundle_id={this.state.bundle.id}

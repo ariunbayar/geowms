@@ -8,6 +8,7 @@ export {
     copyToClipboard,
     logicOp,
     sortArrayOfObj,
+    getUrlParamValue,
 }
 
 //энэ жишээ ийм маягаар явна
@@ -80,4 +81,20 @@ function sortArrayOfObj(array, key, is_reverse=false) {
         return first[key] - second[key]
     })
     return array
+}
+
+function getUrlParamValue(url, param_name) {
+    let split_url = url.split("?")
+    split_url = split_url[split_url.length - 1]
+
+    let params = split_url.split('&')
+    for(const idx in params) {
+        let param = params[idx]
+        let [key, value] = param.split('=')
+        if (param_name.toLowerCase() === key.toLowerCase()) {
+            return value
+        }
+    }
+
+    return ''
 }

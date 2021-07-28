@@ -52,27 +52,7 @@ export class SearchBarComponent extends Component {
 
     async getGeom(geo_id, refreshLayerFn) {
 
-        service
-            .getGeom(geo_id)
-            .then(({ success, data }) => {
-                if (data) {
-                    this.props.setFeatureOnMap(data, refreshLayerFn)
-                }
-                else {
-                    this.modalChange(
-                        'fa fa-exclamation-circle',
-                        '',
-                        'warning',
-                        'GEOM өгөгдөл байхгүй байна',
-                        '',
-                        false,
-                        '',
-                        '',
-                        null,
-                        null
-                    )
-                }
-            })
+        this.props.getGeom(geo_id, refreshLayerFn)
 
     }
 
