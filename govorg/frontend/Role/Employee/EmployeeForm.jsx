@@ -57,7 +57,8 @@ export class EmployeeForm extends Component {
             color = "text-danger"
         } else {
             color = "text-warning"
-        } return color
+        }
+        return color
         
     }
 
@@ -78,7 +79,6 @@ export class EmployeeForm extends Component {
             custom_query,
             нэмэх_товч,
             нэмэлт_талбарууд,
-            is_user,
         } = this.state
         const { is_admin } = this.props.employee
         return (
@@ -109,7 +109,6 @@ export class EmployeeForm extends Component {
                             нэмэх_товч={is_admin ? нэмэх_товч : null}
                             custom_query={custom_query}
                             нэмэлт_талбарууд={нэмэлт_талбарууд}
-                            is_user={is_user}
                         />
                     </div>
                 </div>

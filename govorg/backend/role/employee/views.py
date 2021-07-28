@@ -153,6 +153,10 @@ def list(request, payload):
     if is_user:
         qs = qs.filter(user__is_user=True)
 
+    custom_query = payload.get('custom_query')
+    if custom_query:
+        qs = qs.filter(**custom_query)
+
     qs = qs.filter(search__icontains=payload.get('query'))
     if not qs:
         rsp = {
