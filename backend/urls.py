@@ -206,7 +206,6 @@ urlpatterns = [
         path('save-value-types/', config_views.save_value_types),
         path('qgis-plugin/', config_views.check_qgis_path),
         path('qgis-plugin/save/', config_views.qgis_plugin_save)
-
     ], 'config'))),
 
     path('api/error500/', include(([
