@@ -261,8 +261,4 @@ urlpatterns = [
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
-
-#     path('geoportal_app/static/assets/', include(([
-#         path('qgis_plugin.zip/', bundle_views.zip, name='qgis_plugin.zip'),
-#     ], 'ppt'))),
 ]
