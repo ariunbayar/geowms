@@ -453,9 +453,10 @@ def _get_emp_perm_display(emp_perm):
         property_of_feature[feature_id] = property_perm_count
         emp_perm_properties = emp_perm_properties.distinct('property_id')
         for property_id in emp_perm_properties:
-            prop = LProperties.objects.get(property_id=property_id['property_id'])
-            property_data, perm_list = get_property_data_display(prop, feature_id, emp_perm, EmpPermInspire, False)
-            properties.append(property_data)
+            prop = LProperties.objects.filter(property_id=property_id['property_id']).first()
+            if prop:
+                property_data, perm_list = get_property_data_display(prop, feature_id, emp_perm, EmpPermInspire, False)
+                properties.append(property_data)
 
     package_features = [
         get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature, gov_perm_inspire_qs)
