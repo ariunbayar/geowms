@@ -56,7 +56,7 @@ def _check_pk(apps, schema_editor):
     tables = ['l_data_types', 'l_features', 'l_properties']
 
     unneed_properties = LProperties.objects.filter(property_id=0)
-    if unneed_properties > 1:
+    if len(unneed_properties) > 1:
         unneed_properties.delete()
 
     cursor = connections['default'].cursor()
