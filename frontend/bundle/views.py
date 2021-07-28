@@ -483,7 +483,7 @@ def get_search_property_value(request, payload):
                             for feature in features:
                                 properties = feature['properties']
                                 for key, value in properties.items():
-                                    if not value or not isinstance(value, str):
+                                    if not value or not isinstance(value, str) or key == geo_id:
                                         continue
 
                                     if search_value.lower() in value.lower():
