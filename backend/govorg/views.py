@@ -82,7 +82,7 @@ def хадгалах(request, payload, pk=None):
             system.wms_layers.set(layers)
             for accepted_prop in accepted_props:
                 GovOrgWMSLayer.objects.update_or_create(
-                    govorg_id=system.id,
+                    system_id=system.id,
                     wms_layer_id=accepted_prop.get('layer_id'),
                     defaults={
                         'attributes': utils.json_dumps(accepted_prop.get('attributes'))
@@ -118,22 +118,22 @@ def set_attributes(request, payload, pk):
 def _get_govorg_detail_display(request, system):
     wms_ids = []
     wms_detail_list = []
-    govorg_layer_detail = []
-    govorg_id = system.id
+    system_layer_detail = []
+    system_id = system.id
     system_local_base_url = utils.get_config('system_local_base_url')
 
-    govorg_layers = list(GovOrgWMSLayer.objects.filter(govorg_id=govorg_id).values('wms_layer_id', 'attributes'))
+    system_layers = list(GovOrgWMSLayer.objects.filter(system_id=system_id).values('wms_layer_id', 'attributes'))
 
     wms_layer_ids = []
-    for govorg_layer in govorg_layers:
+    for system_layer in system_layers:
 
-        if govorg_layer['wms_layer_id'] not in wms_layer_ids:
-            wms_layer_ids.append(govorg_layer['wms_layer_id'])
-        if govorg_layer['attributes']:
-            govorg_layer_attr = govorg_layer['attributes'].replace("\'", "\"")
-            govorg_layer_detail.append({
-                'layer_id': govorg_layer['wms_layer_id'],
-                'attributes': utils.json_load(govorg_layer_attr)
+        if system_layer['wms_layer_id'] not in wms_layer_ids:
+            wms_layer_ids.append(system_layer['wms_layer_id'])
+        if system_layer['attributes']:
+            system_layer_attr = system_layer['attributes'].replace("\'", "\"")
+            system_layer_detail.append({
+                'layer_id': system_layer['wms_layer_id'],
+                'attributes': utils.json_load(system_layer_attr)
             })
 
     wms_layer_detail = WMSLayer.objects.filter(id__in=wms_layer_ids)
@@ -169,7 +169,7 @@ def _get_govorg_detail_display(request, system):
     return {
         'detail': _get_govorg_display(system),
         'wms_list': wms_detail_list,
-        'govorg_attributes': govorg_layer_detail
+        'system_attributes': system_layer_detail
     }
 
 
