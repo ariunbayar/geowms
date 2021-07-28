@@ -1,16 +1,12 @@
 from django.views.decorators.http import require_GET
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
-from django.core.paginator import Paginator
 from main.decorators import ajax_required
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.postgres.search import SearchVector
 from django.http import JsonResponse
 from geoportal_app.models import User
-from geoportal_app.models import Role
 from backend.org.models import Employee
 from main.components import Datatable
-
 
 
 def _get_user_display(user):
@@ -30,6 +26,7 @@ def _get_user_display(user):
 def _datetime_display(dt):
     return dt.strftime('%Y-%m-%d') if dt else None
 
+
 def _get_user_detail(user):
     return {
         'id': user.id,
@@ -41,8 +38,8 @@ def _get_user_detail(user):
         'is_sso': user.is_sso,
         'username': user.username,
         'is_active': user.is_active,
-        'last_login':_datetime_display(user.last_login),
-        'date_joined':_datetime_display(user.date_joined)
+        'last_login': _datetime_display(user.last_login),
+        'date_joined': _datetime_display(user.date_joined)
     }
 
 
@@ -86,15 +83,9 @@ def userCount(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def дэлгэрэнгүй(request, pk):
-
     user = get_object_or_404(User, pk=pk)
-    all_role = Role.objects.all()
-    all_roles = [_get_role_display(q)for q in all_role]
-    roles = [_get_role_display(role) for role in user.roles.all()]
     rsp = {
         'user_detail': _get_user_detail(user),
-        'roles': roles,
-        'all_role': all_roles,
     }
 
     return JsonResponse(rsp)
@@ -140,12 +131,6 @@ def roleCreate(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def paginatedList(request, payload):
-
-    def _get_roles(pk):
-        user = User.objects.filter(pk=pk).first()
-        role = user.roles.all().first()
-        return role.get_id_display() if role else ''
-
     оруулах_талбарууд = ['id', 'last_name', 'first_name', 'is_superuser', 'email', 'is_active', 'is_sso']
 
     datatable = Datatable(
@@ -155,8 +140,6 @@ def paginatedList(request, payload):
     )
 
     items, total_page, start_index = datatable.get()
-    for item in items:
-        item['roles'] = _get_roles(item['id'])
 
     rsp = {
         'items': items,

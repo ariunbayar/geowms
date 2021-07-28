@@ -1,15 +1,7 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../helpers/service'
 export const service = {
-    loadWMSLayers,
     loadBaseLayers,
     findSum
-}
-
-function loadWMSLayers(id) {
-    const requestOptions = {
-        ...getGetOptions(),
-    }
-    return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
 }
 
 function loadBaseLayers() {

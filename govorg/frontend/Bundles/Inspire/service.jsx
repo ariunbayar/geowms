@@ -17,7 +17,6 @@ export const service = {
     createUpd,
     createDel,
     sendFile,
-    loadWMSLayers,
     searchMeta,
     getMetaData,
     getMetaFields,
@@ -138,13 +137,6 @@ function sendFile(formData, fid, tid, name, pid){
         body: formData,
     }
     return fetch(`${prefix}/send-data/${tid}/${pid}/${fid}/${name}/`, opts).then(handleResponse)
-}
-
-function loadWMSLayers(id) {
-    const requestOptions = {
-        ...getGetOptions(),
-    }
-    return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
 }
 
 function searchMeta(pk) {

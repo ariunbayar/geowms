@@ -26,7 +26,6 @@ from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
-from backend.payment.models import Payment
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, Position
