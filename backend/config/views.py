@@ -622,7 +622,7 @@ def check_qgis_path(request):
     success = False
     file_name ='qgis_plugin.zip'
 
-    file_path = os.path.join(settings.STATIC_ROOT + '/' 'assets/'+ file_name)
+    file_path = os.path.join(settings.STATIC_ROOT , 'assets', file_name)
     file_list = []
     file_detail = {
         'name': '',
@@ -656,3 +656,9 @@ def qgis_plugin_save(request):
     return JsonResponse({
         'success': True
     })
+
+
+print(os.path.join("Hello", 'world'))
+print(os.path.join("Hello", 'world'))
+print(os.path.join("Hello", 'world'))
+print(os.path.join("Hello", 'world'))
