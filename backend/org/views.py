@@ -515,12 +515,16 @@ def employee_list(request, payload, level, pk):
         {"field": "user_id", "action": backend_org_utils.get_email, "new_field": "user__email"},
         {"field": "position_id", "action": backend_org_utils.get_position_name, "new_field": "position"},
     ]
+    нэмэлт_талбарууд = [
+        {"field": "role_name", "action": backend_org_utils.get_role_name},
+    ]
 
     datatable = Datatable(
         model=Employee,
         payload=payload,
         initial_qs=qs,
         оруулах_талбарууд=оруулах_талбарууд,
+        нэмэлт_талбарууд=нэмэлт_талбарууд,
         хувьсах_талбарууд=хувьсах_талбарууд,
         has_search=False,
     )

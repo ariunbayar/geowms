@@ -105,6 +105,14 @@ def _get_email(user_id, item):
     return user.email
 
 
+def _get_role_name(item):
+    role_name = ''
+    role = EmpPerm.objects.filter(employee=item['id']).first()
+    if role and role.emp_role:
+        role_name = role.emp_role.name
+    return role_name
+
+
 def _get_position_name(postition_id, item):
     position_name = ''
     position = Position.objects.filter(id=postition_id).first()
@@ -148,12 +156,16 @@ def list(request, payload):
         {"field": "user_id", "action": _get_email, "new_field": "user__email"},
         {"field": "position_id", "action": _get_position_name, "new_field": "position"},
     ]
+    нэмэлт_талбарууд = [
+        {"field": "role_name", "action": _get_role_name},
+    ]
 
     datatable = Datatable(
         model=Employee,
         payload=payload,
         initial_qs=qs,
         оруулах_талбарууд=оруулах_талбарууд,
+        нэмэлт_талбарууд=нэмэлт_талбарууд,
         хувьсах_талбарууд=хувьсах_талбарууд,
         has_search=False,
     )

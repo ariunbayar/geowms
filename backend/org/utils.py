@@ -11,6 +11,7 @@ from backend.inspire.models import LDataTypes
 from backend.inspire.models import LDataTypeConfigs
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import GovRoleInspire
+from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRole
 
 from .models import Employee
@@ -605,6 +606,14 @@ def get_name(user_id, item):
 def get_email(user_id, item):
     user = User.objects.filter(pk=user_id).first()
     return user.email
+
+
+def get_role_name(item):
+    role_name = ''
+    role = EmpPerm.objects.filter(employee=item['id']).first()
+    if role and role.emp_role:
+        role_name = role.emp_role.name
+    return role_name
 
 
 def get_position_name(postition_id, item):
