@@ -50,7 +50,6 @@ export default class ConfigSystem extends Component {
 
     handleSubmit(values) {
         const { files} = this.state
-        console.log("D", files)
         const file = files[0]
         var form_datas = new FormData()
         if (files && file.length > 0) {
