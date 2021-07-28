@@ -21,23 +21,23 @@ export default class ConfigSystem extends Component {
     }
 
     componentDidMount() {
-        service.config.qgis_plugin.get().then(({files}) => {
-            this.setState({
-                files
-            })
+        service.config.qgis_plugin.get().then(({ success, files }) => {
+            if (success){
+                this.setState({
+                    files
+                })
+            }
         })
     }
 
-    componentDidUpdate(pP, pS) {
-        const {file_uploaded, is_editing} = this.state
-        if (pS.file_uploaded !== file_uploaded) {
-            if (!is_editing) this.handleSubmit()
-        }
-    }
-
-    handleEdit(e) {
+    handleEdit(e, status) {
         e.preventDefault()
-        var { is_editing, icon_name } = this.state
+        var { is_editing, icon_name, file_uploaded } = this.state
+        if (status == 'floppy-o'){
+            if (file_uploaded){
+                this.handleSubmit()
+            }
+        }
         if ( !is_editing ) {
             icon_name = 'edit'}
         else icon_name = 'floppy-o'
@@ -52,8 +52,8 @@ export default class ConfigSystem extends Component {
         const { files} = this.state
         const file = files[0]
         var form_datas = new FormData()
-        if (files && file.length > 0) {
-        form_datas.append('files', file, file.name)
+        if (files && files.length > 0) {
+        form_datas.append('files', file, 'qgis_plugin.zip')
         service.config.qgis_plugin
             .save(form_datas)
             .then(({success}) => {
@@ -62,7 +62,6 @@ export default class ConfigSystem extends Component {
                 }
             })
         }
-        else file
     }
 
     getFile(files) {
@@ -70,14 +69,13 @@ export default class ConfigSystem extends Component {
     }
 
     render() {
-
         var { files, icon_name, is_editing } = this.state
         return (
             <div className="card">
                 <div className="card-header">
                     QGIS Plugin
                     <div className="card-action">
-                        <a href="#" onClick={ this.handleEdit }>
+                        <a href="#" onClick={ (e) => this.handleEdit(e, icon_name) }>
                             <i className={'fa fa-' + icon_name}></i>
                         </a>
                     </div>

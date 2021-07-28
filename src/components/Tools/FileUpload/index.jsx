@@ -89,7 +89,8 @@ function FileUpload(props) {
                             {
                                 !is_validate
                                 ?
-                                    <i className="fa fa-trash-o m-1 mr-2 float-right" role="button" onClick={(e) => fileAction(e, 'Remove_File', is_multiple)}></i>
+                                    !disabled &&
+                                        <i className="fa fa-trash-o m-1 mr-2 float-right" role="button" onClick={(e) => fileAction(e, 'Remove_File', is_multiple)}></i>
                                 :
                                     <i className="fa fa-exclamation-circle m-1 mr-2 blink text-danger"></i>
                             }

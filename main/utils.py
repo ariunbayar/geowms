@@ -1070,9 +1070,9 @@ def save_img_to_folder(image, folder_name, file_name, ext):
     return folder_name + '/' + file_full_name
 
 
-def save_file_to_storage(file, folder_name, file_full_name):
+def save_file_to_storage(file, folder_name, file_full_name, storage_path=settings.MEDIA_ROOT):
     from django.core.files.storage import FileSystemStorage
-    path = os.path.join(settings.MEDIA_ROOT, folder_name)
+    path = os.path.join(storage_path, folder_name)
     fs = FileSystemStorage(
         location=path
     )
@@ -2025,32 +2025,28 @@ def has_user(id=None, username=None, email=None):
 def get_feature_ids_of_theme(theme_code):
 
     LThemes = apps.get_model('backend_inspire', 'LThemes')
-    LPackages = apps.get_model('backend_inspire', 'LPackages')
-    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
 
     feature_ids = list()
 
     theme_qs = LThemes.objects
     theme_qs = theme_qs.filter(theme_code=theme_code)
+    theme_qs = theme_qs.prefetch_related('lpackages_set__lfeatures_set')
     theme = theme_qs.first()
 
     if theme:
-        pack_qs = LPackages.objects
-        pack_qs = pack_qs.filter(theme_id=theme.theme_id)
+        pack_qs = theme.lpackages_set.all()
         for pack in pack_qs:
-            feature_qs = LFeatures.objects
-            feature_qs = feature_qs.filter(package_id=pack.package_id)
-            if feature_qs:
-                feature_ids_new = list(feature_qs.values_list('feature_id', flat=True))
-                feature_ids = feature_ids + feature_ids_new
+            feature_qs = pack.lfeatures_set.all()
+            for feature in feature_qs:
+                feature_ids.append(feature.feature_id)
 
     return feature_ids
 
 
 # file ruu text bichih
 def write_to_file(text, file_name='test.txt'):
-    with open(file_name, 'w') as f:
-        f.write(text)
+    with open(file_name, 'a') as f:
+        f.write("\n" + text)
 
 
 # зөвхөн тест үед л хэрэг болно эхлэл хугацааг тавина

@@ -2,11 +2,7 @@
 import zipfile
 from io import BytesIO
 
-from django.conf.urls import url
-
-from django.contrib.auth.decorators import login_required
 from backend.dedsanbutets.models import ViewNames
-from django.db.models import base
 import requests
 
 from django.http import HttpResponse, Http404
@@ -23,12 +19,8 @@ from api.utils import (
 )
 from backend.bundle.models import Bundle
 from backend.wms.models import WMS
-from backend.inspire.models import LProperties
 from django.utils.timezone import localtime, now
-import main.geoserver as geoserver
-from geoportal_app.models import Role
-from django.core.cache import cache
-from main.decorators import get_conf_geoserver, get_conf_geoserver_base_url
+from main.decorators import get_conf_geoserver_base_url
 from main import utils
 
 
@@ -197,9 +189,9 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
         def _get_allowed_layers():
             user_roles = _get_user_roles(request.user)
             wms_layers = wms.wmslayer_set.filter(
-                    bundlelayer__bundle__pk=bundle_id,
-                    bundlelayer__role_id__in=user_roles,
-                )
+                bundlelayer__bundle__pk=bundle_id,
+                bundlelayer__role_id__in=user_roles,
+            )
             allowed_layers = set([layer.code for layer in wms_layers])
             return allowed_layers
 
@@ -273,7 +265,7 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
     if request_request == 'getcapabilities':
         raise Http404
 
-    bundle = get_object_or_404(Bundle, pk=bundle_id)
+    get_object_or_404(Bundle, pk=bundle_id)
     wms = get_object_or_404(WMS, pk=wms_id)
 
     wms_layer_qs = wms.wmslayer_set.filter(id=layer_id)
@@ -395,7 +387,7 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
         'wmts': 'cache_url',
     }
 
-    bundle = get_object_or_404(Bundle, pk=bundle_id)
+    get_object_or_404(Bundle, pk=bundle_id)
 
     wms_qs = WMS.objects.filter(pk=wms_id)
     if not wms_qs:

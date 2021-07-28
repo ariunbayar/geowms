@@ -61,8 +61,6 @@ def roleCreate(request, payload):
         saves.save()
         return JsonResponse({'success': True})
 
-    return JsonResponse({'success': True})
-
 
 @require_POST
 @ajax_required
@@ -106,9 +104,8 @@ def _get_role_options():
     return form_options
 
 
-
-def _get_form_check_options(bundleId):
-    bundleLayer = BundleLayer.objects.filter(bundle_id=bundleId).order_by('layer_id')
+def _get_form_check_options(bundle_id):
+    bundleLayer = BundleLayer.objects.filter(bundle_id=bundle_id).order_by('layer_id')
     roleOptions = []
     for name, layers in groupby(bundleLayer, lambda ob: ob.layer_id):
         roles = []

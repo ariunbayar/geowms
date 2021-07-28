@@ -1,4 +1,5 @@
 import os
+import requests
 from itertools import groupby
 
 from django.conf import settings
@@ -9,6 +10,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_GET, require_POST
 from django.core.cache import cache
 from django.db import connections
+from django.db.models.query import Prefetch
 
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
@@ -363,5 +365,206 @@ def get_point_buffer_geom(request, payload):
         'success': True,
         'data': feature
     }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def get_search_property_value(request, payload):
+    search_value = payload.get('value')
+    datas = list()
+    cache_time = 3000
+    geo_id = 'inspire_id'
+
+    rsp = {
+        'success': False,
+        'data': [],
+        'error': ""
+    }
+
+    if not search_value:
+        rsp['error'] = 'Хайх утгаа оруулна уу'
+        return JsonResponse(rsp)
+
+    headers = {
+        'User-Agent': 'geo 1.0'
+    }
+
+    cached_datas = cache.get(search_value)
+    if cached_datas:
+        rsp['success'] = True
+        rsp['data'] = cached_datas
+        return JsonResponse(rsp)
+
+    bundle_qs = Bundle.objects
+    bundle_qs = bundle_qs.prefetch_related('ltheme__lpackages_set__lfeatures_set__viewnames_set__viewproperties_set__property')
+    bundle_qs = bundle_qs.prefetch_related(Prefetch('layers__wms'))
+    bundle_qs = bundle_qs.order_by('sort_order')
+    for bundle in bundle_qs:
+        pack_qs = bundle.ltheme.lpackages_set.all()
+        data = dict()
+        data['name'] = bundle.ltheme.theme_name
+        data['id'] = bundle.id
+        data['values'] = list()
+        for pack in pack_qs:
+            features_qs = pack.lfeatures_set.all()
+            for feature in features_qs:
+                data_feature_dict = dict()
+                data_feature_dict['id'] = feature.feature_id
+                data_feature_dict["name"] = feature.feature_name
+                data_feature_dict["values"] = list()
+
+                view_names = feature.viewnames_set.all()
+                for view in view_names:
+                    view_properties = view.viewproperties_set.all()
+                    if not view_properties:
+                        continue
+
+                    property_codes = [
+                        utils.remove_empty_spaces(view_property.property.property_code.lower())
+                        for view_property in view_properties
+                        if view_property.property
+                    ]
+
+                    value_text_idx = 1
+                    value_text_types = utils.value_types()[value_text_idx]['value_names']
+
+                    value_types = value_text_types
+
+                    properties = [
+                        {
+                            "property_code": view_property.property.property_code.lower(),
+                            "value_type_id": view_property.property.value_type_id
+                        }
+                        for view_property in view_properties
+                        if view_property.property
+                    ]
+
+                    layer_name = utils.make_layer_name(utils.make_view_name(feature))
+
+                    has_codes = list()
+                    bundle_layers = bundle.layers.all()
+                    for bundle_layer in bundle_layers:
+                        layer_code = bundle_layer.code
+                        if layer_code == layer_name and layer_code not in has_codes:
+                            wms_url = bundle_layer.wms.url
+                            has_codes.append(layer_code)
+
+                            cql_filters = list()
+                            for prop in properties:
+                                op = ''
+                                if prop['value_type_id'] in value_types:
+                                    op = 'ilike'
+
+                                if op:
+                                    _filter = """{} {} '%{}%'""".format(prop['property_code'], op, search_value)
+                                    cql_filters.append(_filter)
+
+                            property_codes.append(geo_id)
+
+                            select_properties = ",".join(property_codes)
+
+                            geo_server_url = '{url}?service=WFS&version=1.1.0&request=GetFeature&TYPENAME={code}'.format(url=wms_url, code=layer_code)
+                            geo_server_url = '{base_url}&propertyName={properties}'.format(base_url=geo_server_url, properties=select_properties)
+                            geo_server_url = geo_server_url + "&" + "srsName=EPSG:4326"
+                            if not cql_filters:
+                                continue
+
+                            cql_filters = " or ".join(cql_filters)
+                            geo_server_url = geo_server_url + "&" + "cql_filter=" + cql_filters
+
+                            geo_server_url = geo_server_url + "&outputFormat=application/json"
+                            geo_server_url = geo_server_url + '&format_options=CHARSET:UTF-8'
+                            geo_server_url = geo_server_url + '&MAXFEATURES=5'
+
+                            _response = requests.get(geo_server_url, headers=headers, timeout=300, verify=False)
+                            content = _response.content.decode()
+                            if 'Exception' in content:
+                                continue
+
+                            try:
+                                geo_json = utils.json_load(content)
+                            except Exception as e:
+                                raise e
+
+                            features = geo_json['features']
+                            for geo_feature in features:
+                                properties = geo_feature['properties']
+
+                                geo_value = ''
+                                for key, value in properties.items():
+                                    if not value or not isinstance(value, str) or key == geo_id:
+                                        continue
+
+                                    if search_value.lower() in value.lower():
+                                        geo_value = value
+                                        break
+
+                                data_feature_dict['values'].append({
+                                    "id": properties[geo_id],
+                                    "name": geo_value,
+                                })
+
+                if not data_feature_dict['values']:
+                    continue
+
+                data['values'].append(data_feature_dict)
+
+        if not data['values']:
+            continue
+
+        datas.append(data)
+
+    cache.set(search_value, datas, cache_time)
+    if not datas:
+        rsp['error'] = 'Мэдээлэл олдсонгүй'
+        return JsonResponse(rsp)
+
+    rsp['success'] = True
+    rsp['data'] = datas
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def get_geom(request, payload):
+    feature = []
+    geo_id = payload.get('geo_id')
+    bundle_id = payload.get('bundle_id')
+
+    rsp = {
+        'success': False,
+        'data': [],
+    }
+
+    geom = utils.geo_cache('geom', geo_id, utils.get_geom(geo_id), 1800)
+    if geom:
+        mgeo_qs = MGeoDatas.objects
+        mgeo_qs = mgeo_qs.select_related('feature__package__theme__bundle')
+        mgeo_qs = mgeo_qs.prefetch_related('feature__viewnames_set__viewproperties_set')
+        mgeo_qs = mgeo_qs.prefetch_related('feature__viewnames_set__viewproperties_set')
+        mgeo_qs = mgeo_qs.filter(geo_id=geo_id)
+        mgeo = mgeo_qs.first()
+
+        if bundle_id != mgeo.feature.package.theme.bundle.id:
+            return JsonResponse(rsp)
+
+        view_names = mgeo.feature.viewnames_set.all()
+        for view in view_names:
+            view_properties = view.viewproperties_set.all()
+            if view_properties:
+                geom = utils.geo_cache('geom', geo_id, utils.get_geom(geo_id), 1800)
+                if geom:
+                    geo_json = geom.json
+                    feature = utils.get_feature_from_geojson(geo_json)
+                    rsp['success'] = True
+                    rsp['data'] = feature
+            else:
+                rsp['success'] = False
+                rsp['data'] = feature
+
+            break
 
     return JsonResponse(rsp)

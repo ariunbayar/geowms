@@ -5,21 +5,21 @@ from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse
 
 from backend.wms.models import WMS
-from backend.govorg.models import GovOrg
+from backend.govorg.models import System
 
 from main.decorators import ajax_required, gov_required
 from main.components import Datatable
 from main import utils
 
 
-def _get_govorg_display(govorg):
+def _get_govorg_display(system):
 
     return {
-        'id': govorg.pk,
-        'name': govorg.name,
-        'token': govorg.token,
-        'website': govorg.website,
-        'created_at': govorg.created_at.strftime('%Y-%m-%d'),
+        'id': system.pk,
+        'name': system.name,
+        'token': system.token,
+        'website': system.website,
+        'created_at': system.created_at.strftime('%Y-%m-%d'),
     }
 
 
@@ -29,11 +29,11 @@ def _get_govorg_display(govorg):
 @login_required(login_url='/gov/secure/login/')
 def systemList(request, payload):
 
-    qs = request.org.govorg_set.filter(deleted_by__isnull=True)
+    qs = request.org.system_set.filter(deleted_by__isnull=True)
     оруулах_талбарууд = ['id', 'name', 'token', 'created_at']
 
     datatable = Datatable(
-        model=GovOrg,
+        model=System,
         initial_qs=qs,
         payload=payload,
         оруулах_талбарууд=оруулах_талбарууд
@@ -125,7 +125,7 @@ def _get_system_detail_display(request, system):
 @login_required(login_url='/gov/secure/login/')
 def detail(request, pk):
 
-    system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
+    system = get_object_or_404(System, pk=pk, deleted_by__isnull=True)
     system_local_base_url = utils.get_config('system_local_base_url')
     rsp = {
         'system': _get_system_detail_display(request, system),
