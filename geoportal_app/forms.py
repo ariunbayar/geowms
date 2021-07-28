@@ -1,6 +1,8 @@
 from django import forms
+from django.db.models.query_utils import Q
 
 from geoportal_app.models import User
+from backend.org.models import Employee
 
 
 class UserForm(forms.ModelForm):
@@ -37,7 +39,6 @@ class UserForm(forms.ModelForm):
             'email': {
                 'required': 'Мэйлээ оруулна уу!',
                 'max_length': 'Мэйл %(limit_value)d тэмдэгт байх ёстой!',
-                'unique': 'Мэйл хаяг бүртгэлтэй байна!',
             },
             'gender': {
                 'required': 'Хүйсээ оруулна уу!',
@@ -48,3 +49,11 @@ class UserForm(forms.ModelForm):
                 'max_length': 'Регистрийн дугаар %(limit_value)d тэмдэгт байх ёстой!',
             },
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get("email")
+        if self.instance:
+            user = User.objects.filter(~Q(username=self.instance), email=email).first()
+            if user:
+                self.add_error('email', 'Бүртгэлтэй мэйл хаяг байна!')
