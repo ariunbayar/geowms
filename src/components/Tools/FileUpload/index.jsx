@@ -1,3 +1,4 @@
+import { disable } from 'ol/rotationconstraint';
 import React, { useState, useEffect } from 'react';
 import './style.css'
 
@@ -70,7 +71,7 @@ function FileUpload(props) {
         SetFiles(file_list)
     }
 
-    const { className, default_text, accept, is_multiple, info_text, is_validate } = props
+    const { className, default_text, accept, is_multiple, info_text, is_validate, disabled } = props
     var last_file = files[files.length-1]
     if (last_file){
         var default_files = last_file.name
@@ -78,13 +79,12 @@ function FileUpload(props) {
     if ( !is_multiple ){
         var file = files[0]
     }
-
     return(
         <div>
             {
                 <div className={`row ${className}`}>
                     <div className="custom-file col-5 my-auto ml-3">
-                        <div className={`flex-container ${is_validate && 'border-danger'}`}>
+                        <div className={`flex-container ${disabled && 'change_bg'}  ${is_validate && 'border-danger'}`}>
                             <label className='custom-label'  htmlFor="clickFile"> {(files && files.length > 0 )? default_files : default_text}</label>
                             {
                                 !is_validate
@@ -104,6 +104,7 @@ function FileUpload(props) {
                                 onChange={(e) => fileAction(e, 'Get_File', is_multiple)}
                                 multiple={is_multiple}
                                 accept={accept}
+                                disabled={disabled}
                             />
                         </div>
                         {
