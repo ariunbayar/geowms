@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models.deletion import PROTECT
-from backend.inspire.models import LFeatures
+from backend.inspire.models import LFeatures, LProperties
 
 
 class ViewNames(models.Model):
@@ -13,7 +13,7 @@ class ViewNames(models.Model):
 
 class ViewProperties(models.Model):
     view = models.ForeignKey(ViewNames, on_delete=models.PROTECT)
-    property_id = models.IntegerField()
+    property = models.ForeignKey(LProperties, null=True, on_delete=models.PROTECT)
     update_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

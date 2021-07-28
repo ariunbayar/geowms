@@ -1075,25 +1075,29 @@ export default class BundleMap extends Component {
     }
 
     getGeom(geo_id, refreshLayerFn, is_from_url=false) {
+        const bundle_id = this.state.bundle.id
+
         service
-            .getGeom(geo_id)
+            .getGeom(geo_id, bundle_id)
             .then(({ success, data }) => {
-                if (data) {
+                if (success) {
                     this.setFeatureOnMap(data, refreshLayerFn, is_from_url)
                 }
                 else {
-                    this.modalChange(
-                        'fa fa-exclamation-circle',
-                        '',
-                        'warning',
-                        'GEOM өгөгдөл байхгүй байна',
-                        '',
-                        false,
-                        '',
-                        '',
-                        null,
-                        null
-                    )
+                    const modal = {
+                        modal_status: "open",
+                        modal_icon: 'fa fa-exclamation-circle',
+                        modal_bg: '',
+                        icon_color: 'warning',
+                        title: 'GEOM өгөгдөл байхгүй байна',
+                        text: '',
+                        has_button: false,
+                        actionNameBack: "",
+                        actionNameDelete: "",
+                        modalAction: "",
+                        modalClose: ""
+                    }
+                    global.MODAL(modal)
                 }
             })
     }
