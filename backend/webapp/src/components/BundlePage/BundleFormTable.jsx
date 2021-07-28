@@ -87,14 +87,13 @@ export default class BundleFormTable extends Component {
                     <td key={idx}>
                         {
                             id != 5 &&
-                        <input
-                            type="checkbox"
-                            onChange={this.handleLayerToggle}
-                            checked={this.state.roles.indexOf(id) > -1}
-                            value={id}
-                        />
+                                <input
+                                    type="checkbox"
+                                    onChange={this.handleLayerToggle}
+                                    checked={this.state.roles.indexOf(id) > -1}
+                                    value={id}
+                                />
                         }
-
                     </td>
                 )}
             </tr>

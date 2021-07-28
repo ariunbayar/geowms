@@ -981,7 +981,7 @@ def int_to_str(number):
     return str(number).zfill(9)
 
 
-def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, feature):
+def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, feature, selection_count):
     success_count = 0
     failed_count = 0
     unique_id = ano_db.unique_id
@@ -1019,13 +1019,13 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
             count = _get_count_of_table(cursor, table_name, pk_field_max_range, start_data, pk_field_type, pk_field_name)
 
         if limit_count and int(limit_count) >= 0:
-            SELECTCOUNT = int(limit_count)
+            selection_count = int(limit_count)
         count = int(count)
         current_data_counts = 0
         current_geo_id = last_geo_id
         i = 0
-        count_of_loop = count/SELECTCOUNT
-        count_of_odd = count%SELECTCOUNT
+        count_of_loop = count/selection_count
+        count_of_odd = count%selection_count
         if count_of_odd > 0:
             count_of_loop = int(count_of_loop) + 1
         while current_data_counts < int(count):
@@ -1067,12 +1067,13 @@ def _insert_single_table(ano_db, ano_db_table_pg, cursor):
     columns = utils.json_load(field_config)
     feature_code = ano_db_table_pg.feature_code
     feature = LFeatures.objects.filter(feature_code=feature_code).first()
-    success_count, failed_count, total_count = _insert_to_geo_db(ano_db, ano_db_table_pg, table_name, cursor, columns, feature)
+    success_count, failed_count, total_count = _insert_to_geo_db(ano_db, ano_db_table_pg, table_name, cursor, columns, feature, SELECTCOUNT)
     table_info_text = '''
         {table_name} хүснэгт
         нийт {total_count} мөр дата-наас
         "{feature_name}" feature-д
-        амжилттай орсон {success_count}
+        амжилттай орсон {success_count},
+        амжилтгүй орсон {failed_count}
         '''.format(
             table_name=table_name,
             total_count=total_count,
