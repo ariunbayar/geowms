@@ -9,7 +9,6 @@ class SubmitClass extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            url: "/llc/llc-request/",
             agreed_submit: false,
             one_check: true,
             show_save_btn: true,
@@ -24,12 +23,10 @@ class SubmitClass extends Component {
             if(this.state.one_check)
                 this.setState({ agreed_submit: true, one_check: false })
         }
-
         if(pP.values.kind !== values.kind) {
             if(values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН")
                 this.setState({ info_status: true })
         }
-
         if(pP.values.state !== values.state) {
             if(values.kind == "ИЛГЭЭСЭН" || values.kind == "ХҮЛЭЭГДЭЖ БУЙ" || values.state == 'ШИЙДВЭРЛЭГДСЭН')
                 this.setState({ show_save_btn: false })
@@ -82,7 +79,7 @@ class SubmitClass extends Component {
                             type="button"
                             disabled={!agreed_submit || !values.file_name ? true : ''}
                             className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
-                            onClick ={()=> this.handleSubmit()}
+                            onClick={()=> this.handleSubmit()}
                         >
                             <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
                         </button>
@@ -91,7 +88,7 @@ class SubmitClass extends Component {
                             <button className="btn btn-secondary btn-sm">
                                 <i
                                     className="fa fa-angle-double-left"
-                                    onClick ={()=> values.history.push(this.state.url)}
+                                    onClick={()=> values.history.push(`/llc/llc-request`)}
 
                                 >
                                     Буцах
@@ -102,7 +99,7 @@ class SubmitClass extends Component {
                                 ?
                                     <button
                                         className="btn btn-primary btn-sm"
-                                        onClick ={()=> this.handleSubmit()}
+                                        onClick={()=> this.handleSubmit()}
                                         disabled={!values.files.length > 0}
                                     >
                                             <i className="fa"> Хадгалах</i>
@@ -142,7 +139,6 @@ export class RequestAdd extends Component {
             state: '',
         }
 
-        this.handleOnChange = this.handleOnChange.bind(this)
         this.handlePassValues = this.handlePassValues.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.getTools = this.getTools.bind(this)
@@ -151,7 +147,6 @@ export class RequestAdd extends Component {
         this.modalClose = this.modalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.enableLoader = this.enableLoader.bind(this)
-        this.getFile = this.getFile.bind(this)
     }
 
     componentDidMount() {
@@ -195,50 +190,6 @@ export class RequestAdd extends Component {
 
     handleSelectModel(selected_tools) {
         this.setState({ selected_tools })
-    }
-
-    handleOnChange(e, selection) {
-        var name = ''
-        var value = ''
-        if (!selection) {
-            name = e.target.name
-            value = e.target.value
-        }
-        else {
-            name = e
-            value = selection['id']
-        }
-
-        this.validationForm()
-        this.setState({ [name]: value })
-    }
-
-    getFile(files) {
-        const { id } = this.props.match.params
-        var { file_name, file_state } = this.state
-        const file = files[0]
-        if(files && files.length > 0)
-            file_name = file.name
-            if (id) {
-                file_state = true
-            }
-
-        this.setState({ files, file_name, file_state })
-    }
-
-    validationForm() {
-        var forms = document.getElementsByClassName('form-control')
-        for (var i = 0; i < forms.length; i++) {
-            let form = forms[i]
-            if(form.value == '') {
-                form.classList.add('is-invalid')
-            }
-            else {
-                form.classList.remove('is-invalid')
-                form.classList.add('is-valid')
-            }
-        }
-
     }
 
     handleModalClose() {
@@ -324,14 +275,12 @@ export class RequestAdd extends Component {
                     <RequestDetail
                         id={id}
                         {...this.state}
-                        handleOnChange={this.handleOnChange}
                         submitClass={SubmitClass}
                         handlePassValues={this.handlePassValues}
                         history={this.props.history}
                         info={info}
                         handleSelectModel={this.handleSelectModel}
                         enableLoader={this.enableLoader}
-                        getFile={this.getFile}
                     />
                 </div>
                 <Modal

@@ -34,10 +34,10 @@ class ActionClass extends Component {
     handleSubmit() {
         const { id } =this.props.values
         const { mergejilten } = this.props
-        this.props.loader(true)
+        this.setState({ is_loading: true })
         service.sendRequest(id, mergejilten).then(({ success, info }) =>{
             if(success) {
-                this.props.loader(false)
+                this.setState({ is_loading: false })
                 this.modalChange(
                     'fa fa-check-circle',
                     'success',
@@ -71,7 +71,7 @@ class ActionClass extends Component {
         values.closeRequestMap()
     }
 
-    modalOpen(){
+    modalOpen() {
         this.setState({ modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
         })
@@ -92,23 +92,23 @@ class ActionClass extends Component {
     }
 
     render() {
-        const { values } = this.props
-        const { url, is_loading } = this.state
+        const { is_loading } = this.state
         return (
-                <div className='row ml-2 my-4'>
-                    <p
-                        className="btn btn-secondary"
-                        onClick ={()=> this.modalClose()}>
-                            Буцах
-                    </p>
-                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+            <div className='row ml-2 my-4'>
+                <Loader is_loading={is_loading} text={'Уншиж байна'}/>
+                <p
+                    className="btn btn-secondary"
+                    onClick ={()=> this.modalClose()}>
+                        Буцах
+                </p>
+                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 
-                    <p
-                        className="btn btn-primary"
-                        onClick ={()=> this.handleModalOpen()}
-                    >
-                        <i className="fa"> Хүсэлт илгээх</i>
-                    </p>
+                <p
+                    className="btn btn-primary"
+                    onClick ={()=> this.handleModalOpen()}
+                >
+                    <i className="fa"> Хүсэлт илгээх</i>
+                </p>
                 <Modal
                     modal_status={ this.state.modal_status }
                     modal_icon={ this.state.modal_icon }
@@ -122,7 +122,7 @@ class ActionClass extends Component {
                     modalAction={ this.handleSubmit}
                     modalClose={ this.modalClose}
                 />
-                </div>
+            </div>
         )
     }
 }
@@ -168,7 +168,7 @@ class SendModal extends Component{
                     is_loading: false
                 })
             }
-        this.props.handleIsload(false)
+            this.props.handleIsload(false)
         })
     }
 
@@ -178,8 +178,6 @@ class SendModal extends Component{
 
     render() {
         const { id } = this.props.values.field
-        const {
-        } = this.state
         return (
             <div className="col-md-12">
                 <Loader is_loading={this.state.is_loading}/>
@@ -192,8 +190,8 @@ class SendModal extends Component{
                         info={this.props.values.info}
                         handleOnChange={this.handleOnChange}
                     />
-                    </div>
                 </div>
+            </div>
         )
     }
 }
@@ -235,7 +233,7 @@ export default class RequestModal extends Component {
                 {
                     !invis
                     ?
-                        !(values.state == "ИЛГЭЭСЭН" && values.kind == 'ХҮЛЭЭГДЭЖ БУЙ')
+                        !(values.state=="ИЛГЭЭСЭН" && values.kind=='ХҮЛЭЭГДЭЖ БУЙ')
                                 ?
                                     <a className={`fa fa-paper-plane-o text-primary mt-2 ml-2`} onClick={this.openRequestModal}></a>
                                 :
@@ -246,16 +244,16 @@ export default class RequestModal extends Component {
                 {
                     modal_status == 'open'
                     &&
-                    <ModelSendData
-                        body={SendModal}
-                        field ={values}
-                        status={modal_status}
-                        modal_dialog={true}
-                        modal_bg= 'white'
-                        info={true}
-                        title='Хүсэлт Илгээх'
-                        closeRequestMap={this.closeRequestMap}
-                    />
+                        <ModelSendData
+                            body={SendModal}
+                            field ={values}
+                            status={modal_status}
+                            modal_dialog={true}
+                            modal_bg= 'white'
+                            info={true}
+                            title='Хүсэлт Илгээх'
+                            closeRequestMap={this.closeRequestMap}
+                        />
                 }
                 </div>
         )
