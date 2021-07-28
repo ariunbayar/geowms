@@ -657,8 +657,3 @@ def qgis_plugin_save(request):
         'success': True
     })
 
-
-print(os.path.join("Hello", 'world'))
-print(os.path.join("Hello", 'world'))
-print(os.path.join("Hello", 'world'))
-print(os.path.join("Hello", 'world'))
