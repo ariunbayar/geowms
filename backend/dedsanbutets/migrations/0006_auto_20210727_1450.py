@@ -11,8 +11,8 @@ VIEWPROPERTIES_CACHE_KEY = 'view_properties_datas'
 
 
 def _saveDatas(apps, schema):
-    ViewNames = apps.get_model('backend_inspire', 'ViewNames')
-    ViewProperties = apps.get_model('backend_inspire', 'ViewProperties')
+    ViewNames = apps.get_model('dedsanbutets', 'ViewNames')
+    ViewProperties = apps.get_model('dedsanbutets', 'ViewProperties')
 
     view_names_datas = list(ViewNames.objects.values('id', 'feature_id'))
     cache.set(VIEWNAME_CACHE_KEY, view_names_datas, 300)
@@ -21,14 +21,14 @@ def _saveDatas(apps, schema):
 
     view_properties_datas = list(ViewProperties.objects.values('id', 'property_id'))
     cache.set(VIEWPROPERTIES_CACHE_KEY, view_properties_datas, 300)
-    print("\n")
     print('\x1b[6;30;42m' + '...ViewProperty ийн датаг хадгалж авлаа...' + '\x1b[0m')
 
 
 def _insertDatas(apps, schema):
-    ViewNames = apps.get_model('backend_inspire', 'ViewNames')
-    ViewProperties = apps.get_model('backend_inspire', 'ViewProperties')
+    ViewNames = apps.get_model('dedsanbutets', 'ViewNames')
+    ViewProperties = apps.get_model('dedsanbutets', 'ViewProperties')
 
+    print("\n")
     print('\33[94m' + "ViewNames ийн датаг оруулж эхэллээ" + '\33[0m')
 
     view_names_datas = cache.get(VIEWNAME_CACHE_KEY)
