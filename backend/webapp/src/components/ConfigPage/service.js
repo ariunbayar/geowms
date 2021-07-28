@@ -171,6 +171,24 @@ const inspire = {
 
 }
 
+const qgis_plugin = {
+
+    get: function() {
+        const requestOptions = getGetOptions()
+        return fetch('/back/api/config/qgis-plugin/', requestOptions).then(handleResponse)
+    },
+
+    save: function(values) {
+        const opts = {
+            ...getPostOptions(),
+            body: values
+        }
+        return fetch('/back/api/config/qgis-plugin/save/', opts).then(handleResponse)
+    },
+
+}
+
+
 export const service = {
     config: {
         geoserver: geoserver,
@@ -182,6 +200,7 @@ export const service = {
         payment: payment,
         qpay: qpay,
         inspire: inspire,
+        qgis_plugin: qgis_plugin,
     },
     getDisk,
     getPostgeVersion,

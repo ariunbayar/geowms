@@ -1070,9 +1070,9 @@ def save_img_to_folder(image, folder_name, file_name, ext):
     return folder_name + '/' + file_full_name
 
 
-def save_file_to_storage(file, folder_name, file_full_name):
+def save_file_to_storage(file, folder_name, file_full_name, storage_path=settings.MEDIA_ROOT):
     from django.core.files.storage import FileSystemStorage
-    path = os.path.join(settings.MEDIA_ROOT, folder_name)
+    path = os.path.join(storage_path, folder_name)
     fs = FileSystemStorage(
         location=path
     )
