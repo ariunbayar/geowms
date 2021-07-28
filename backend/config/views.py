@@ -1,11 +1,9 @@
 import os
 import re
+import subprocess
 import json
 
-import zipfile
 from django.core.files.storage import FileSystemStorage
-from io import BytesIO
-import subprocess
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
@@ -635,7 +633,10 @@ def check_qgis_path(request):
         file_detail['name'] = file_name
         file_detail['size'] = os.path.getsize(file_path)
         file_list.append(file_detail)
+        success = True
+
     return JsonResponse ({
+        'success': success,
         'files': file_list
     })
 

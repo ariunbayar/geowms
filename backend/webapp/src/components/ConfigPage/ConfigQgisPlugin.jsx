@@ -29,7 +29,7 @@ export default class ConfigSystem extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const {file_uploaded, is_editing, icon_name} = this.state
+        const {file_uploaded, is_editing} = this.state
         if (pS.file_uploaded !== file_uploaded) {
             if (!is_editing) this.handleSubmit()
         }
@@ -50,9 +50,10 @@ export default class ConfigSystem extends Component {
 
     handleSubmit(values) {
         const { files} = this.state
+        console.log("D", files)
         const file = files[0]
         var form_datas = new FormData()
-        if (file.size>0) {
+        if (files && file.length > 0) {
         form_datas.append('files', file, file.name)
         service.config.qgis_plugin
             .save(form_datas)
@@ -66,7 +67,6 @@ export default class ConfigSystem extends Component {
     }
 
     getFile(files) {
-        var {is_editing, icon_name} = this.state
         this.setState({ files, file_uploaded: true })
     }
 
@@ -79,7 +79,7 @@ export default class ConfigSystem extends Component {
                     QGIS Plugin
                     <div className="card-action">
                         <a href="#" onClick={ this.handleEdit }>
-                            <i className={'fa fa-' +icon_name}></i>
+                            <i className={'fa fa-' + icon_name}></i>
                         </a>
                     </div>
                 </div>
@@ -93,7 +93,6 @@ export default class ConfigSystem extends Component {
                             accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
                             onChange={(e) => fileAction(e, 'files')}
                             disabled={is_editing ? true : ''}
-                            className_2={is_editing ? "change_bg" : ''}
                         />
                     </div>
                 </div>
