@@ -612,6 +612,8 @@ def create(request, payload):
     org = get_object_or_404(Org, pk=employee.org_id)
 
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
+    if not geo_json:
+        return JsonResponse({'success': False, 'info': 'geom-ын мэдээлэл хоосон байна!'})
     if not success:
         return JsonResponse({'success': success, 'info': info})
 
@@ -708,6 +710,10 @@ def update(request, payload):
 
     employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
     org = get_object_or_404(Org, pk=employee.org_id)
+
+
+    if not geo_json:
+        return JsonResponse({'success': False, 'info': 'geom-ын мэдээлэл хоосон байна!'})
 
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
     if not success:
