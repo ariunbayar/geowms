@@ -16,21 +16,18 @@ export class EmployeeForm extends Component {
             талбарууд: [
                 {'field': 'user__first_name', "title": 'Нэр', 'has_action': true},
                 {'field': 'user__email', "title": 'Цахим шуудан'},
-                {'field': 'user_state', "title": 'Төлөв'},
                 {'field': 'position', "title": 'Албан тушаал'},
                 {'field': 'role_name', "title": 'Role', "is_sort": true},
                 {'field': 'is_admin', "title": 'Админ', 'has_action': true, "is_center": true},
             ],
             хувьсах_талбарууд: [
                 {"field": "user__first_name", "action": (values) => this.go_link(values)},
-                {"field": "user__email", "text": ""},
-                {"field": "user_state", "text": ""},
-                {"field": "position", "text": ""},
-                {"field": "is_admin", "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
+                {"field": "user__email",  "text": ""},
+                {"field": "position",  "text": ""},
+                {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
             ],
             is_user: true,
             drop_name: 'Хэрэглэгч',
-
         }
 
         this.handleListChange = this.handleListChange.bind(this)
@@ -76,7 +73,6 @@ export class EmployeeForm extends Component {
                             <div className="dropdown-menu mr-2" aria-labelledby="dropdownMenuLink">
                                 <button className="dropdown-item" onClick={() => this.handleListChange(true, 'Хэрэглэгч')}>Хэрэглэгч</button>
                                 <button className="dropdown-item" onClick={() => this.handleListChange(false, 'Бүх ажилчид')}>Бүх ажилчид</button>
-                                <button className="dropdown-item" onClick={() => this.handleListChange(false, 'Чөлөөлөгдсөн ажилчид')}>Чөлөөлөгдсөн ажилчид</button>
                             </div>
                         </div>
                     </div>
