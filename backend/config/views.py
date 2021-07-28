@@ -645,12 +645,13 @@ def check_qgis_path(request):
 @user_passes_test(lambda u: u.is_superuser)
 def qgis_plugin_save(request):
     uploaded_file = request.FILES['files']
-    file_path = os.path.join(settings.STATIC_ROOT + '/' + 'assets/')
-    fs = FileSystemStorage(
-        location=file_path
-    )
-    file = fs.save('qgis_plugin.zip', uploaded_file)
-    fs.url(file)
+    file_name = uploaded_file.name
+    file_path = os.path.join(settings.STATIC_ROOT, 'assets/')
+
+    if os.path.exists(file_path + file_name):
+        os.remove(file_path + file_name)
+
+    utils.save_file_to_storage(uploaded_file, file_path, file_name, storage_path=settings.STATIC_ROOT)
 
     return JsonResponse({
         'success': True
