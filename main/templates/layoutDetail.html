@@ -53,14 +53,7 @@
           <img class="logo-top" src="{% static "assets/image/logo/logo.png" %}" alt="">
         </a>
       </div>
-      <div class="col-md-4 align-self-center">
-        <div class="input-group input-group-sm">
-          <input type="text" class="form-control search-input" placeholder="Хайх үг">
-          <div class="input-group-append">
-            <button class="btn gp-outline-primary" type="submit">Хайх</button>
-          </div>
-        </div>
-      </div>
+      {% include "search_property.html" %}
       <div class="col-md-4 align-self-center">
         <div class="login-reg float-right">
           <div class="ml-auto mt-2 mt-lg-0">

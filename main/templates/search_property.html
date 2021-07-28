@@ -1,0 +1,263 @@
+<div class="col-md-4 align-self-center p-0 py-sm-2">
+    <form class="input-group input-group-sm">
+        <input type="text" class="form-control search-input" placeholder="Хайх үг">
+        <div class="input-group-append">
+            <button class="btn gp-outline-primary" type="submit" id="searchBtn">Хайх</button>
+        </div>
+    </form>
+    <div class="search-value-box d-none" id="search-value-box">
+        <div class="search-value-box-footer" id="search-value-box-footer"></div>
+    </div>
+</div>
+<script>
+
+    var datas = Array()
+    var start_number = 0
+    var max_page = 1
+
+    var input_elem
+    var group_box_id = 'value-group-box'
+
+    const main_value_element = document.getElementById('search-value-box')
+
+    const close_elem = document.createElement('span')
+    close_elem.className = 'close-btn'
+    close_elem.innerHTML = '&times;'
+    close_elem.addEventListener('click', closeBox)
+    main_value_element.appendChild(close_elem)
+
+    const footer_element = document.getElementById('search-value-box-footer')
+
+    const prev_btn = document.createElement('span')
+    prev_btn.className = "fa fa-caret-left gp-text-primary fa-1x mr-2"
+    prev_btn.id = "prev_btn"
+    prev_btn.setAttribute('role', 'button')
+    prev_btn.addEventListener('click', prevPage)
+
+    const next_btn = document.createElement('span')
+    next_btn.id = "next_btn"
+    next_btn.setAttribute('role', 'button')
+    next_btn.className = "fa fa-caret-right gp-text-primary fa-1x"
+    next_btn.addEventListener('click', netxPage)
+
+    footer_element.appendChild(prev_btn)
+    footer_element.appendChild(next_btn)
+
+    const now_page = document.createElement('span')
+    now_page.innerText = " " + (start_number + 1)
+    footer_element.appendChild(now_page)
+
+    const max_page_elem = document.createElement('span')
+    max_page_elem.innerText = " - " + max_page
+    footer_element.appendChild(max_page_elem)
+
+    const btn_element = document.getElementById('searchBtn')
+
+    let form_element = btn_element.parentElement.parentElement
+    form_element.addEventListener('submit', searchProperty)
+
+    function searchProperty(event) {
+        event.preventDefault()
+        const childrens = event.target.children
+        for (let index = 0; index < childrens.length; index++) {
+            const element = childrens[index];
+            const tag_name = element.tagName
+            if (tag_name == 'INPUT') {
+                const value = element.value
+                element.addEventListener("click", openBox)
+                input_elem = element
+                getProperties(value)
+                break
+            }
+        }
+    }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function getOption(body) {
+        return {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body
+        }
+    }
+
+    function getProperties(value) {
+        fetch('/api/search-value/', getOption(JSON.stringify({ value })))
+            .then(rsp => text = rsp.text())
+            .then(text => text && JSON.parse(text))
+            .then(({ success, data, error }) => {
+
+                start_number = 0
+                resetDatasDisplay()
+
+                if (success) {
+                    datas = data
+                    putValues(data)
+                    toggleDisplay(true)
+
+                    max_page = datas.length
+                    toggleDisplay(true, next_btn)
+                    if (max_page < 2) toggleDisplay(false, next_btn)
+                    toggleDisplay(false, prev_btn)
+
+                    max_page_elem.innerText = " - " + max_page
+                    now_page.innerText = " " + (start_number + 1)
+
+                }
+                else {
+                    alert(error)
+                    toggleDisplay(false)
+                }
+            })
+    }
+
+    function resetDatasDisplay() {
+        const childrens = main_value_element.children
+        for (let index = 0; index < childrens.length; index++) {
+            const element = childrens[index];
+            if (element.id == group_box_id) {
+                main_value_element.removeChild(element)
+            }
+        }
+    }
+
+    function netxPage() {
+        start_number = start_number + 1
+        start_number = Math.min(start_number, max_page)
+        let display_number = start_number + 1
+        if (max_page == display_number) {
+            toggleDisplay(false, next_btn)
+        }
+        now_page.innerText = " " + display_number
+
+        resetDatasDisplay()
+        toggleDisplay(true, prev_btn)
+        putValues(datas)
+
+    }
+
+    function prevPage() {
+        min_number = 0
+        start_number = start_number - 1
+        start_number = Math.max(start_number, min_number)
+        let display_number = start_number + 1
+        if (start_number == min_number) {
+            toggleDisplay(false, prev_btn)
+        }
+        now_page.innerText = " " + display_number
+        resetDatasDisplay()
+        toggleDisplay(true, next_btn)
+        putValues(datas)
+
+    }
+
+    function closeBox() {
+        toggleDisplay(false)
+    }
+
+    function openBox() {
+        if (datas.length > 0) {
+            toggleDisplay(true)
+        }
+    }
+
+    function toggleDisplay(is_display, element="") {
+        let _remove = 'd-none'
+        let _add = 'd-show'
+        if (!is_display) {
+            _remove = 'd-show'
+            _add = 'd-none'
+        }
+
+        let elem = main_value_element
+        if (element) {
+            elem = element
+        }
+
+        elem.classList.remove(_remove)
+        elem.classList.add(_add)
+    }
+
+    function putValues(datas) {
+        for (const idx in datas) {
+
+            if (start_number != idx) {
+                continue
+            }
+            let item = datas[idx]
+
+            const grp_box_element = document.createElement('div')
+            grp_box_element.className = 'value-group-box'
+            grp_box_element.id = group_box_id
+            const grp_label_element = document.createElement('div')
+            grp_label_element.className = 'value-group-box-label'
+            grp_label_element.innerText = item.name
+            grp_label_element.id = item.id
+            grp_box_element.appendChild(grp_label_element)
+
+            const layer_box_element = document.createElement('div')
+            layer_box_element.className = 'layer-box'
+
+            item.values.map((item_data, d_idx) => {
+                const value_element = document.createElement('div')
+                value_element.className = 'value'
+                value_element.innerText = item_data.name
+                layer_box_element.appendChild(value_element)
+
+                const value_box_element = document.createElement('div')
+                value_box_element.className = 'value-box'
+
+                item_data.values.map((value, v_idx) => {
+                    const value_element = document.createElement('div')
+                    value_element.className = 'value'
+                    value_element.innerText = value.name
+                    value_element.id = item_data.id
+                    value_element.addEventListener('click', () => goBundle(item.id, item_data.id))
+                    value_box_element.appendChild(value_element)
+                })
+                layer_box_element.appendChild(value_box_element)
+
+            })
+            grp_box_element.appendChild(layer_box_element)
+
+            main_value_element.appendChild(grp_box_element)
+        }
+
+        // <div class="value-group-box">
+        //     <div class="value-group-box-label" id="1"></div>
+        //     <div class="value-box">
+        //         <div class="value" id=""></div>
+        //         <div class="value" id=""></div>
+        //         <div class="value" id=""></div>
+        //         <div class="value" id=""></div>
+        //         <div class="value" id=""></div>
+        //     </div>
+        // </div>
+
+    }
+
+    function goBundle(bundle_id, geo_id) {
+        let url = '/дэд-сан/' + bundle_id + "/"
+        let query = "?to=" + geo_id
+        window.location.href = url + query
+    }
+
+</script>

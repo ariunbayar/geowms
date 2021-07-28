@@ -410,6 +410,11 @@ def get_search_property_value(request, payload):
         for pack in pack_qs:
             features_qs = pack.lfeatures_set.all()
             for feature in features_qs:
+                data_feature_dict = dict()
+                data_feature_dict['id'] = feature.feature_id
+                data_feature_dict["name"] = feature.feature_name
+                data_feature_dict["values"] = list()
+
                 view_names = feature.viewnames_set.all()
                 for view in view_names:
                     view_properties = view.viewproperties_set.all()
@@ -419,6 +424,7 @@ def get_search_property_value(request, payload):
                     property_codes = [
                         utils.remove_empty_spaces(view_property.property.property_code.lower())
                         for view_property in view_properties
+                        if view_property.property
                     ]
 
                     value_text_idx = 1
@@ -432,6 +438,7 @@ def get_search_property_value(request, payload):
                             "value_type_id": view_property.property.value_type_id
                         }
                         for view_property in view_properties
+                        if view_property.property
                     ]
 
                     layer_name = utils.make_layer_name(utils.make_view_name(feature))
@@ -473,6 +480,8 @@ def get_search_property_value(request, payload):
 
                             _response = requests.get(geo_server_url, headers=headers, timeout=300, verify=False)
                             content = _response.content.decode()
+                            if 'Exception' in content:
+                                continue
 
                             try:
                                 geo_json = utils.json_load(content)
@@ -480,21 +489,32 @@ def get_search_property_value(request, payload):
                                 raise e
 
                             features = geo_json['features']
-                            for feature in features:
-                                properties = feature['properties']
+                            for geo_feature in features:
+                                properties = geo_feature['properties']
+
+                                geo_value = ''
                                 for key, value in properties.items():
                                     if not value or not isinstance(value, str) or key == geo_id:
                                         continue
 
                                     if search_value.lower() in value.lower():
-                                        data['values'].append({
-                                            "id": properties[geo_id],
-                                            "name": value,
-                                        })
-                    if not data['values']:
-                        continue
+                                        geo_value = value
+                                        break
 
-                    datas.append(data)
+                                data_feature_dict['values'].append({
+                                    "id": properties[geo_id],
+                                    "name": geo_value,
+                                })
+
+                if not data_feature_dict['values']:
+                    continue
+
+                data['values'].append(data_feature_dict)
+
+        if not data['values']:
+            continue
+
+        datas.append(data)
 
     cache.set(search_value, datas, cache_time)
     if not datas:

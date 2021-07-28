@@ -53,15 +53,7 @@
                     <img class="logo-top" src="{% static "assets/image/logo/logo.png" %}" alt="">
                 </a>
             </div>
-            <div class="col-md-4 align-self-center p-0">
-                <div class="input-group input-group-sm">
-                    <input type="text" class="form-control search-input" placeholder="Хайх үг">
-                    <div class="input-group-append">
-                        <button class="btn gp-outline-primary" type="button" id="searchBtn">Хайх</button>
-                    </div>
-                </div>
-                <div class="search-value-box d-none" id="search-value-box"></div>
-            </div>
+            {% include "search_property.html" %}
             <div class="col-md-4 align-self-center">
                 <div class="login-reg float-right">
                     <div class="ml-auto mt-2 mt-lg-0">
@@ -234,119 +226,6 @@
                 }
             });
         });
-    </script>
-    <script>
-
-        var datas
-
-        const main_value_element = document.getElementById('search-value-box')
-
-        const btn_element = document.getElementById('searchBtn')
-        btn_element.addEventListener('click', searchProperty)
-
-        function searchProperty(mouse_event) {
-            let main_element = btn_element.parentElement.parentElement
-            const childrens = main_element.children
-            for (let index = 0; index < childrens.length; index++) {
-                const element = childrens[index];
-                const tag_name = element.tagName
-                if (tag_name == 'INPUT') {
-                    const value = element.value
-                    getProperties(value)
-                    break
-                }
-            }
-        }
-
-        function getCookie(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = cookies[i].trim();
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        function getOption(body) {
-            return {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
-                body
-            }
-        }
-
-        function getProperties(value) {
-            fetch('/api/search-value/', getOption(JSON.stringify({ value })))
-                .then(rsp => text = rsp.text())
-                .then(text => text && JSON.parse(text))
-                .then(({ success, data, error }) => {
-                    if (success) {
-                        datas = data
-                        console.log(data);
-                        putValues(data)
-                        toggleDisplay(true)
-                    }
-                    else {
-                        alert(error)
-                    }
-                })
-        }
-
-        function toggleDisplay(is_display) {
-            let _remove = 'd-none'
-            let _add = 'd-show'
-            if (!is_display) {
-                _remove = 'd-show'
-                _add = 'd-none'
-            }
-            main_value_element.classList.remove(_remove)
-            main_value_element.classList.add(_add)
-        }
-
-        function putValues(datas) {
-            datas.map((item, idx) => {
-
-                const grp_box_element = document.createElement('div')
-                grp_box_element.className = 'value-group-box'
-                const grp_label_element = document.createElement('div')
-                grp_label_element.className = 'value-group-box-label'
-                grp_label_element.innerText = item.name
-                grp_label_element.id = item.id
-                grp_box_element.appendChild(grp_label_element)
-
-                const value_box_element = document.createElement('div')
-                value_box_element.className = 'value-box'
-
-                item.values.map((item_data, d_idx) => {
-                    const value_element = document.createElement('div')
-                    value_element.className = 'value'
-                    value_element.innerText = item_data.name
-                    value_element.id = item_data.id
-                    value_element.addEventListener('click', () => goBundle(item.id, item_data.id))
-                    value_box_element.appendChild(value_element)
-                })
-                grp_box_element.appendChild(value_box_element)
-
-                main_value_element.appendChild(grp_box_element)
-            })
-        }
-
-        function goBundle(bundle_id, geo_id) {
-            let url = '/дэд-сан/' + bundle_id + "/"
-            let query = "?to=" + geo_id
-            window.location.href = url + query
-        }
-
     </script>
     {% block script %}
     {% endblock %}

@@ -2045,8 +2045,8 @@ def get_feature_ids_of_theme(theme_code):
 
 # file ruu text bichih
 def write_to_file(text, file_name='test.txt'):
-    with open(file_name, 'w') as f:
-        f.write(text)
+    with open(file_name, 'a') as f:
+        f.write("\n" + text)
 
 
 # зөвхөн тест үед л хэрэг болно эхлэл хугацааг тавина
