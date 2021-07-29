@@ -607,7 +607,6 @@ def get_geom(request, payload):
         mgeo_qs = MGeoDatas.objects
         mgeo_qs = mgeo_qs.select_related('feature__package__theme__bundle')
         mgeo_qs = mgeo_qs.prefetch_related('feature__viewnames_set__viewproperties_set')
-        mgeo_qs = mgeo_qs.prefetch_related('feature__viewnames_set__viewproperties_set')
         mgeo_qs = mgeo_qs.filter(geo_id=geo_id)
         mgeo = mgeo_qs.first()
 
