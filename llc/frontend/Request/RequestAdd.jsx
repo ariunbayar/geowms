@@ -35,11 +35,11 @@ class SubmitClass extends Component {
 
     handleSubmit() {
         const {
-            project_name, id, files,
+            project_name, id,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
         } = this.props.values
-        const { file_state, selected_tools } = this.props
+        const { files, file_state, selected_tools } = this.props
         var blob = []
         const file = files[0]
 
@@ -70,6 +70,7 @@ class SubmitClass extends Component {
     render() {
         var { values, file_name } = this.props
         const { agreed_submit, show_save_btn } = this.state
+        console.log(this);
         return (
             <Fragment>
                 {
