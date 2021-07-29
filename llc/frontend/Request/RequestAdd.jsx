@@ -70,7 +70,6 @@ class SubmitClass extends Component {
     render() {
         var { values, file_name } = this.props
         const { agreed_submit, show_save_btn } = this.state
-        console.log(this);
         return (
             <Fragment>
                 {
