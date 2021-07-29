@@ -32,7 +32,7 @@ class ActionClass extends Component {
     }
 
     handleSubmit() {
-        const { id } =this.props.values
+        const { id } =this.props
         const { mergejilten } = this.props
         this.setState({ is_loading: true })
         service.sendRequest(id, mergejilten).then(({ success, info }) =>{

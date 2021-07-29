@@ -19,14 +19,14 @@ export default class UsedTools extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const { selected_tools } = this.props.values
-        if(pP.values.selected_tools != selected_tools) {
+        const { selected_tools } = this.props
+        if(pP.selected_tools != selected_tools) {
             this.setState({ selected_tools: selected_tools })
         }
     }
 
     handleSelectedTool(value_type, value, idx) {
-        var array = [...this.props.values.selected_tools]
+        var array = [...this.props.selected_tools]
         if(value_type) {
             array = array.concat(value)
         }
@@ -66,8 +66,9 @@ export default class UsedTools extends Component {
 
     render() {
         const {
-            tool_datas, info, state, selected_tools
+            tool_datas, info, state
         } = this.props.values
+        const { selected_tools } = this.props
         return (
             <div className="col-md-12">
                 <label htmlFor=''> Зураглал үйлдэхдээ ашигласан багаж</label>

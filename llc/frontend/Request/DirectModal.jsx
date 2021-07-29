@@ -71,9 +71,9 @@ export class Form extends Component {
         this.state = {
             form_checked: false,
             id: props.id,
-            file_state: props.file_state,
-
-
+            file_name: '',
+            file_state: false,
+            selected_tools: [],
             info: false,
             desc_info: false,
             state: props.state,
@@ -95,7 +95,6 @@ export class Form extends Component {
             zahialagch: props.zahialagch,
             project_name: props.project_name,
             desc: props.desc,
-            file_name: props.file_name,
             object_type: props.object_type,
             object_count: props.object_count,
             hurungu_oruulalt: props.hurungu_oruulalt,
@@ -107,6 +106,7 @@ export class Form extends Component {
         this.getValueCheckbox = this.getValueCheckbox.bind(this)
         this.validationForm = this.validationForm.bind(this)
         this.getFile = this.getFile.bind(this)
+        this.handleSelectModel = this.handleSelectModel.bind(this)
     }
 
     componentDidMount() {
@@ -132,7 +132,6 @@ export class Form extends Component {
             pP.zahialagch !== this.props.zahialagch ||
             pP.project_name !== this.props.project_name ||
             pP.desc !== this.props.desc ||
-            pP.file_name !== this.props.file_name ||
             pP.object_type !== this.props.object_type ||
             pP.object_count !== this.props.object_count ||
             pP.hurungu_oruulalt !== this.props.hurungu_oruulalt ||
@@ -147,11 +146,11 @@ export class Form extends Component {
                 zahialagch: this.props.zahialagch,
                 project_name: this.props.project_name,
                 desc: this.props.desc,
-                file_name: this.props.file_name,
                 object_type: this.props.object_type,
                 object_count: this.props.object_count,
                 hurungu_oruulalt: this.props.hurungu_oruulalt,
                 tool_datas: this.props.tool_datas,
+                selected_tools: this.props.selected_tools,
             })
         }
 
@@ -246,11 +245,15 @@ export class Form extends Component {
         this.setState({mergejilten: selection.user_id})
     }
 
+    handleSelectModel(selected_tools) {
+        this.setState({ selected_tools })
+    }
+
     render() {
         const {
             mergejilten, emp_fields, info, desc_info, aimag_name,
             zahialagch, project_name, desc, object_type, object_count,
-            hurungu_oruulalt
+            hurungu_oruulalt, selected_tools
         } = this.state
         var { investment_status, hide_file, disabled } = this.state
         var default_mergejilten = ''
@@ -396,7 +399,8 @@ export class Form extends Component {
                     }
                     <UsedTools
                         values={this.props}
-                        handleSelectModel={this.props.handleSelectModel}
+                        selected_tools={selected_tools}
+                        handleSelectModel={this.handleSelectModel}
                     />
                     {
                         (!info && !hide_file)
@@ -423,8 +427,10 @@ export class Form extends Component {
                             valid_request = {document.getElementsByClassName('is-valid')}
                             nationwide = {this.state.nationwide}
                             values={this.props}
+                            {...this.state}
                             mergejilten={default_mergejilten}
                             enableLoader={this.props.enableLoader}
+                            file_name={this.state.file_name}
                         />
                 }
             </div>

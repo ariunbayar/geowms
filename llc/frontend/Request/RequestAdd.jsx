@@ -35,12 +35,11 @@ class SubmitClass extends Component {
 
     handleSubmit() {
         const {
-            files, project_name,
+            project_name, id,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            id, file_state,
         } = this.props.values
-        const { selected_tools } = this.props
+        const { files, file_state, selected_tools } = this.props
         var blob = []
         const file = files[0]
 
@@ -69,7 +68,7 @@ class SubmitClass extends Component {
     }
 
     render() {
-        var { values } = this.props
+        var { values, file_name } = this.props
         const { agreed_submit, show_save_btn } = this.state
         return (
             <Fragment>
@@ -78,7 +77,7 @@ class SubmitClass extends Component {
                     ?
                         <button
                             type="button"
-                            disabled={!agreed_submit || !values.file_name ? true : ''}
+                            disabled={!agreed_submit || !file_name ? true : ''}
                             className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
                             onClick={()=> this.handleSubmit()}
                         >
@@ -131,7 +130,6 @@ export class RequestAdd extends Component {
             vector_datas: [],
             tool_datas: [],
             selected_tools: [],
-            file_name: '',
             state: '',
             file_state: false,
             aimag_name: '',
@@ -143,7 +141,6 @@ export class RequestAdd extends Component {
         this.handlePassValues = this.handlePassValues.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.getTools = this.getTools.bind(this)
-        this.handleSelectModel = this.handleSelectModel.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
@@ -187,10 +184,6 @@ export class RequestAdd extends Component {
             .then(({ tool_datas }) => {
                 this.setState({ tool_datas })
             })
-    }
-
-    handleSelectModel(selected_tools) {
-        this.setState({ selected_tools })
     }
 
     handleModalClose() {
@@ -280,7 +273,6 @@ export class RequestAdd extends Component {
                         handlePassValues={this.handlePassValues}
                         history={this.props.history}
                         info={info}
-                        handleSelectModel={this.handleSelectModel}
                         enableLoader={this.enableLoader}
                     />
                 </div>
