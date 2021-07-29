@@ -6,6 +6,7 @@ from django.utils.deconstruct import deconstructible
 
 from main import utils
 
+
 class Role(models.Model):
     ROLE1 = 1
     ROLE2 = 2
@@ -49,7 +50,7 @@ class User(AbstractUser):
     gender = models.CharField(max_length=10, null=True)
     is_sso = models.BooleanField(default=False)
     is_user = models.BooleanField(default=False)
-    email = models.EmailField(blank=True, unique=True)
+    email = models.EmailField(blank=True)
 
 
 class UserValidationEmail(models.Model):

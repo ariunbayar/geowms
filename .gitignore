@@ -7,7 +7,7 @@ backend/**/*.dev.html
 frontend/**/*.dev.html
 govorg/**/*.dev.html
 llc/**/*.dev.html
-
+geoportal_app/**/*.qgis_plugin.zip
 
 main/settings/dev.py
 main/settings/prod.py

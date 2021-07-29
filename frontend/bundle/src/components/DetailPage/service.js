@@ -129,12 +129,12 @@ function getFeatureInfo(layer_codes, coordinates) {
     return fetch('/payment/get-feature-info/', requestOptions).then(handleResponse)
 }
 
-function getGeom(geo_id) {
+function getGeom(geo_id, bundle_id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({geo_id})
+        body: JSON.stringify({ geo_id, bundle_id })
     }
-    return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
+    return fetch('/api/get-geom/', requestOptions).then(handleResponse)
 }
 
 function getContainGeoms(layers_code, geometry, km_scale) {

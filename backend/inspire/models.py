@@ -215,7 +215,7 @@ class MGeoDatas(models.Model):
 
     geo_id = models.CharField(primary_key=True, max_length=100)
     geo_data = models.GeometryCollectionField(srid=4326) #geometry(GeometryZ,32648),
-    feature_id = models.IntegerField()
+    feature = models.ForeignKey(LFeatures, on_delete=PROTECT)
     created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
     modified_on = models.DateTimeField(auto_now=True)

@@ -1,12 +1,15 @@
+import os
 import re
 import subprocess
 import json
 
+from django.core.files.storage import FileSystemStorage
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
 from django.db import connections
+from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
@@ -610,3 +613,47 @@ def save_value_types(request, payload):
         'success': True,
     }
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def check_qgis_path(request):
+    success = False
+    file_name ='qgis_plugin.zip'
+
+    file_path = os.path.join(settings.STATIC_ROOT , 'assets', file_name)
+    file_list = []
+    file_detail = {
+        'name': '',
+        'size': ''
+    }
+    if os.path.exists(file_path):
+        file_detail['name'] = file_name
+        file_detail['size'] = os.path.getsize(file_path)
+        file_list.append(file_detail)
+        success = True
+
+    return JsonResponse ({
+        'success': success,
+        'files': file_list
+    })
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def qgis_plugin_save(request):
+    uploaded_file = request.FILES['files']
+    file_name = uploaded_file.name
+    file_path = os.path.join(settings.STATIC_ROOT, 'assets/')
+
+    if os.path.exists(file_path + file_name):
+        os.remove(file_path + file_name)
+
+    utils.save_file_to_storage(uploaded_file, file_path, file_name, storage_path=settings.STATIC_ROOT)
+
+    return JsonResponse({
+        'success': True
+    })
+
