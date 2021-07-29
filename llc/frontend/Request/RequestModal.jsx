@@ -32,8 +32,7 @@ class ActionClass extends Component {
     }
 
     handleSubmit() {
-        const { id } =this.props
-        const { mergejilten } = this.props
+        const { mergejilten, id } = this.props
         this.setState({ is_loading: true })
         service.sendRequest(id, mergejilten).then(({ success, info }) =>{
             if(success) {
@@ -148,7 +147,7 @@ class SendModal extends Component{
 
     componentDidMount() {
         const values = this.props.values
-        const {id} = values.field
+        const { id } = values.field
         this.setState({ is_loading: true })
         service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom }) =>{
             if (form_field) {
@@ -196,7 +195,6 @@ export default class RequestModal extends Component {
         super(props)
         this.state = {
             values: props.values,
-            icon: this.props.icon,
             modal_status: 'closed',
             state: props.values.state,
             kind: props.values.kind,
