@@ -58,8 +58,8 @@ export default class Forms extends Component {
     }
 
     handleRemove() {
-        const { model_name, model_id, edit_name, type, top_id } = this.props
-        this.props.remove(model_name, model_id, edit_name, type, top_id)
+        const { model_name, model_id, edit_name, type } = this.props
+        this.props.remove(model_name, model_id, edit_name, type)
     }
 
     openModal(logo, title, text, action) {
@@ -271,7 +271,7 @@ export default class Forms extends Component {
                                 ?
                                     <a
                                         className="btn col-md-4 btn-danger mr-1 text-white"
-                                        onClick={() => this.openModal('times-circle text-danger', 'Устгах', `Та ${prop_edit_name} - нэртэй ${prop_name}-г устгахдаа итгэлтэй байна уу ?`, this.handleRemove)}
+                                        onClick={this.handleRemove}
                                     >
                                         Устгах
                                     </a>

@@ -819,18 +819,29 @@ def _get_datas(mode_name):
     return types
 
 
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def remove(request, payload):
-    model_name = payload.get('model_name')
-    model_id = payload.get('model_id')
-    Model = _get_Model(model_name)
-    data = Model.objects.filter(pk=model_id)
-    if data:
-        data.delete()
+def erese(model_name, model_id):
+
+    field_name = ''
+    if model_name == 'property':
+        field_name = 'property_id'
+        model_name = 'data_type_config'
+    if model_name == 'data_type':
+        field_name = 'data_type_id'
+        model_name = 'feature_config'
+
+    if not field_name:
+        return
+
+    model_name = _get_Model(model_name)
+
+    updateData = {}
+    data = model_name.objects.filter(pk=top_id)
+    for i in model_name._meta.get_fields():
+        if str(field_name) == str(i.name):
+            updateData[field_name] = None
+    if updateData != {}:
         rsp = {
-            'success': True,
+            'success': False,
             'info': 'Амжилттай устгалаа'
         }
     else:
@@ -844,37 +855,22 @@ def remove(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def erese(request, payload):
+def remove(request, payload):
     model_name = payload.get('model_name')
-    top_id = payload.get('top_id')
-    if model_name == 'property':
-        field_name = 'property_id'
-        model_name = 'data_type_config'
-    if model_name == 'data_type':
-        field_name = 'data_type_id'
-        model_name = 'feature_config'
-    model_name = _get_Model(model_name)
-    try:
-        updateData = {}
-        data = model_name.objects.filter(pk=top_id)
-        for i in model_name._meta.get_fields():
-            if str(field_name) == str(i.name):
-                updateData[field_name] = None
-        if updateData != {}:
-            data.update(**updateData)
-            rsp = {
-                'success': True,
-                'info': 'Амжилттай устгалаа'
-            }
-        else:
-            rsp = {
-                'success': False,
-                'info': 'Хоосон байна'
-            }
-    except Exception as e:
+    model_id = payload.get('model_id')
+    Model = _get_Model(model_name)
+    data = Model.objects.filter(pk=model_id)
+    if data:
+        data.update(is_active=False)
+        erese(model_name, model_id)
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай устгалаа'
+        }
+    else:
         rsp = {
             'success': False,
-            'info': 'Алдаа гарсан байна: ' + str(e)
+            'info': 'Хоосон байна'
         }
     return JsonResponse(rsp)
 
