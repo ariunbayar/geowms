@@ -9,6 +9,7 @@ class SubmitClass extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            url: "/llc/llc-request/",
             agreed_submit: false,
             one_check: true,
             show_save_btn: true,
@@ -88,8 +89,7 @@ class SubmitClass extends Component {
                             <button className="btn btn-secondary btn-sm">
                                 <i
                                     className="fa fa-angle-double-left"
-                                    onClick={()=> values.history.push(`/llc/llc-request`)}
-
+                                    onClick={()=> values.history.push(this.state.url)}
                                 >
                                     Буцах
                                 </i>
