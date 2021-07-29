@@ -121,13 +121,22 @@ def _get_position_name(postition_id, item):
     return position_name
 
 
+def _get_state_name(state_id, item):
+    if state_id == 1:
+        state = Employee.STATE_WORKING
+    elif state_id == 2:
+        state = Employee.STATE_BREAK
+    elif state_id == 3:
+        state = Employee.STATE_FIRED
+    else:
+        state = Employee.STATE_SICK
+    return state
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def list(request, payload):
-    is_user = payload.get('is_user')
-    fired_user = payload.get('fired_user')
-
     employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org = get_object_or_404(Org, employee=employee)
 
@@ -138,12 +147,6 @@ def list(request, payload):
         "user__first_name",
         "user__last_name"
     ))
-
-    if is_user:
-        qs = qs.filter(user__is_user=True)
-
-    if fired_user:
-        qs = qs.filter(state=3)
 
     custom_query = payload.get('custom_query')
     if custom_query:
@@ -158,10 +161,11 @@ def list(request, payload):
         }
         return JsonResponse(rsp)
 
-    оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token']
+    оруулах_талбарууд = ['id', 'state', 'position_id', 'is_admin', 'user_id', 'token']
     хувьсах_талбарууд = [
         {"field": "user_id", "action": _get_name, "new_field": "user__first_name"},
         {"field": "user_id", "action": _get_email, "new_field": "user__email"},
+        {"field": "state", "action": _get_state_name, "new_field": "user_state"},
         {"field": "position_id", "action": _get_position_name, "new_field": "position"},
     ]
     нэмэлт_талбарууд = [
@@ -473,10 +477,9 @@ def _get_emp_perm_display(emp_perm):
         property_of_feature[feature_id] = property_perm_count
         emp_perm_properties = emp_perm_properties.distinct('property_id')
         for property_id in emp_perm_properties:
-            prop = LProperties.objects.filter(property_id=property_id['property_id']).first()
-            if prop:
-                property_data, perm_list = get_property_data_display(prop, feature_id, emp_perm, EmpPermInspire, False)
-                properties.append(property_data)
+            prop = LProperties.objects.get(property_id=property_id['property_id'])
+            property_data, perm_list = get_property_data_display(prop, feature_id, emp_perm, EmpPermInspire, False)
+            properties.append(property_data)
 
     package_features = [
         get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature, gov_perm_inspire_qs)

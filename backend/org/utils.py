@@ -630,6 +630,18 @@ def get_position_name(postition_id, item):
     return position_name
 
 
+def get_state_name(state_id, item):
+    if state_id == 1:
+        state = Employee.STATE_WORKING
+    elif state_id == 2:
+        state = Employee.STATE_BREAK
+    elif state_id == 3:
+        state = Employee.STATE_FIRED
+    else:
+        state = Employee.STATE_SICK
+    return state
+
+
 def perm_name_validation(payload, perm):
     values = payload.get('values')
     role_id = payload.get('pk')

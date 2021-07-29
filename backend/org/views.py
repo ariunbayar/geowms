@@ -26,6 +26,7 @@ from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
+from backend.payment.models import Payment
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, Position
@@ -487,7 +488,6 @@ def detail(request, level, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def employee_list(request, payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
-    is_user = payload.get('is_user')
 
     qs = Employee.objects
     qs = qs.filter(org=org)
@@ -496,13 +496,6 @@ def employee_list(request, payload, level, pk):
         "user__first_name",
         "user__last_name"
     ))
-
-    if is_user:
-        qs = qs.filter(user__is_user=True)
-
-    fired_user = payload.get('fired_user')
-    if fired_user:
-        qs = qs.filter(state=3)
 
     custom_query = payload.get('custom_query')
     if custom_query:
@@ -517,11 +510,11 @@ def employee_list(request, payload, level, pk):
         }
         return JsonResponse(rsp)
 
-    оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token', 'created_at', 'updated_at']
+    оруулах_талбарууд = ['id', 'position_id', 'state', 'is_admin', 'user_id', 'token', 'created_at', 'updated_at']
     хувьсах_талбарууд = [
         {"field": "user_id", "action": backend_org_utils.get_name, "new_field": "user__first_name"},
         {"field": "user_id", "action": backend_org_utils.get_email, "new_field": "user__email"},
-        {"field": "user_id", "action": backend_org_utils.get_is_user, "new_field": "is_user"},
+        {"field": "state", "action": backend_org_utils.get_state_name, "new_field": "user_state"},
         {"field": "position_id", "action": backend_org_utils.get_position_name, "new_field": "position"},
     ]
     нэмэлт_талбарууд = [

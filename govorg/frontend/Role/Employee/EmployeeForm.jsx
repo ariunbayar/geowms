@@ -7,7 +7,7 @@ export class EmployeeForm extends Component {
 
     constructor(props) {
         super(props)
-        
+
         this.state={
             refresh: false,
             жагсаалтын_холбоос: `/gov/api/role/employee/`,
@@ -16,6 +16,7 @@ export class EmployeeForm extends Component {
             талбарууд: [
                 {'field': 'user__first_name', "title": 'Нэр', 'has_action': true},
                 {'field': 'user__email', "title": 'Цахим шуудан'},
+                {'field': 'user_state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'position', "title": 'Албан тушаал'},
                 {'field': 'role_name', "title": 'Role', "is_sort": true},
                 {'field': 'is_admin', "title": 'Админ', 'has_action': true, "is_center": true},
@@ -23,11 +24,12 @@ export class EmployeeForm extends Component {
             хувьсах_талбарууд: [
                 {"field": "user__first_name", "action": (values) => this.go_link(values)},
                 {"field": "user__email",  "text": ""},
+                {"field": "user_state",  "action": this.setStateColor, "action_type": true},
                 {"field": "position",  "text": ""},
                 {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
             ],
             is_user: true,
-            drop_name: 'Хэрэглэгч',      
+            drop_name: 'Хэрэглэгч',
 
         }
 
@@ -56,7 +58,7 @@ export class EmployeeForm extends Component {
             color = "text-warning"
         }
         return color
-        
+
     }
 
     go_link(values) {
@@ -64,8 +66,8 @@ export class EmployeeForm extends Component {
     }
 
     handleListChange(drop_name, custom_query) {
-        this.setState({ drop_name, custom_query }) 
-    } 
+        this.setState({ drop_name, custom_query })
+    }
 
     render() {
         const {

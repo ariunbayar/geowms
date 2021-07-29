@@ -40,6 +40,7 @@ export class UserTable extends Component {
                 {'field': 'user__email', "title": 'Цахим шуудан'},
                 {'field': 'position', "title": 'Албан тушаал'},
                 {'field': 'role_name', "title": 'Role', "is_sort": true},
+                {'field': 'user_state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'is_admin', "title": 'Админ', 'has_action': true, "is_center": true},
                 {'field': 'created_at', "title": 'Үүссэн'},
                 {'field': 'updated_at', "title": 'Зассан'},
@@ -48,6 +49,7 @@ export class UserTable extends Component {
                 {"field": "user__first_name", "action": (values) => this.go_link(values)},
                 {"field": "user__email",  "text": ""},
                 {"field": "position",  "text": ""},
+                {"field": "user_state",  "action": this.setStateColor, "action_type": true},
                 {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
                 {"field": "created_at",  "text": ""},
                 {"field": "updated_at",  "text": ""},
@@ -149,9 +151,26 @@ export class UserTable extends Component {
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${values.id}/дэлгэрэнгүй/`)
     }
 
+    setStateColor(user_state){
+        var color
+        if(user_state == 'Ажиллаж байгаа'){
+            color = "text-success"
+        }
+        else if(user_state == 'Чөлөөтэй'){
+            color = "text-secondary"
+        }
+        else if(user_state == 'Чөлөөлөгдсөн'){
+            color = "text-danger"
+        } else {
+            color = "text-warning"
+        }
+        return color
+
+    }
+
     handleListChange(drop_name, custom_query) {
-        this.setState({ drop_name, custom_query }) 
-    } 
+        this.setState({ drop_name, custom_query })
+    }
 
     render() {
         const {
