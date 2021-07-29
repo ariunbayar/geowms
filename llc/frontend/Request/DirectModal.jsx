@@ -58,7 +58,7 @@ class Map extends Component {
         return (
             <LLCMap
                 vector_datas={vector_datas}
-                heighr={height}
+                height={height}
                 aimag_geom={aimag_geom}
             />
         )
@@ -104,6 +104,7 @@ export class Form extends Component {
 
         }
         this.handleOnChange = this.handleOnChange.bind(this)
+        this.getMergejilten = this.getMergejilten.bind(this)
         this.getValueCheckbox = this.getValueCheckbox.bind(this)
         this.validationForm = this.validationForm.bind(this)
         this.handleSelectModel = this.handleSelectModel.bind(this)
@@ -249,6 +250,10 @@ export class Form extends Component {
         this.setState({ selected_tools })
     }
 
+    getMergejilten(selection) {
+        this.setState({mergejilten: selection.user_id})
+    }
+
     render() {
         const {
             mergejilten, emp_fields, info, desc_info, selected_tools, aimag_name,
@@ -377,7 +382,7 @@ export class Form extends Component {
                                             bracket_option={1}
                                             default_value={default_mergejilten}
                                             disabled={(!info && disabled) && true}
-                                            handleSelectField={this.props.handleOnChange}
+                                            handleSelectField={this.getMergejilten}
                                             default_text={"----   Илгээх мэргэжилтэнээ сонгоно уу  ----"}
                                         />
                                 }

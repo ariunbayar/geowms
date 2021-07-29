@@ -144,7 +144,6 @@ class SendModal extends Component{
             mergejilten: '',
             is_loading: false
         }
-        this.handleOnChange = this.handleOnChange.bind(this)
     }
 
     componentDidMount() {
@@ -172,10 +171,6 @@ class SendModal extends Component{
         })
     }
 
-    handleOnChange(state_name, selection, e) {
-        this.setState({mergejilten: selection.user_id})
-    }
-
     render() {
         const { id } = this.props.values.field
         return (
@@ -188,7 +183,6 @@ class SendModal extends Component{
                         submitClass={ActionClass}
                         closeRequestMap={this.props.closeRequestMap}
                         info={this.props.values.info}
-                        handleOnChange={this.handleOnChange}
                     />
                 </div>
             </div>
