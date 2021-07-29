@@ -241,7 +241,7 @@ export class Form extends Component {
         this.setState({ ...set_state_obj })
     }
 
-    getMergejilten(selection) {
+    getMergejilten(state_name, selection, e) {
         this.setState({mergejilten: selection.user_id})
     }
 

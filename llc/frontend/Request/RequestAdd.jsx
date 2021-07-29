@@ -38,8 +38,8 @@ class SubmitClass extends Component {
             project_name, id,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-        } = this.props.values
-        const { files, file_state, selected_tools } = this.props
+            files, file_state, selected_tools
+        } = this.props
         var blob = []
         const file = files[0]
 
