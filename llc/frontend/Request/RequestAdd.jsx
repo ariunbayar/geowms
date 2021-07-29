@@ -39,15 +39,18 @@ class SubmitClass extends Component {
             project_name, id,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            files, file_state, selected_tools
+            file_state, selected_tools
         } = this.props
+
+        const { files } = this.props.values
         var blob = []
+
         const file = files[0]
 
         if (id) {
             if (!file_state) {
                 const obj = file
-                blob = new Blob([JSON.stringify(obj, null, 2)], { type : 'application/vnd.rar' })
+                blob = new Blob([JSON.stringify(obj, null, 2)], { type : 'application/vnd.zip' })
             }
             else blob = file
         }
@@ -71,6 +74,7 @@ class SubmitClass extends Component {
     render() {
         var { values, file_name } = this.props
         const { agreed_submit, show_save_btn } = this.state
+        console.log(this.props);
         return (
             <Fragment>
                 {
@@ -151,7 +155,7 @@ export class RequestAdd extends Component {
         const { id } = this.props.match.params
         if (id) {
             this.setState({ is_loading: true })
-            service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom }) =>{
+            service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom }) => {
                 if (form_field) {
                     this.setState({
                         vector_datas,

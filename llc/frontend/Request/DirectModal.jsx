@@ -361,7 +361,7 @@ export class Form extends Component {
                         (info || disabled) &&
                             <div className="form-group col-md-12">
                                 {
-                                    (emp_fields && emp_fields.length > 0) &&
+                                    (emp_fields) &&
                                         <SelectField
                                             display_mode={true}
                                             name_key='org_name'
