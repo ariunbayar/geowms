@@ -59,7 +59,7 @@ export default class Маягт extends Component {
             }
             else {
                 this.setState({ is_loading: true })
-                service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success, info}) => {
+                service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success, info }) => {
                     if (success) {
                         global.refreshCount()
                         global.NOTIF('success', info, 'check')
@@ -313,7 +313,7 @@ export default class Маягт extends Component {
                                           className={'form-control ' + (errors.order_no ? 'is-invalid' : '')}
                                           placeholder="Тушаалын дугаар"
                                       />
-                                      <ErrorMessage className="text-danger" name="order_no" component="span"/>
+                                      <ErrorMessage className="invalid-feedback" name="order_no" component="span"/>
                                     </div>
                                 </div>
                                 <div className="row my-3 ">
@@ -327,7 +327,7 @@ export default class Маягт extends Component {
                                           placeholder="Тушаал гарсан огноо"
                                           type="date"
                                       />
-                                      <ErrorMessage className="text-danger" name="order_at" component="span"/>
+                                      <ErrorMessage className="invalid-feedback" name="order_at" component="span"/>
                                     </div>
                                 </div>
                                 <div>
