@@ -3,6 +3,7 @@ from re import template
 from django.conf import settings
 
 from django.db import connections
+from django.db.models.aggregates import Max
 from django.forms.models import model_to_dict
 from django.db.models import ManyToOneRel
 from django.forms.utils import flatatt
@@ -305,7 +306,6 @@ def getFields(request, payload):
 
     id = payload.get('id')
     edit_name = payload.get('edit_name')
-    not_id = False
 
     Model = _get_Model(model_name)
     fields = []
@@ -321,7 +321,7 @@ def getFields(request, payload):
             field = dict()
             if type_name == "CharField":
                 type_name = 'text'
-            if type_name == "IntegerField" or type_name == "BigIntegerField":
+            if type_name == "IntegerField" or type_name == "BigIntegerField" or type_name == "AutoField":
                 type_name = 'number'
             if type_name == "BooleanField":
                 type_name = 'radio'
@@ -336,19 +336,29 @@ def getFields(request, payload):
             field['data'] = data
 
             if not edit_name:
-                if 'id' in field_name and not 'connect' in field_name:
+                if 'id' in field_name:
                     if '_' in savename:
-                        if savename == 'data_type_config' and field_name == 'data_type_id':
-                            field['data'] = id
-                        elif savename == 'feature_config' and not field_name == 'data_type_id':
-                            field['data'] = id
-                            not_id = True
-                        elif not not_id:
-                            out = savename.split('_')
-                            if not str(out[0]) in field_name:
+                        main_field_name = savename + "_id"
+
+                        if 'config' in savename:
+                            parent = utils.remove_text_from_str(savename, 'config')
+                            parent = parent + "id"
+                            if parent == field_name:
                                 field['data'] = id
+
+                        if main_field_name == field_name:
+                            field['data'] = id
+
                     else:
                         field['data'] = id
+
+                if field_name == 'is_active':
+                    field['data'] = True
+
+                if field_name == 'order_no':
+                    max_order_no = Model.objects.aggregate(Max('order_no'))
+                    field['data'] = max_order_no['order_no__max'] + 1
+
             if edit_name:
                 if savename == 'theme' and field_name == 'bundle':
                     pass
@@ -635,7 +645,6 @@ def _str_to_bool(str):
 
 
 def _rsp_validation(data, datas, model_name):
-    info = ''
     keys = ['connect_feature_id', 'connect_feature_property_id', 'is_connect_to_feature']
     if model_name == 'feature_config':
         if 'has_class' in datas:
@@ -646,16 +655,15 @@ def _rsp_validation(data, datas, model_name):
                     if not rem_data[check_data]:
                         info = 'false'
                         return info
-                info = 'true'
-                return info
+                return True
             else:
                 if not data['data']:
-                    info = 'false'
-                    return info
+                    return False
     else:
         if not data['data']:
-            info = 'false'
-            return info
+            return False
+
+    return True
 
 
 @require_POST
@@ -668,34 +676,100 @@ def save(request, payload):
     json = payload.get("form_values")
     model_name_old = model_name
     Model = _get_Model(model_name)
+    now_model_name = edit_name if edit_name else model_name
+
+    error = ''
+
+    important_code_models = ['package', 'feature']
 
     datas = {}
     for data in json:
+        datas[data['field_name']] = data['data']
+
+        if 'code' in data['field_name'] and now_model_name in important_code_models:
+            if "-" not in data['data']:
+                if now_model_name == 'package':
+                    theme = LThemes.objects.filter(pk=model_id).first()
+                    theme_code = theme.theme_code
+                    error = 'Буруу code байна. "Жишээ: {}-{}"'.format(theme_code, data['data'])
+                if now_model_name == 'feature':
+                    _package = LPackages.objects.filter(pk=model_id).first()
+                    package_code = _package.package_code
+                    error = 'Буруу code байна. "Жишээ: {}-{}"'.format(package_code, data['data'])
+                break
+
+            else:
+                if now_model_name == 'package':
+                    theme = LThemes.objects.filter(pk=model_id).first()
+                    theme_code = theme.theme_code
+                    code = data['data'].split('-')[0]
+                    if theme_code != code:
+                        error = 'Theme code таарахгүй байна. "{}" ийм байхаас таны оруулсан: {}'.format(theme_code, code)
+                        break
+
+                    qs = Model.objects.filter(package_code=data['data'])
+                    if qs:
+                        error = 'Package code давхардаж байна!'
+                        break
+
+                if now_model_name == 'feature':
+                    _package = LPackages.objects.filter(pk=model_id).first()
+                    package_code = _package.package_code
+
+                    codes = data['data'].split(package_code)
+                    if len(codes) < 2:
+                        error = 'Буруу feature code байна. Жишээ: "{}-..."'.format(package_code)
+                        break
+
+                    feature_code = codes[len(codes) - 1]
+                    if "-" not in feature_code:
+                        error = 'Буруу feature code байна. Жишээ: "{}-..."'.format(package_code)
+                        break
+
+                    feature_code = utils.remove_text_from_str(feature_code, '-')
+                    qs = LFeatures.objects.filter(feature_code=data['data'])
+                    if qs:
+                        error = 'Feature code давхардаж байна!'
+                        break
+
         if not data['data']:
             data['data'] = None
+
         if data['field_type'] == 'radio':
             datas[data['field_name']] = _str_to_bool(data['data'])
-        # if data['field_type'] == 'order_no':
-        #     order_no = len(Model.objects.all()) + 1
-        #     datas[data['field_name']] = order_no
+
+        if data['field_name'] == 'order_no':
+            if not data['data']:
+                error = 'Order No хоосон байна утга оруулна уу!'
+            qs = Model.objects.filter(order_no=data['data'])
+            if qs:
+                error = 'Order No давхардсан байна!'
+
         else:
-            datas[data['field_name']] = data['data']
             info = _rsp_validation(data, datas, model_name)
-            if info == 'true':
-                rsp = {'success': True}
-            elif info == 'false':
-                return JsonResponse({'success': False, 'info': 'Хоосон байна, утга оруулна уу!'})
+            if not info:
+                error = 'Хоосон байна, утга оруулна уу!'
+                break
+
+    if error:
+        return JsonResponse({'success': False, 'info': error})
 
     model_qs = Model.objects
 
+
     if not edit_name:
+        qs = model_qs.filter(pk=datas[model_name + "_id"])
+        if qs:
+            error = 'ID давхардаж байна'
+            return JsonResponse({'success': False, 'info': error})
+
         datas['created_by'] = request.user.id
         datas['modified_by'] = request.user.id
         if model_name_old == 'theme':
             is_active = datas['is_active']
             order_no = datas['order_no']
 
-            last_order_n = Bundle.objects.all().order_by('sort_order').last().sort_order
+            last_order_n = Bundle.objects.aggregate(Max('sort_order'))['sort_order__max']
 
             datas['order_no'] = order_no if order_no else last_order_n + 1
             datas['is_active'] = is_active if is_active else False
@@ -714,6 +788,7 @@ def save(request, payload):
         datas['modified_on'] = utils.date_to_timezone(utils.get_today_datetime(is_string=True))
         model_filter = _get_model_filter(model_name, model_id)
         model_qs.filter(**model_filter).update(**datas)
+
     rsp = {
         'success': True,
         'info': 'Амжилттай хадгаллаа'

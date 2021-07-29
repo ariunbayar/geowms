@@ -43,6 +43,7 @@ export default class Forms extends Component {
                 global.MODAL(modal)
                 if (code !== '') this.props.refresh(code)
                 else this.props.refresh()
+                this.props.done()
             }
             else {
                 const modal = {
@@ -109,12 +110,15 @@ export default class Forms extends Component {
 
     componentDidUpdate(pP) {
         const { model_id, model_name, edit_name } = this.props
-        if(pP.model_id !== model_id) {
-            this.getFields(model_name, model_id, edit_name)
-            this.setState({ before_id: pP.model_id, before_name: pP.model_name, before_edit_name: pP.edit_name })
-        }
         if(pP.model_name !== model_name || pP.edit_name !== edit_name) {
-            this.setState({ model_id, model_name, edit_name })
+            this.setState({
+                model_id,
+                model_name,
+                edit_name,
+                before_id: pP.model_id,
+                before_name: pP.model_name,
+                before_edit_name: pP.edit_name,
+            })
             this.getFields(model_name, model_id, edit_name)
         }
     }
@@ -145,13 +149,13 @@ export default class Forms extends Component {
     makeModel() {
         this.setState({ jumped: true })
         if (this.props.model_name == 'feature_config') {
-            this.props.handleFormLeft('data_type', '')
+            this.props.handleFormLeft('data_type', this.props.model_id)
         }
         if ((this.props.model_name == 'property') || (this.props.model_name == 'value_type')) {
-            this.props.handleFormLeft('value_type', '')
+            this.props.handleFormLeft('value_type', this.props.model_id)
         }
         if (this.props.model_name == 'data_type_config') {
-            this.props.handleFormLeft('property', '')
+            this.props.handleFormLeft('property', this.props.model_id)
         }
     }
 
@@ -189,9 +193,9 @@ export default class Forms extends Component {
                 {
                     prop_edit_name && prop_name
                     ?
-                        <h4 className="text-center">{prop_name}-{prop_edit_name}{(prop_id ? `-` + prop_id : '')}</h4>
+                        <h4 className="text-center">{prop_name}-{prop_edit_name}{(!jumped && prop_id ? `-` + prop_id : '')}</h4>
                     :
-                        <h4 className="text-center"> Model-{prop_name}{(prop_id ? `-` + prop_id : '')}</h4>
+                        <h4 className="text-center"> Model-{prop_name}{(!jumped && prop_id ? `-` + prop_id : '')}</h4>
                 }
                 <hr></hr>
                 <div>

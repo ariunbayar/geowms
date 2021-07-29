@@ -95,6 +95,10 @@ export class List extends Component {
         this.setState({ form_is_laod_left: true })
     }
 
+    leftFormDone() {
+        this.setState({ form_is_laod: true })
+    }
+
     isDelete() {
         this.setState({ is_delete: !this.state.is_delete })
     }
@@ -208,6 +212,7 @@ export class List extends Component {
                                                     >
                                                         {theme.name}
                                                     </span>
+                                                    <a href={`#${theme.code}`}>¶</a>
                                                     &nbsp;
                                                     {
                                                         is_delete
@@ -328,9 +333,9 @@ export class List extends Component {
                                     model_name={model_name}
                                     model_id={model_id}
                                     refresh={this.getAll}
-                                    done={() => this.done()}
                                     edit_name={edit_name}
                                     remove={(...values) => this.delete(...values)}
+                                    done={() => this.leftFormDone()}
                                     type="left"
                                 />
                         }
