@@ -28,6 +28,7 @@ export default class RequestDetail extends Component {
                 <div className="col-md-5">
                     <Form
                         {...this.props}
+                        enableLoader={this.handleLoaderActive}
                     />
                 </div>
                 {
@@ -151,6 +152,7 @@ export class Form extends Component {
                 hurungu_oruulalt: this.props.hurungu_oruulalt,
                 tool_datas: this.props.tool_datas,
                 selected_tools: this.props.selected_tools,
+                files: this.props.files,
             })
         }
 
@@ -263,6 +265,7 @@ export class Form extends Component {
         if (info && hurungu_oruulalt) {
             investment_status = [ investment_status[hurungu_oruulalt-1] ]
         }
+
         return (
             <div>
                 <form className="form-row">
@@ -431,6 +434,7 @@ export class Form extends Component {
                             mergejilten={default_mergejilten}
                             enableLoader={this.props.enableLoader}
                             file_name={this.state.file_name}
+                            handleLoaderActive={this.handleLoaderActive}
                         />
                 }
             </div>

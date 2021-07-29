@@ -11,7 +11,6 @@ class ActionClass extends Component {
         this.state = {
             url: "/llc/llc-request/",
             modal_status: 'closed',
-            is_loading: false,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.modalClose = this.modalClose.bind(this)
@@ -33,10 +32,9 @@ class ActionClass extends Component {
 
     handleSubmit() {
         const { mergejilten, id } = this.props
-        this.setState({ is_loading: true })
+        this.props.enableLoader(true)
         service.sendRequest(id, mergejilten).then(({ success, info }) =>{
             if(success) {
-                this.setState({ is_loading: false })
                 this.modalChange(
                     'fa fa-check-circle',
                     'success',
@@ -60,7 +58,7 @@ class ActionClass extends Component {
                     null,
                 )
             }
-
+            this.props.enableLoader(false)
         })
     }
 
@@ -91,10 +89,8 @@ class ActionClass extends Component {
     }
 
     render() {
-        const { is_loading } = this.state
         return (
             <div className='row ml-2 my-4'>
-                <Loader is_loading={is_loading} text={'Уншиж байна'}/>
                 <p
                     className="btn btn-secondary"
                     onClick ={()=> this.modalClose()}>

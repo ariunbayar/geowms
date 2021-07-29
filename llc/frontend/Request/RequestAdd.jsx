@@ -42,7 +42,7 @@ class SubmitClass extends Component {
             file_state, selected_tools
         } = this.props
 
-        const { files } = this.props.values
+        const { files } = this.props
         var blob = []
 
         const file = files[0]
@@ -50,7 +50,7 @@ class SubmitClass extends Component {
         if (id) {
             if (!file_state) {
                 const obj = file
-                blob = new Blob([JSON.stringify(obj, null, 2)], { type : 'application/vnd.zip' })
+                blob = new Blob([JSON.stringify(obj, null, 2)], { type : 'application/vnd.rar' })
             }
             else blob = file
         }
@@ -74,7 +74,6 @@ class SubmitClass extends Component {
     render() {
         var { values, file_name } = this.props
         const { agreed_submit, show_save_btn } = this.state
-        console.log(this.props);
         return (
             <Fragment>
                 {
