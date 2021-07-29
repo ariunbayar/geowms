@@ -608,6 +608,9 @@ def create(request, payload):
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
+    if not geo_json:
+        return JsonResponse({'success': False, 'info': 'geom-ын мэдээлэл хоосон байна!'})
+
     employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org = get_object_or_404(Org, pk=employee.org_id)
 
@@ -706,6 +709,9 @@ def update(request, payload):
     order_no = form_json.get('order_no')
     order_at = form_json.get('order_at')
 
+    if not old_geo_id:
+        return JsonResponse({'success': False, 'info': 'geom-ын мэдээлэл хоосон байна!'})
+
     employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
     org = get_object_or_404(Org, pk=employee.org_id)
 
@@ -714,7 +720,16 @@ def update(request, payload):
         return JsonResponse({'success': success, 'info': info})
 
     form_json = check_form_json(fid, form_json, employee)
-    geo_json = json.dumps(geo_json, ensure_ascii=False)
+
+    if not geo_json:
+        mgeo_qs = MGeoDatas.objects.filter(geo_id=old_geo_id)
+        if not mgeo_qs:
+            return JsonResponse({'success': success, 'info': "geom-ын мэдээлэл олдсонгүй!"})
+
+        mgeo = mgeo_qs.first()
+        geo_json = mgeo.geo_data.json
+
+    geo_json = utils.json_dumps(geo_json)
 
     ChangeRequest.objects.create(
             old_geo_id=old_geo_id,
