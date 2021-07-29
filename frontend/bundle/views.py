@@ -281,11 +281,79 @@ def findPoints(request, payload):
     return JsonResponse(rsp)
 
 
+def _get_cql_filter(properties, search_value):
+    value_types = _get_value_types()
+    cql_filters = list()
+    for prop in properties:
+        op = ''
+        if prop['value_type_id'] in value_types:
+            op = 'ilike'
+
+        if op:
+            _filter = """{} {} '%{}%'""".format(prop['property_code'], op, search_value)
+            cql_filters.append(_filter)
+
+    return cql_filters
+
+
+def _get_content(wms_url, layer_code, select_properties, cql_filters):
+    headers = {
+        'User-Agent': 'geo 1.0'
+    }
+
+    geo_server_url = '{url}?service=WFS&version=1.1.0&request=GetFeature&TYPENAME={code}'.format(url=wms_url, code=layer_code)
+    geo_server_url = '{base_url}&propertyName={properties}'.format(base_url=geo_server_url, properties=select_properties)
+    geo_server_url = geo_server_url + "&" + "srsName=EPSG:4326"
+    geo_server_url = geo_server_url + "&" + "cql_filter=" + cql_filters
+    geo_server_url = geo_server_url + "&outputFormat=application/json"
+    geo_server_url = geo_server_url + '&format_options=CHARSET:UTF-8'
+    geo_server_url = geo_server_url + '&MAXFEATURES=5'
+
+    _response = requests.get(geo_server_url, headers=headers, timeout=300, verify=False)
+    content = _response.content.decode()
+    return content
+
+
+def _get_pub_properties(view_properties):
+    property_codes = [
+        utils.remove_empty_spaces(view_property.property.property_code.lower())
+        for view_property in view_properties
+        if view_property.property
+    ]
+
+    properties = [
+        {
+            "property_code": view_property.property.property_code.lower(),
+            "value_type_id": view_property.property.value_type_id
+        }
+        for view_property in view_properties
+        if view_property.property
+    ]
+
+    return properties, property_codes
+
+
+def _get_property_value(properties, search_value, geo_id_name):
+    geo_value = ''
+    for key, value in properties.items():
+        if not value or not isinstance(value, str) or key == geo_id_name:
+            continue
+
+        if search_value.lower() in value.lower():
+            geo_value = value
+            break
+
+    return geo_value
+
+
 @require_POST
 @ajax_required
 def get_search_value(request, payload):
     bundle_id = payload.get('bundle_id')
     search_value = payload.get('value')
+    geo_id = 'inspire_id'
+
+    datas = list()
 
     rsp = {
         'success': False,
@@ -297,40 +365,74 @@ def get_search_value(request, payload):
         rsp['error'] = 'Хайх утгаа оруулна уу'
         return JsonResponse(rsp)
 
-    bundle_pk_cache_key = 'bundle_{}'.format(bundle_id)
-    geo_ids_cache_key = 'bundle_{}_geo_ids'.format(bundle_id)
+    bundle_search_value = 'bundle_{}_search_value_{}'.format(bundle_id, search_value)
     cache_time = 3000
 
-    pk = cache.get(bundle_pk_cache_key)
-    if pk != bundle_id:
-        cache.set(bundle_pk_cache_key, bundle_id, cache_time)
-        bundle = get_object_or_404(Bundle, pk=bundle_id)
-        theme_code = bundle.ltheme.theme_code
+    cached_datas = cache.get(bundle_search_value)
+    if cached_datas:
+        rsp['success'] = True
+        rsp['data'] = cached_datas
+        return JsonResponse(rsp)
 
-        feature_ids = utils.get_feature_ids_of_theme(theme_code)
-        mgeo_qs = MGeoDatas.objects
-        mgeo_qs = mgeo_qs.filter(feature_id__in=feature_ids)
-        geo_ids = list(mgeo_qs.values_list('geo_id', flat=True))
+    bundle_qs = Bundle.objects
+    bundle_qs = bundle_qs.prefetch_related('ltheme__lpackages_set__lfeatures_set__viewnames_set__viewproperties_set__property')
+    bundle_qs = bundle_qs.prefetch_related(Prefetch('layers__wms'))
+    bundle_qs = bundle_qs.filter(pk=bundle_id)
+    if not bundle_qs:
+        raise Http404
 
-        cache.set(geo_ids_cache_key, geo_ids, cache_time)
-    else:
-        geo_ids = cache.get(geo_ids_cache_key)
+    bundle = bundle_qs.first()
 
-    qs_datas = MDatas.objects
-    qs_datas = qs_datas.filter(
-        geo_id__in=geo_ids,
-    )
-    qs_datas = qs_datas.filter(
-        value_text__icontains=search_value
-    )
-    qs_datas = qs_datas.extra(
-        select={
-            'name': 'value_text'
-        }
-    )  # select value_text as name
-    qs_datas = qs_datas.order_by('geo_id')[:5]
-    datas = list(qs_datas.values('geo_id', 'name'))
+    pack_qs = bundle.ltheme.lpackages_set.all()
+    for pack in pack_qs:
+        features_qs = pack.lfeatures_set.all()
+        for feature in features_qs:
+            view_names = feature.viewnames_set.all()
+            for view in view_names:
+                view_properties = view.viewproperties_set.all()
+                if not view_properties:
+                    continue
 
+                properties, property_codes = _get_pub_properties(view_properties)
+                layer_name = utils.make_layer_name(utils.make_view_name(feature))
+
+                has_codes = list()
+                bundle_layers = bundle.layers.all()
+                for bundle_layer in bundle_layers:
+                    layer_code = bundle_layer.code
+                    if layer_code == layer_name and layer_code not in has_codes:
+                        wms_url = bundle_layer.wms.url
+                        has_codes.append(layer_code)
+
+                        cql_filters = _get_cql_filter(properties, search_value)
+                        if not cql_filters:
+                            continue
+
+                        cql_filters = " or ".join(cql_filters)
+                        property_codes.append(geo_id)
+                        select_properties = ",".join(property_codes)
+
+                        content = _get_content(wms_url, layer_code, select_properties, cql_filters)
+
+                        if 'Exception' in content:
+                            continue
+
+                        try:
+                            geo_json = utils.json_load(content)
+                        except Exception as e:
+                            raise e
+
+                        features = geo_json['features']
+                        for geo_feature in features:
+                            properties = geo_feature['properties']
+
+                            geo_value = _get_property_value(properties, search_value, geo_id)
+                            datas.append({
+                                "geo_id": properties[geo_id],
+                                "name": geo_value,
+                            })
+
+    cache.set(bundle_search_value, datas, cache_time)
     if not datas:
         rsp['error'] = 'Мэдээлэл олдсонгүй'
         return JsonResponse(rsp)
@@ -367,6 +469,14 @@ def get_point_buffer_geom(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+def _get_value_types():
+    value_text_idx = 1
+    value_text_types = utils.value_types()[value_text_idx]['value_names']
+
+    value_types = value_text_types
+    return value_types
 
 
 @require_POST
@@ -421,26 +531,7 @@ def get_search_property_value(request, payload):
                     if not view_properties:
                         continue
 
-                    property_codes = [
-                        utils.remove_empty_spaces(view_property.property.property_code.lower())
-                        for view_property in view_properties
-                        if view_property.property
-                    ]
-
-                    value_text_idx = 1
-                    value_text_types = utils.value_types()[value_text_idx]['value_names']
-
-                    value_types = value_text_types
-
-                    properties = [
-                        {
-                            "property_code": view_property.property.property_code.lower(),
-                            "value_type_id": view_property.property.value_type_id
-                        }
-                        for view_property in view_properties
-                        if view_property.property
-                    ]
-
+                    properties, property_codes = _get_pub_properties(view_properties)
                     layer_name = utils.make_layer_name(utils.make_view_name(feature))
 
                     has_codes = list()
@@ -451,35 +542,15 @@ def get_search_property_value(request, payload):
                             wms_url = bundle_layer.wms.url
                             has_codes.append(layer_code)
 
-                            cql_filters = list()
-                            for prop in properties:
-                                op = ''
-                                if prop['value_type_id'] in value_types:
-                                    op = 'ilike'
-
-                                if op:
-                                    _filter = """{} {} '%{}%'""".format(prop['property_code'], op, search_value)
-                                    cql_filters.append(_filter)
-
-                            property_codes.append(geo_id)
-
-                            select_properties = ",".join(property_codes)
-
-                            geo_server_url = '{url}?service=WFS&version=1.1.0&request=GetFeature&TYPENAME={code}'.format(url=wms_url, code=layer_code)
-                            geo_server_url = '{base_url}&propertyName={properties}'.format(base_url=geo_server_url, properties=select_properties)
-                            geo_server_url = geo_server_url + "&" + "srsName=EPSG:4326"
+                            cql_filters = _get_cql_filter(properties, search_value)
                             if not cql_filters:
                                 continue
 
                             cql_filters = " or ".join(cql_filters)
-                            geo_server_url = geo_server_url + "&" + "cql_filter=" + cql_filters
+                            property_codes.append(geo_id)
+                            select_properties = ",".join(property_codes)
 
-                            geo_server_url = geo_server_url + "&outputFormat=application/json"
-                            geo_server_url = geo_server_url + '&format_options=CHARSET:UTF-8'
-                            geo_server_url = geo_server_url + '&MAXFEATURES=5'
-
-                            _response = requests.get(geo_server_url, headers=headers, timeout=300, verify=False)
-                            content = _response.content.decode()
+                            content = _get_content(wms_url, layer_code, select_properties, cql_filters)
                             if 'Exception' in content:
                                 continue
 
@@ -492,15 +563,7 @@ def get_search_property_value(request, payload):
                             for geo_feature in features:
                                 properties = geo_feature['properties']
 
-                                geo_value = ''
-                                for key, value in properties.items():
-                                    if not value or not isinstance(value, str) or key == geo_id:
-                                        continue
-
-                                    if search_value.lower() in value.lower():
-                                        geo_value = value
-                                        break
-
+                                geo_value = _get_property_value(properties, search_value, geo_id)
                                 data_feature_dict['values'].append({
                                     "id": properties[geo_id],
                                     "name": geo_value,
