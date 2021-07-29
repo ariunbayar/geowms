@@ -501,6 +501,14 @@ def employee_list(request, payload, level, pk):
     if is_user:
         qs = qs.filter(user__is_user=True)
 
+    fired_user = payload.get('fired_user')
+    if fired_user:
+        qs = qs.filter(state=3)
+
+    custom_query = payload.get('custom_query')
+    if custom_query:
+        qs = qs.filter(**custom_query)
+
     qs = qs.filter(search__icontains=payload.get('query'))
     if not qs:
         rsp = {

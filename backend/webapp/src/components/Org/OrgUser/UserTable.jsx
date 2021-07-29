@@ -33,7 +33,7 @@ export class UserTable extends Component {
             refresh: false,
             жагсаалтын_холбоос: `/back/api/org/level-${props.match.params.level}/${props.match.params.id}/employeeList/`,
             нэмэх_товч: `/back/байгууллага/түвшин/${props.match.params.level}/${props.match.params.id}/хэрэглэгч/нэмэх/`,
-            custom_query: {},
+            custom_query: {"user__is_user": true},
             modal_status: 'closed',
             талбарууд: [
                 {'field': 'user__first_name', "title": 'Нэр', 'has_action': true},
@@ -149,9 +149,9 @@ export class UserTable extends Component {
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${values.id}/дэлгэрэнгүй/`)
     }
 
-    handleListChange(is_user, drop_name) {
-        this.setState({ is_user, drop_name })
-    }
+    handleListChange(drop_name, custom_query) {
+        this.setState({ drop_name, custom_query }) 
+    } 
 
     render() {
         const {
@@ -162,7 +162,6 @@ export class UserTable extends Component {
             хувьсах_талбарууд,
             custom_query,
             нэмэх_товч,
-            is_user,
         } = this.state
         return (
             <div className="card">
@@ -175,8 +174,9 @@ export class UserTable extends Component {
                             </a>
 
                             <div className="dropdown-menu mr-2" aria-labelledby="dropdownMenuLink">
-                                <button className="dropdown-item" onClick={() => this.handleListChange(true, 'Хэрэглэгч')}>Хэрэглэгч</button>
-                                <button className="dropdown-item" onClick={() => this.handleListChange(false, 'Бүх ажилчид')}>Бүх ажилчид</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange('Хэрэглэгч', {'user__is_user': true})}>Хэрэглэгч</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange('Бүх ажилчид', {})}>Бүх ажилчид</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange('Чөлөөлөгдсөн ажилчид', {'state':3})}>Чөлөөлөгдсөн ажилчид</button>
                             </div>
                         </div>
                     </div>
@@ -192,7 +192,6 @@ export class UserTable extends Component {
                             хувьсах_талбарууд={хувьсах_талбарууд}
                             нэмэх_товч={нэмэх_товч}
                             custom_query={custom_query}
-                            is_user={is_user}
                         />
                     </div>
                 </div>

@@ -29,7 +29,6 @@ export class PortalDataTable extends Component {
             color: props.color || "dark",
             max_data: props.max_data || 'open',
             table_head_color: props.table_head_color || 'white',
-            is_user: this.props.is_user,
             start_index: 1,
         }
         this.paginate = this.paginate.bind(this)
@@ -45,11 +44,11 @@ export class PortalDataTable extends Component {
         }
     }
 
-    paginate (page, query, sort_name, per_page, custom_query, is_user) {
+    paginate (page, query, sort_name, per_page, custom_query) {
         const { жагсаалтын_холбоос } = this.state
         this.setState({ уншиж_байгаа_эсэх: true })
         return service
-            .list(жагсаалтын_холбоос, page, per_page, query, sort_name, custom_query, is_user)
+            .list(жагсаалтын_холбоос, page, per_page, query, sort_name, custom_query)
             .then(page => {
                 this.setState({ items: page.items, items_length: page.items.length, уншиж_байгаа_эсэх: false, start_index: page.start_index })
                 return page
@@ -77,9 +76,6 @@ export class PortalDataTable extends Component {
         if(pp.нэмэх_товч !== this.props.нэмэх_товч) {
             this.setState({ нэмэх_товч: this.props.нэмэх_товч })
         }
-        if(pp.is_user !== this.props.is_user) {
-            this.setState({ is_user: this.props.is_user })
-        }
         if(pp.нэмэлт_талбарууд !== this.props.нэмэлт_талбарууд) {
             this.setState({ нэмэлт_талбарууд: this.props.нэмэлт_талбарууд })
         }
@@ -89,7 +85,7 @@ export class PortalDataTable extends Component {
         const { items, current_page, items_length, per_page,
             талбарууд, хоосон_байх_үед_зурвас, нэмэх_товч, уншиж_байх_үед_зурвас,
             уншиж_байгаа_эсэх, хувьсах_талбарууд, нэмэлт_талбарууд,
-            хайлт, color, max_data, table_head_color, is_user, start_index
+            хайлт, color, max_data, table_head_color, start_index
         } = this.state
         return (
             <div>
@@ -197,7 +193,6 @@ export class PortalDataTable extends Component {
                             sort_name={this.state.sort_name}
                             per_page={per_page}
                             color={color}
-                            is_user={is_user}
                         />
                     </div>
                 </div>

@@ -138,6 +138,7 @@ def _get_state_name(state_id, item):
 @login_required(login_url='/gov/secure/login/')
 def list(request, payload):
     is_user = payload.get('is_user')
+    fired_user = payload.get('fired_user')
 
     employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org = get_object_or_404(Org, employee=employee)
@@ -152,6 +153,9 @@ def list(request, payload):
 
     if is_user:
         qs = qs.filter(user__is_user=True)
+
+    if fired_user:
+        qs = qs.filter(state=3)
 
     custom_query = payload.get('custom_query')
     if custom_query:

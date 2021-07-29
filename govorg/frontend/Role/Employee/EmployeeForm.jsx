@@ -8,12 +8,12 @@ export class EmployeeForm extends Component {
 
     constructor(props) {
         super(props)
-
+        
         this.state={
             refresh: false,
             жагсаалтын_холбоос: `/gov/api/role/employee/`,
             нэмэх_товч: `/gov/perm/employee/add/`,
-            custom_query: {},
+            custom_query: {"user__is_user": true},
             талбарууд: [
                 {'field': 'user__first_name', "title": 'Нэр', 'has_action': true},
                 {'field': 'user__email', "title": 'Цахим шуудан'},
@@ -30,7 +30,7 @@ export class EmployeeForm extends Component {
                 {"field": "is_admin", "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
             ],
             is_user: true,
-            drop_name: 'Хэрэглэгч',
+            drop_name: 'Хэрэглэгч',      
 
         }
 
@@ -66,9 +66,9 @@ export class EmployeeForm extends Component {
         this.props.history.push(`/gov/perm/employee/${values.id}/detail/`)
     }
 
-    handleListChange(is_user, drop_name) {
-        this.setState({ is_user, drop_name })
-    }
+    handleListChange(drop_name, custom_query) {
+        this.setState({ drop_name, custom_query }) 
+    } 
 
     render() {
         const {
@@ -91,9 +91,9 @@ export class EmployeeForm extends Component {
                             </a>
 
                             <div className="dropdown-menu mr-2" aria-labelledby="dropdownMenuLink">
-                                <button className="dropdown-item" onClick={() => this.handleListChange(true, 'Хэрэглэгч')}>Хэрэглэгч</button>
-                                <button className="dropdown-item" onClick={() => this.handleListChange(false, 'Бүх ажилчид')}>Бүх ажилчид</button>
-                                <button className="dropdown-item" onClick={() => this.handleListChange(false, 'Чөлөөлөгдсөн ажилчид')}>Чөлөөлөгдсөн ажилчид</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange('Хэрэглэгч', {'user__is_user': true})}>Хэрэглэгч</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange('Бүх ажилчид', {})}>Бүх ажилчид</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange('Чөлөөлөгдсөн ажилчид', {'state':3})}>Чөлөөлөгдсөн ажилчид</button>
                             </div>
                         </div>
                     </div>
