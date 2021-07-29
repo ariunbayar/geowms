@@ -738,13 +738,6 @@ def save(request, payload):
         if data['field_type'] == 'radio':
             datas[data['field_name']] = _str_to_bool(data['data'])
 
-        if data['field_name'] == 'order_no':
-            if not data['data']:
-                error = 'Order No хоосон байна утга оруулна уу!'
-            qs = Model.objects.filter(order_no=data['data'])
-            if qs:
-                error = 'Order No давхардсан байна!'
-
         else:
             info = _rsp_validation(data, datas, model_name)
             if not info:
@@ -756,12 +749,15 @@ def save(request, payload):
 
     model_qs = Model.objects
 
-
     if not edit_name:
         qs = model_qs.filter(pk=datas[model_name + "_id"])
         if qs:
             error = 'ID давхардаж байна'
             return JsonResponse({'success': False, 'info': error})
+
+        qs = model_qs.filter(order_no=datas['order_no'])
+        if qs:
+            error = 'Order No давхардсан байна!'
 
         datas['created_by'] = request.user.id
         datas['modified_by'] = request.user.id
@@ -787,7 +783,15 @@ def save(request, payload):
         datas['modified_by'] = request.user.id
         datas['modified_on'] = utils.date_to_timezone(utils.get_today_datetime(is_string=True))
         model_filter = _get_model_filter(model_name, model_id)
-        model_qs.filter(**model_filter).update(**datas)
+        model_qs = model_qs.filter(**model_filter)
+
+        model_obj = model_qs.first()
+        if model_obj.order_no != datas['order_no']:
+            qs = Model.objects.filter(order_no=datas['order_no'])
+            if qs:
+                error = 'Order No давхардсан байна!'
+
+        model_qs.update(**datas)
 
     rsp = {
         'success': True,
