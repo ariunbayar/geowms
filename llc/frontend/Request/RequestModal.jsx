@@ -137,7 +137,8 @@ class SendModal extends Component{
             aimag_geom: [],
             selected_tools: [],
             mergejilten: '',
-            is_loading: false
+            is_loading: false,
+            disabled: true
         }
     }
 
