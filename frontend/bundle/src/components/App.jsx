@@ -17,7 +17,7 @@ export class App extends Component {
             <>
                 <DisplayModal getModalFunc={(fn) => this.setNotAndModal(fn, 'MODAL')}/>
                 <DisplayNotif getNotifFunc={(fn) => this.setNotAndModal(fn, 'NOTIF')}/>
-                <DetailPage bundle={this.props.bundle}/>
+                <DetailPage {...this.props}/>
             </>
         )
 

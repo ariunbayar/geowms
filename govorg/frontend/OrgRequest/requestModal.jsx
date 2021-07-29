@@ -16,6 +16,17 @@ export const get_modal_text = (kind) => {
 }
 
 export const FormJson = ({form_json, modalChange, modalClose, values, cancelWarningRequest}) => {
+
+    form_json.map((prop, idx) => {
+        if (prop.data_list && prop.data_list.length > 0){
+            prop.data_list.map((data, idx) => {
+                if (prop.data == data.code_list_id){
+                    prop.data = data.code_list_name
+                }
+            })
+        }
+    })
+
     return (
         <div className="col-md-4 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
             {

@@ -1579,6 +1579,9 @@ def get_popup_info(request, payload):
             continue
 
         content = content.decode()
+        if 'Exception' in content:
+            continue
+
         content = utils.json_load(content)
         features = content['features']
         for feature in features:

@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import { PortalDataTable } from "@utils/DataTable/index"
 import {NavLink} from "react-router-dom"
-import { addEquivalentTransforms } from "ol/proj"
 
 
 export class EmployeeForm extends Component {
@@ -17,17 +16,15 @@ export class EmployeeForm extends Component {
             талбарууд: [
                 {'field': 'user__first_name', "title": 'Нэр', 'has_action': true},
                 {'field': 'user__email', "title": 'Цахим шуудан'},
-                {'field': 'user_state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'position', "title": 'Албан тушаал'},
                 {'field': 'role_name', "title": 'Role', "is_sort": true},
                 {'field': 'is_admin', "title": 'Админ', 'has_action': true, "is_center": true},
             ],
             хувьсах_талбарууд: [
                 {"field": "user__first_name", "action": (values) => this.go_link(values)},
-                {"field": "user__email", "text": ""},
-                {"field": "user_state", "action": this.setStateColor, "action_type": true},
-                {"field": "position", "text": ""},
-                {"field": "is_admin", "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
+                {"field": "user__email",  "text": ""},
+                {"field": "position",  "text": ""},
+                {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
             ],
             is_user: true,
             drop_name: 'Хэрэглэгч',      

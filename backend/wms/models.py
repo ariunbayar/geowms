@@ -38,7 +38,7 @@ class WMSLog(models.Model):
         db_table = 'api_wms_log'
         ordering = ('-created_at',)
 
-    system = models.ForeignKey('backend_govorg.GovOrg', on_delete=models.PROTECT, null=True)
+    system = models.ForeignKey('backend_govorg.System', on_delete=models.PROTECT, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True)
     qs_all = models.TextField(null=True)
     qs_request = models.CharField(max_length=50, db_index=True)

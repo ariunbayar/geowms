@@ -103,7 +103,6 @@ def oauth2(request):
                     gender=gender,
                     is_sso=True,
                 )
-                user.roles.add(1)
             auth.login(request, user)
             has_llc = check_llc_user(user)
             if has_llc:

@@ -9,13 +9,12 @@ export class DetailPage extends Component {
         super(props)
 
         this.state = {
-            bundle: props.bundle,
         }
     }
 
     render() {
         return (
-            <BundleMap bundle={this.state.bundle}/>
+            <BundleMap {...this.props}/>
         )
     }
 }

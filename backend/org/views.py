@@ -18,7 +18,7 @@ from django.views.decorators.http import require_GET, require_POST
 from django.conf import settings
 from django.forms.models import model_to_dict
 
-from backend.govorg.models import GovOrg
+from backend.govorg.models import System
 from backend.inspire.models import LThemes
 from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
@@ -26,7 +26,6 @@ from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
-from backend.payment.models import Payment
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, Position
@@ -409,7 +408,7 @@ def org_remove(request, payload, level):
             user = User.objects.filter(pk=org_user.user_id).first()
             if user:
                 _remove_user(user, org_user)
-        org_govorgs = GovOrg.objects.filter(org=org)
+        org_govorgs = System.objects.filter(org=org)
         for org_govorg in org_govorgs:
             org_govorg.org = None
             org_govorg.deleted_by = request.user
@@ -434,7 +433,7 @@ def org_list(request, payload, level):
     qs = Org.objects.filter(level=level)
     if qs:
         qs = qs.annotate(num_employees=Count('employee', distinct=True))
-        qs = qs.annotate(num_systems=Count('govorg', distinct=True))
+        qs = qs.annotate(num_systems=Count('system', distinct=True))
 
         datatable = Datatable(
             model=Org,
@@ -522,6 +521,7 @@ def employee_list(request, payload, level, pk):
     хувьсах_талбарууд = [
         {"field": "user_id", "action": backend_org_utils.get_name, "new_field": "user__first_name"},
         {"field": "user_id", "action": backend_org_utils.get_email, "new_field": "user__email"},
+        {"field": "user_id", "action": backend_org_utils.get_is_user, "new_field": "is_user"},
         {"field": "position_id", "action": backend_org_utils.get_position_name, "new_field": "position"},
     ]
     нэмэлт_талбарууд = [

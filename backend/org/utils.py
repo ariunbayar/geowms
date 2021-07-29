@@ -41,6 +41,14 @@ def check_qs(Model, selected_filter):
     return qs
 
 
+def get_is_user(user_id, item):
+    user_qs = User.objects.filter(id=user_id)
+    if not user_qs:
+        return False
+    user = user_qs.first()
+    return user.is_user
+
+
 def make_user_detail(values):
     keys = ['id', 'is_super', 'position', 'is_admin', 'phone_number', 'state', 'pro_class']
     user_detail = utils.key_remove_of_dict(values, keys)
