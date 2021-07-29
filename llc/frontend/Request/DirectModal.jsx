@@ -91,7 +91,6 @@ export class Form extends Component {
             emp_fields: props.emp_fields,
             info: props.info,
             desc_info: props.desc_info,
-            selected_tools: props.selected_tools,
             aimag_name: props.aimag_name,
             zahialagch: props.zahialagch,
             project_name: props.project_name,
@@ -107,7 +106,6 @@ export class Form extends Component {
         this.getMergejilten = this.getMergejilten.bind(this)
         this.getValueCheckbox = this.getValueCheckbox.bind(this)
         this.validationForm = this.validationForm.bind(this)
-        this.handleSelectModel = this.handleSelectModel.bind(this)
         this.getFile = this.getFile.bind(this)
     }
 
@@ -130,7 +128,6 @@ export class Form extends Component {
             pP.emp_fields !== this.props.emp_fields ||
             pP.info !== this.props.info ||
             pP.desc_info !== this.props.desc_info ||
-            pP.selected_tools !== this.props.selected_tools ||
             pP.aimag_name !== this.props.aimag_name ||
             pP.zahialagch !== this.props.zahialagch ||
             pP.project_name !== this.props.project_name ||
@@ -146,7 +143,6 @@ export class Form extends Component {
                 emp_fields: this.props.emp_fields,
                 info: this.props.info,
                 desc_info: this.props.desc_info,
-                selected_tools: this.props.selected_tools,
                 aimag_name: this.props.aimag_name,
                 zahialagch: this.props.zahialagch,
                 project_name: this.props.project_name,
@@ -246,21 +242,16 @@ export class Form extends Component {
         this.setState({ ...set_state_obj })
     }
 
-    handleSelectModel(selected_tools) {
-        this.setState({ selected_tools })
-    }
-
     getMergejilten(selection) {
         this.setState({mergejilten: selection.user_id})
     }
 
     render() {
         const {
-            mergejilten, emp_fields, info, desc_info, selected_tools, aimag_name,
-            zahialagch, project_name, desc, file_name, object_type, object_count,
+            mergejilten, emp_fields, info, desc_info, aimag_name,
+            zahialagch, project_name, desc, object_type, object_count,
             hurungu_oruulalt
         } = this.state
-
         var { investment_status, hide_file, disabled } = this.state
         var default_mergejilten = ''
         if (mergejilten) default_mergejilten = mergejilten
@@ -405,6 +396,7 @@ export class Form extends Component {
                     }
                     <UsedTools
                         values={this.props}
+                        handleSelectModel={this.props.handleSelectModel}
                     />
                     {
                         (!info && !hide_file)

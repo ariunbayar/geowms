@@ -33,7 +33,7 @@ export default class UsedTools extends Component {
         else {
             array.splice(idx, 1);
         }
-        this.props.values.handleSelectModel(array)
+        this.props.handleSelectModel(array)
     }
 
     handleModalOpen(values) {

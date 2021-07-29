@@ -38,8 +38,9 @@ class SubmitClass extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            selected_tools, id, file_state,
+            id, file_state,
         } = this.props.values
+        const { selected_tools } = this.props
         var blob = []
         const file = files[0]
 
@@ -61,7 +62,7 @@ class SubmitClass extends Component {
         form_datas.append('zahialagch', zahialagch)
         form_datas.append('ulsiin_hemjeend', this.props.nationwide ? this.props.nationwide: '' )
         form_datas.append('selected_tools', JSON.stringify({ selected_tools }))
-        this.props.values.enableLoader(true)
+        this.props.enableLoader(true)
         service.saveRequest(form_datas).then(({ success, info }) => {
             this.props.values.handlePassValues(success, info)
         })
