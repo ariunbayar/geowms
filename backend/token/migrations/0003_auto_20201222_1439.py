@@ -5,7 +5,7 @@ def record_used_tokens(apps, schema_editor):
 
     KindToken = apps.get_model('backend_token', 'KindToken')
     UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
-    System = apps.get_model('backend_govorg', 'GovOrg')
+    System = apps.get_model('backend_govorg', 'System')
 
     KIND_VALIDATION_EMAIL = 1
     KIND_GIS_SYSTEM_TOKEN = 4
