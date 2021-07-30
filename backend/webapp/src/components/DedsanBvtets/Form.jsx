@@ -31,30 +31,43 @@ export default class Forms extends Component {
     onSubmit() {
         this.setState({ is_loading: true })
         const { values, model_name, code, model_id, edit_name } = this.state
-        service.save(values, model_name, model_id, edit_name).then(({ success, info }) => {
-            this.setState({ is_loading: false, info })
-            if (success) {
-                const modal = {
-                    modal_status: "open",
-                    modal_icon: "fa fa-check-circle",
-                    icon_color: 'success',
-                    title: info,
+        service
+            .save(values, model_name, model_id, edit_name)
+            .then(({ success, info }) => {
+                if (success) {
+                    const modal = {
+                        modal_status: "open",
+                        modal_icon: "fa fa-check-circle",
+                        icon_color: 'success',
+                        title: info,
+                    }
+                    global.MODAL(modal)
+                    if (code !== '') this.props.refresh(code)
+                    else this.props.refresh()
+                    this.props.done()
                 }
-                global.MODAL(modal)
-                if (code !== '') this.props.refresh(code)
-                else this.props.refresh()
-                this.props.done()
-            }
-            else {
+                else {
+                    const modal = {
+                        modal_status: "open",
+                        modal_icon: "fa fa-times-circle",
+                        icon_color: 'danger',
+                        title: info,
+                    }
+                    global.MODAL(modal)
+                }
+            })
+            .catch(error => {
                 const modal = {
                     modal_status: "open",
                     modal_icon: "fa fa-times-circle",
                     icon_color: 'danger',
-                    title: info,
+                    title: "Алдаа гарсан байна",
                 }
                 global.MODAL(modal)
-            }
-        })
+            })
+            .finally(() => {
+                this.setState({ is_loading: false })
+            })
     }
 
     handleRemove() {
@@ -88,18 +101,20 @@ export default class Forms extends Component {
         if (value_obj.field_name == 'is_connect_to_feature') {
             this.state.values[idx - 3].data = type
             if (type == 'true') {
-                this.state.values[idx + 1].data = ''
-                this.state.values[idx + 2].data = ''
+                this.state.values[idx + 1].data = null
+                this.state.values[idx + 2].data = null
             }
         }
         if (value_obj.field_name == 'has_class') {
             this.state.values[idx + 3].data = type
             if (type == 'false') {
-                this.state.values[idx + 4].data = ''
-                this.state.values[idx + 5].data = ''
+                this.state.values[idx + 4].data = null
+                this.state.values[idx + 5].data = null
             }
         }
-        this.setState({ values: this.state.values })
+        if (this.state.model_name == 'feature_config') {
+            this.setState({ values: this.state.values })
+        }
     }
 
     getValue(data, idx) {
@@ -180,6 +195,7 @@ export default class Forms extends Component {
         const prop_id = this.props.model_id
         const { values, jumped, edit_name, is_connected_to_feature_idx, is_loading } = this.state
         const btn_name = edit_name !== '' ? 'Засах' : 'Хадгалах'
+
         return (
             <div className='overflow-auto card-body'>
                  {
@@ -307,6 +323,7 @@ function Select(props) {
         setValue(val)
         props.setValue(val, props.index)
     }
+
     return (
         <select
             className='form-control'
@@ -318,7 +335,7 @@ function Select(props) {
                 :
                     ''
             }
-            value={value}
+            value={value || ""}
             onChange={handleOnChange}
         >
             <option value=""> --- Сонгоно уу --- </option>

@@ -106,11 +106,10 @@ export class List extends Component {
     remove(model_name, model_id, name, formLorR) {
         const modal = {
             modal_status: "open",
-            modal_icon: "fa fa-exclamation-circle",
+            modal_icon: "fa fa-times-circle",
             modal_bg: '',
-            icon_color: 'warning',
-            title: 'Устгах',
-            text: `Та "${name}" нэртэй "${model_name}"-г устгахдаа итгэлтэй байна уу?`,
+            icon_color: 'danger fa-4x',
+            title: `Та "${name}" нэртэй "${model_name}"-г устгахад холбогдсон датанууд устах тул та итгэлтэй байна уу?`,
             has_button: true,
             actionNameBack: 'Үгүй',
             actionNameDelete: 'Тийм',

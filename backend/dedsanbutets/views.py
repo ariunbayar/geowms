@@ -12,9 +12,10 @@ from django.views.decorators.http import require_GET, require_POST
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 
 from .models import ViewNames, ViewProperties, FeatureOverlaps
-from backend.inspire.models import LThemes
+from backend.inspire.models import LThemes, MDatas
 from backend.inspire.models import LPackages
 from backend.inspire.models import LFeatures
 from backend.inspire.models import LDataTypeConfigs
@@ -256,6 +257,16 @@ def _check_select_type(field_name, model_name):
     if model_name not in not_select_fields:
         if '_id' not in field_name:
             return False
+
+        not_has_option = {
+            'code_list': ['property_id'],
+            'code_list_config': ['property_id']
+        }
+
+        if model_name in not_has_option.keys():
+            if field_name in not_has_option[model_name]:
+                return False
+
         field_name = field_name.split('_id')[0]
         if field_name not in model_name:
             return True
@@ -273,11 +284,11 @@ def _get_option_datas(model_name, field_name):
         find_data['name'] = 'data_type_id'
         find_data['find'] = 'data_type'
 
-    if model_name == 'data_type_config' or model_name == 'code_list_config':
+    if model_name == 'data_type_config':
         find_data['name'] = 'property_id'
         find_data['find'] = 'property'
 
-    if model_name == 'code_list':
+    if model_name == 'code_list_config':
         find_data['name'] = 'property_id'
         find_data['find'] = 'property'
 
@@ -338,10 +349,19 @@ def getFields(request, payload):
                     if '_' in savename:
                         main_field_name = savename + "_id"
 
+                        special_fields = {
+                            'code_list': ['property_id'],
+                            'code_list_config': ['property_id'],
+                        }
+
                         if 'config' in savename:
                             parent = utils.remove_text_from_str(savename, 'config')
                             parent = parent + "id"
                             if parent == field_name:
+                                field['data'] = id
+
+                        if savename in special_fields.keys():
+                            if field_name in special_fields[savename]:
                                 field['data'] = id
 
                         if main_field_name == field_name:
@@ -647,16 +667,19 @@ def _rsp_validation(data, datas, model_name):
     if model_name == 'feature_config':
         if 'has_class' in datas:
             has_class = datas['has_class']
-            if has_class == True:
+            if has_class is True:
                 rem_data = utils.key_remove_of_dict(datas, keys)
                 for check_data in rem_data:
                     if not rem_data[check_data]:
-                        info = 'false'
-                        return info
+                        return False
                 return True
             else:
                 if not data['data']:
                     return False
+    elif model_name == 'code_list':
+        if 'top_code_list_id' in datas:
+            return True
+
     else:
         if not data['data']:
             return False
@@ -682,8 +705,6 @@ def save(request, payload):
 
     datas = {}
     for data in json:
-        datas[data['field_name']] = data['data']
-
         if 'code' in data['field_name'] and now_model_name in important_code_models:
             if "-" not in data['data']:
                 if now_model_name == 'package':
@@ -737,6 +758,7 @@ def save(request, payload):
             datas[data['field_name']] = _str_to_bool(data['data'])
 
         else:
+            datas[data['field_name']] = data['data']
             info = _rsp_validation(data, datas, model_name)
             if not info:
                 error = 'Хоосон байна, утга оруулна уу!'
@@ -752,9 +774,10 @@ def save(request, payload):
         if qs:
             error = 'ID давхардаж байна'
 
-        qs = model_qs.filter(order_no=datas['order_no'])
-        if qs:
-            error = 'Order No давхардсан байна!'
+        if 'order_no' in datas:
+            qs = model_qs.filter(order_no=datas['order_no'])
+            if qs:
+                error = 'Order No давхардсан байна!'
 
         if model_name == 'theme':
             qs = LThemes.objects.filter(theme_code=datas[model_name + "_code"])
@@ -791,10 +814,11 @@ def save(request, payload):
         model_qs = model_qs.filter(**model_filter)
 
         model_obj = model_qs.first()
-        if model_obj.order_no != datas['order_no']:
-            qs = Model.objects.filter(order_no=datas['order_no'])
-            if qs:
-                error = 'Order No давхардсан байна!'
+        if 'order_no' in datas:
+            if model_obj.order_no != datas['order_no']:
+                qs = Model.objects.filter(order_no=datas['order_no'])
+                if qs:
+                    error = 'Order No давхардсан байна!'
 
         if model_name == 'theme':
             if model_obj.theme_code != datas["theme_code"]:
@@ -833,37 +857,121 @@ def _get_datas(mode_name):
     return types
 
 
-def erese(model_name, model_id):
+def _delete_main_table_datas(will_deletes, feature_ids):
+    if 'feature' in will_deletes:
+        mgeo_qs = MGeoDatas.objects
+        mgeo_qs = mgeo_qs.filter(feature_id__in=feature_ids)
+        geo_ids = list(mgeo_qs.values_list('geo_id', flat=True))
 
-    field_name = ''
-    if model_name == 'property':
-        field_name = 'property_id'
-        model_name = 'data_type_config'
-    if model_name == 'data_type':
-        field_name = 'data_type_id'
-        model_name = 'feature_config'
+        mdatas_qs = MDatas.objects
+        mdatas_qs = mdatas_qs.filter(geo_id__in=geo_ids)
 
-    if not field_name:
-        return
+        mdatas_qs.delete()
+        mgeo_qs.delete()
 
-    model_name = _get_Model(model_name)
 
-    updateData = {}
-    data = model_name.objects.filter(pk=top_id)
-    for i in model_name._meta.get_fields():
-        if str(field_name) == str(i.name):
-            updateData[field_name] = None
-    if updateData != {}:
-        rsp = {
-            'success': False,
-            'info': 'Амжилттай устгалаа'
-        }
-    else:
-        rsp = {
-            'success': False,
-            'info': 'Хоосон байна'
-        }
-    return JsonResponse(rsp)
+def erese(model_name, model_id, this_ins_idx, will_deletes):
+
+    main_field_name = model_name + "_id"
+
+    success = True
+    info = ''
+
+    # ustgah uyd edgeer model iin baganuudiig None bolgoh
+    erese_fields = {
+        'feature_config': [
+            {
+                'model': 'feature_config',
+                'fields': ['data_type_id']
+            }
+        ],
+        'data_type_config': [
+            {
+                'model': 'data_type_config',
+                'fields': ['property_id']
+            }
+        ],
+        'property': [
+            {
+                'model': 'data_type_config',
+                'fields': ['property_id'],
+            }
+        ],
+        'value_type': [
+            {
+                'model': 'property',
+                'fields': ['value_type_id']
+            }
+        ],
+        'data_type': [
+            {
+                'model': 'feature_config',
+                'fields': ['data_type_id']
+            }
+        ]
+    }
+
+    speciel_delete_fields = {
+        'code_list_config': 'property_id',
+        'code_list': 'property_id'
+    }
+
+    child_ids = [model_id]
+    child_field_name = main_field_name
+
+    will_delete_qs = list()
+
+    feature_ids = list()  # m_geo_datas bolon m_datas aas ustgahad hereg bolno
+
+    # foreign key eer holbogdson ustgaj bolohgv datag null bolgoh ni
+    for will_delete in will_deletes:
+        DeleteModel = _get_Model(will_delete)
+
+        delete_qs = DeleteModel.objects
+
+        delete_filter = {'{}__in'.format(child_field_name): child_ids}
+        delete_qs = delete_qs.filter(**delete_filter)
+
+        if will_delete == 'feature':
+            feature_ids = child_ids
+
+        if will_delete in erese_fields:
+            will_erese_fields = erese_fields[will_delete]
+            for will_erese_field in will_erese_fields:
+                erese_model = will_erese_field['model']
+                EreseModel = _get_Model(erese_model)
+
+                qs = EreseModel.objects
+
+                fields = dict()
+                qs = qs.filter(**delete_filter)
+
+                if not qs:
+                    continue
+
+                for field in will_erese_field['fields']:
+                    fields[field] = None
+
+                # ustgasaas umnu foreign key eer holbogdson field iig null bolgono
+                qs.update(**fields)
+
+        child_field_name = will_delete + "_id"
+        if will_delete in speciel_delete_fields.keys():
+            child_field_name = speciel_delete_fields[will_delete]
+
+        child_ids = list(delete_qs.values_list(child_field_name, flat=True))
+        will_delete_qs.append(delete_qs)
+
+    will_delete_qs.reverse()
+
+    _delete_main_table_datas(will_deletes, feature_ids)
+
+    for qs in will_delete_qs:
+        qs.delete()  # tuhain songoson oo ustgana
+
+    info = "Амжилттай устгалаа"
+
+    return success, info
 
 
 @require_POST
@@ -872,20 +980,50 @@ def erese(model_name, model_id):
 def remove(request, payload):
     model_name = payload.get('model_name')
     model_id = payload.get('model_id')
+
     Model = _get_Model(model_name)
-    data = Model.objects.filter(pk=model_id)
-    if data:
-        data.update(is_active=False)
-        erese(model_name, model_id)
+
+    with transaction.atomic():
+
+        data = Model.objects.filter(pk=model_id)
+        if not data:
+            rsp = {
+                'success': False,
+                'info': 'Хоосон байна'
+            }
+            return JsonResponse(rsp)
+
+        inspire_tree = [
+            ['theme', 'package', 'feature', 'feature_config'],
+            ['data_type', 'data_type_config'],
+            ['value_type'],
+            ['property', 'code_list_config', 'code_list'],
+        ]
+
+        this_ins_idx = ''
+        will_deletes = list()
+        for ins_idx in range(0, len(inspire_tree)):
+            table_names = inspire_tree[ins_idx]
+            this_ins_idx = ins_idx
+            for idx in range(0, len(table_names)):
+                table_name = table_names[idx]
+                if table_name == model_name:
+                    will_deletes = table_names[idx:len(table_names)]
+                    break
+
+        if not will_deletes or not this_ins_idx:
+            rsp = {
+                'success': False,
+                'info': 'Хүснэгт олдсонгүй'
+            }
+            return JsonResponse(rsp)
+
+        success, info = erese(model_name, model_id, this_ins_idx, will_deletes)
         rsp = {
-            'success': True,
-            'info': 'Амжилттай устгалаа'
+            'success': success,
+            'info': info
         }
-    else:
-        rsp = {
-            'success': False,
-            'info': 'Хоосон байна'
-        }
+
     return JsonResponse(rsp)
 
 
