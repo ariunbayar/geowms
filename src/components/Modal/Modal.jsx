@@ -156,7 +156,7 @@ export default class Modal extends Component {
                                         </i>
                                 }
                             </div>
-                            <div className="text-center">
+                            <div className="text-center px-2">
                                 <h5 >{ this.props.title && this.props.title }</h5>
                             </div>
                             {
