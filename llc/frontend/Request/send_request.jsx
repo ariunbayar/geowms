@@ -47,11 +47,8 @@ export default class ModelSendData extends Component {
     }
 
     handleClose(callback) {
-        this.setState({ status: "closing" })
-        setTimeout(() => {
-            this.setState({ status: "closed" })
-            this.props.closeRequestMap()
-        }, 150)
+        this.setState({ status: "closed" })
+        this.props.closeRequestMap()
     }
 
     render () {

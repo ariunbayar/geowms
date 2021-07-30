@@ -17,19 +17,17 @@ class SubmitClass extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
     }
 
-    componentDidUpdate(pP, pS){
+    componentDidUpdate(pP, pS) {
         const { valid_request, values } = this.props
         var forms = document.getElementsByClassName('form-control')
         if (valid_request.length == forms.length ) {
             if(this.state.one_check)
                 this.setState({ agreed_submit: true, one_check: false })
         }
-
         if(pP.values.kind !== values.kind) {
             if(values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН")
                 this.setState({ info_status: true })
         }
-
         if(pP.values.state !== values.state) {
             if(values.kind == "ИЛГЭЭСЭН" || values.kind == "ХҮЛЭЭГДЭЖ БУЙ" || values.state == 'ШИЙДВЭРЛЭГДСЭН')
                 this.setState({ show_save_btn: false })
@@ -38,18 +36,21 @@ class SubmitClass extends Component {
 
     handleSubmit() {
         const {
-            files, project_name,
+            project_name, id,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            selected_tools, id, file_state,
-        } = this.props.values
+            file_state, selected_tools
+        } = this.props
+
+        const { files } = this.props
         var blob = []
+
         const file = files[0]
 
         if (id) {
             if (!file_state) {
                 const obj = file
-                blob = new Blob([JSON.stringify(obj, null, 2)], {type : 'application/vnd.rar'})
+                blob = new Blob([JSON.stringify(obj, null, 2)], { type : 'application/vnd.rar' })
             }
             else blob = file
         }
@@ -64,14 +65,14 @@ class SubmitClass extends Component {
         form_datas.append('zahialagch', zahialagch)
         form_datas.append('ulsiin_hemjeend', this.props.nationwide ? this.props.nationwide: '' )
         form_datas.append('selected_tools', JSON.stringify({ selected_tools }))
-        this.props.values.enableLoader(true)
+        this.props.enableLoader(true)
         service.saveRequest(form_datas).then(({ success, info }) => {
             this.props.values.handlePassValues(success, info)
         })
     }
 
     render() {
-        var { values } = this.props
+        var { values, file_name } = this.props
         const { agreed_submit, show_save_btn } = this.state
         return (
             <Fragment>
@@ -80,9 +81,9 @@ class SubmitClass extends Component {
                     ?
                         <button
                             type="button"
-                            disabled={!agreed_submit || !values.file_name ? true : ''}
+                            disabled={!agreed_submit || !file_name ? true : ''}
                             className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
-                            onClick ={()=> this.handleSubmit()}
+                            onClick={()=> this.handleSubmit()}
                         >
                             <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
                         </button>
@@ -91,8 +92,7 @@ class SubmitClass extends Component {
                             <button className="btn btn-secondary btn-sm">
                                 <i
                                     className="fa fa-angle-double-left"
-                                    onClick ={()=> values.history.push(this.state.url)}
-
+                                    onClick={()=> values.history.push(this.state.url)}
                                 >
                                     Буцах
                                 </i>
@@ -102,7 +102,7 @@ class SubmitClass extends Component {
                                 ?
                                     <button
                                         className="btn btn-primary btn-sm"
-                                        onClick ={()=> this.handleSubmit()}
+                                        onClick={()=> this.handleSubmit()}
                                         disabled={!values.files.length > 0}
                                     >
                                             <i className="fa"> Хадгалах</i>
@@ -129,11 +129,10 @@ export class RequestAdd extends Component {
             object_count: '',
             hurungu_oruulalt: 1,
             zahialagch: '',
-            modal_status:'closed',
+            modal_status: 'closed',
             vector_datas: [],
             tool_datas: [],
             selected_tools: [],
-            file_name:'',
             state: '',
             file_state: false,
             aimag_name: '',
@@ -142,23 +141,20 @@ export class RequestAdd extends Component {
             state: '',
         }
 
-        this.handleOnChange = this.handleOnChange.bind(this)
         this.handlePassValues = this.handlePassValues.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.getTools = this.getTools.bind(this)
-        this.handleSelectModel = this.handleSelectModel.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.enableLoader = this.enableLoader.bind(this)
-        this.getFile = this.getFile.bind(this)
     }
 
     componentDidMount() {
         const { id } = this.props.match.params
         if (id) {
             this.setState({ is_loading: true })
-            service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom }) =>{
+            service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom }) => {
                 if (form_field) {
                     this.setState({
                         vector_datas,
@@ -189,56 +185,8 @@ export class RequestAdd extends Component {
         service
             .getToolDatas()
             .then(({ tool_datas }) => {
-                this.setState({tool_datas})
+                this.setState({ tool_datas })
             })
-    }
-
-    handleSelectModel(selected_tools) {
-        this.setState({ selected_tools })
-    }
-
-    handleOnChange(e, selection) {
-        var name = ''
-        var value = ''
-        if (!selection) {
-            name = e.target.name
-            value = e.target.value
-        }
-        else {
-            name = e
-            value = selection['id']
-        }
-
-        this.validationForm()
-        this.setState({ [name]: value })
-    }
-
-    getFile(files){
-        const { id } = this.props.match.params
-        var { file_name, file_state } = this.state
-        const file = files[0]
-        if(files && files.length > 0)
-            file_name = file.name
-            if (id) {
-                file_state = true
-            }
-
-        this.setState({ files, file_name, file_state })
-    }
-
-    validationForm (){
-        var forms = document.getElementsByClassName('form-control')
-        for (var i = 0; i < forms.length; i++) {
-            let form = forms[i]
-            if(form.value == '') {
-                form.classList.add('is-invalid')
-            }
-            else {
-                form.classList.remove('is-invalid')
-                form.classList.add('is-valid')
-            }
-        }
-
     }
 
     handleModalClose() {
@@ -249,7 +197,7 @@ export class RequestAdd extends Component {
         this.setState({ modal_status: 'closed' })
     }
 
-    handleModalOpen(){
+    handleModalOpen() {
         this.setState({ modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
         })
@@ -310,9 +258,11 @@ export class RequestAdd extends Component {
         })
         this.handleModalOpen()
     }
-    enableLoader(state){
+
+    enableLoader(state) {
         this.setState({ is_loading: state })
     }
+
     render (){
         const { id, info } = this.props.match.params
         return (
@@ -322,14 +272,11 @@ export class RequestAdd extends Component {
                     <RequestDetail
                         id={id}
                         {...this.state}
-                        handleOnChange={this.handleOnChange}
                         submitClass={SubmitClass}
                         handlePassValues={this.handlePassValues}
                         history={this.props.history}
                         info={info}
-                        handleSelectModel={this.handleSelectModel}
                         enableLoader={this.enableLoader}
-                        getFile={this.getFile}
                     />
                 </div>
                 <Modal
