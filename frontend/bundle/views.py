@@ -32,7 +32,9 @@ CACHE_TIMEOUT = 30
 def all(request):
     context_list = []
 
-    bundles = Bundle.objects.prefetch_related('ltheme')
+    qs = Bundle.objects
+    qs = qs.prefetch_related('ltheme')
+    bundles = qs.order_by('sort_order')
     for bundle in bundles:
         theme = bundle.ltheme
         bundle_list = {
