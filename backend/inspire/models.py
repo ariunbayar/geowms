@@ -4,6 +4,11 @@ from backend.org.models import Org, Employee
 from django.conf import settings
 
 
+class InspireManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
+
+
 class LCodeListConfigs(models.Model):
     class Meta:
         db_table = 'l_code_list_configs'
@@ -63,6 +68,9 @@ class LPackages(models.Model):
     class Meta:
         db_table = 'l_packages'
         managed = False
+
+    objects = models.Manager
+    activates = InspireManager
 
     package_id = models.AutoField(primary_key=True)
     package_code = models.CharField(max_length=255, null=True)
@@ -211,7 +219,7 @@ class MDatas(models.Model):
 class MGeoDatas(models.Model):
     class Meta:
         db_table = 'm_geo_datas'
-        managed= False
+        managed = False
 
     geo_id = models.CharField(primary_key=True, max_length=100)
     geo_data = models.GeometryCollectionField(srid=4326) #geometry(GeometryZ,32648),

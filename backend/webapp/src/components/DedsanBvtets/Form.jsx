@@ -31,34 +31,48 @@ export default class Forms extends Component {
     onSubmit() {
         this.setState({ is_loading: true })
         const { values, model_name, code, model_id, edit_name } = this.state
-        service.save(values, model_name, model_id, edit_name).then(({ success, info }) => {
-            this.setState({ is_loading: false, info })
-            if (success) {
-                const modal = {
-                    modal_status: "open",
-                    modal_icon: "fa fa-check-circle",
-                    icon_color: 'success',
-                    title: info,
+        service
+            .save(values, model_name, model_id, edit_name)
+            .then(({ success, info }) => {
+                if (success) {
+                    const modal = {
+                        modal_status: "open",
+                        modal_icon: "fa fa-check-circle",
+                        icon_color: 'success',
+                        title: info,
+                    }
+                    global.MODAL(modal)
+                    if (code !== '') this.props.refresh(code)
+                    else this.props.refresh()
+                    this.props.done()
                 }
-                global.MODAL(modal)
-                if (code !== '') this.props.refresh(code)
-                else this.props.refresh()
-            }
-            else {
+                else {
+                    const modal = {
+                        modal_status: "open",
+                        modal_icon: "fa fa-times-circle",
+                        icon_color: 'danger',
+                        title: info,
+                    }
+                    global.MODAL(modal)
+                }
+            })
+            .catch(error => {
                 const modal = {
                     modal_status: "open",
                     modal_icon: "fa fa-times-circle",
                     icon_color: 'danger',
-                    title: info,
+                    title: "Алдаа гарсан байна",
                 }
                 global.MODAL(modal)
-            }
-        })
+            })
+            .finally(() => {
+                this.setState({ is_loading: false })
+            })
     }
 
     handleRemove() {
-        const { model_name, model_id, edit_name, type, top_id } = this.props
-        this.props.remove(model_name, model_id, edit_name, type, top_id)
+        const { model_name, model_id, edit_name, type } = this.props
+        this.props.remove(model_name, model_id, edit_name, type)
     }
 
     openModal(logo, title, text, action) {
@@ -87,18 +101,20 @@ export default class Forms extends Component {
         if (value_obj.field_name == 'is_connect_to_feature') {
             this.state.values[idx - 3].data = type
             if (type == 'true') {
-                this.state.values[idx + 1].data = ''
-                this.state.values[idx + 2].data = ''
+                this.state.values[idx + 1].data = null
+                this.state.values[idx + 2].data = null
             }
         }
         if (value_obj.field_name == 'has_class') {
             this.state.values[idx + 3].data = type
             if (type == 'false') {
-                this.state.values[idx + 4].data = ''
-                this.state.values[idx + 5].data = ''
+                this.state.values[idx + 4].data = null
+                this.state.values[idx + 5].data = null
             }
         }
-        this.setState({ values: this.state.values })
+        if (this.state.model_name == 'feature_config') {
+            this.setState({ values: this.state.values })
+        }
     }
 
     getValue(data, idx) {
@@ -109,12 +125,15 @@ export default class Forms extends Component {
 
     componentDidUpdate(pP) {
         const { model_id, model_name, edit_name } = this.props
-        if(pP.model_id !== model_id) {
-            this.getFields(model_name, model_id, edit_name)
-            this.setState({ before_id: pP.model_id, before_name: pP.model_name, before_edit_name: pP.edit_name })
-        }
         if(pP.model_name !== model_name || pP.edit_name !== edit_name) {
-            this.setState({ model_id, model_name, edit_name })
+            this.setState({
+                model_id,
+                model_name,
+                edit_name,
+                before_id: pP.model_id,
+                before_name: pP.model_name,
+                before_edit_name: pP.edit_name,
+            })
             this.getFields(model_name, model_id, edit_name)
         }
     }
@@ -145,13 +164,13 @@ export default class Forms extends Component {
     makeModel() {
         this.setState({ jumped: true })
         if (this.props.model_name == 'feature_config') {
-            this.props.handleFormLeft('data_type', '')
+            this.props.handleFormLeft('data_type', this.props.model_id)
         }
         if ((this.props.model_name == 'property') || (this.props.model_name == 'value_type')) {
-            this.props.handleFormLeft('value_type', '')
+            this.props.handleFormLeft('value_type', this.props.model_id)
         }
         if (this.props.model_name == 'data_type_config') {
-            this.props.handleFormLeft('property', '')
+            this.props.handleFormLeft('property', this.props.model_id)
         }
     }
 
@@ -176,6 +195,7 @@ export default class Forms extends Component {
         const prop_id = this.props.model_id
         const { values, jumped, edit_name, is_connected_to_feature_idx, is_loading } = this.state
         const btn_name = edit_name !== '' ? 'Засах' : 'Хадгалах'
+
         return (
             <div className='overflow-auto card-body'>
                  {
@@ -189,9 +209,9 @@ export default class Forms extends Component {
                 {
                     prop_edit_name && prop_name
                     ?
-                        <h4 className="text-center">{prop_name}-{prop_edit_name}{(prop_id ? `-` + prop_id : '')}</h4>
+                        <h4 className="text-center">{prop_name}-{prop_edit_name}{(!jumped && prop_id ? `-` + prop_id : '')}</h4>
                     :
-                        <h4 className="text-center"> Model-{prop_name}{(prop_id ? `-` + prop_id : '')}</h4>
+                        <h4 className="text-center"> Model-{prop_name}{(!jumped && prop_id ? `-` + prop_id : '')}</h4>
                 }
                 <hr></hr>
                 <div>
@@ -267,7 +287,7 @@ export default class Forms extends Component {
                                 ?
                                     <a
                                         className="btn col-md-4 btn-danger mr-1 text-white"
-                                        onClick={() => this.openModal('times-circle text-danger', 'Устгах', `Та ${prop_edit_name} - нэртэй ${prop_name}-г устгахдаа итгэлтэй байна уу ?`, this.handleRemove)}
+                                        onClick={this.handleRemove}
                                     >
                                         Устгах
                                     </a>
@@ -303,6 +323,7 @@ function Select(props) {
         setValue(val)
         props.setValue(val, props.index)
     }
+
     return (
         <select
             className='form-control'
@@ -314,7 +335,7 @@ function Select(props) {
                 :
                     ''
             }
-            value={value}
+            value={value || ""}
             onChange={handleOnChange}
         >
             <option value=""> --- Сонгоно уу --- </option>

@@ -156,25 +156,28 @@ export default class Modal extends Component {
                                         </i>
                                 }
                             </div>
-                            <div className="d-flex justify-content-center">
+                            <div className="text-center px-2">
                                 <h5 >{ this.props.title && this.props.title }</h5>
                             </div>
-                            <div className="modal-body text-wrap text-center ml-2 mr-2 ">
-                                {
-                                    this.props.text &&
-                                    (
-                                        typeof(this.props.text) == 'string'
-                                        ?
-                                            <small className=''>{this.props.text}</small>
-                                        :
-                                        typeof(this.props.text) == 'function'
-                                        ?
-                                            <this.props.text/>
-                                        :
-                                            this.props.text
-                                    )
-                                }
-                            </div>
+                            {
+                                this.props.text
+                                ?
+                                    <div className="modal-body text-wrap text-center ml-2 mr-2 ">
+                                        {
+                                            typeof(this.props.text) == 'string'
+                                            ?
+                                                <small className=''>{this.props.text}</small>
+                                            :
+                                            typeof(this.props.text) == 'function'
+                                            ?
+                                                <this.props.text/>
+                                            :
+                                                this.props.text
+                                        }
+                                    </div>
+                                :
+                                    null
+                            }
                             {
                                 this.props.has_button
                                 ?

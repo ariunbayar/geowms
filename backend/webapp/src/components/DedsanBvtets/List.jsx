@@ -95,6 +95,10 @@ export class List extends Component {
         this.setState({ form_is_laod_left: true })
     }
 
+    leftFormDone() {
+        this.setState({ form_is_laod: true })
+    }
+
     isDelete() {
         this.setState({ is_delete: !this.state.is_delete })
     }
@@ -102,22 +106,21 @@ export class List extends Component {
     remove(model_name, model_id, name, formLorR) {
         const modal = {
             modal_status: "open",
-            modal_icon: "fa fa-exclamation-circle",
+            modal_icon: "fa fa-times-circle",
             modal_bg: '',
-            icon_color: 'warning',
-            title: 'Устгах',
-            text: `Та "${name}" нэртэй "${model_name}"-г устгахдаа итгэлтэй байна уу?`,
+            icon_color: 'danger fa-4x',
+            title: `Та "${name}" нэртэй "${model_name}"-г устгахад холбогдсон датанууд устах тул та итгэлтэй байна уу?`,
             has_button: true,
             actionNameBack: 'Үгүй',
             actionNameDelete: 'Тийм',
-            modalAction: () => this.deleteAndRemove(model_name, model_id),
+            modalAction: () => this.delete(),
             modalClose: null
         }
         global.MODAL(modal)
         this.setState({ model_name, model_id, name, formLorR })
     }
 
-    deleteAndRemove(model_name, model_id){
+    deleteAndRemove(model_name, model_id, formLorR, code) {
         service.remove(model_name, model_id).then(({ success, info }) => {
             if (success) {
                 const modal = {
@@ -127,6 +130,12 @@ export class List extends Component {
                     title: info,
                 }
                 global.MODAL(modal)
+                if (formLorR == 'right') {
+                    this.done()
+                }
+                else {
+                    this.leftFormDone()
+                }
                 this.setState({ hideRight: false })
                 this.getAll();
             }
@@ -148,27 +157,7 @@ export class List extends Component {
 
     delete() {
         const { model_name, model_id, formLorR, code, top_id } = this.state
-        if (formLorR == 'left') {
-            this.deleteAndRemove(model_name, model_id)
-        }
-        if (formLorR == 'right' && top_id) {
-            service.erese(model_name, model_id, top_id).then(({ success, info }) => {
-                if (success) {
-                    this.setState({ hideRight: true })
-                    this.getProperties(code)
-                }
-                else {
-                    alert(info)
-                }
-                this.setState({ info, top_id: '' })
-            })
-            .catch(() => {
-                alert("Алдаа гарсан байна")
-            })
-        }
-        else {
-            this.deleteAndRemove(model_name, model_id)
-        }
+        this.deleteAndRemove(model_name, model_id, formLorR, code)
     }
 
     render() {
@@ -208,6 +197,7 @@ export class List extends Component {
                                                     >
                                                         {theme.name}
                                                     </span>
+                                                    <a href={`#${theme.code}`}>¶</a>
                                                     &nbsp;
                                                     {
                                                         is_delete
@@ -301,7 +291,7 @@ export class List extends Component {
                                         code={code}
                                         done={() => this.done()}
                                         edit_name={edit_name}
-                                        remove={this.delete}
+                                        remove={this.remove}
                                         type="right"
                                         top_id={this.state.top_id}
                                     />
@@ -328,9 +318,9 @@ export class List extends Component {
                                     model_name={model_name}
                                     model_id={model_id}
                                     refresh={this.getAll}
-                                    done={() => this.done()}
                                     edit_name={edit_name}
-                                    remove={(...values) => this.delete(...values)}
+                                    remove={(...values) => this.remove(...values)}
+                                    done={() => this.leftFormDone()}
                                     type="left"
                                 />
                         }
