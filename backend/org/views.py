@@ -514,6 +514,7 @@ def employee_list(request, payload, level, pk):
     хувьсах_талбарууд = [
         {"field": "user_id", "action": backend_org_utils.get_name, "new_field": "user__first_name"},
         {"field": "user_id", "action": backend_org_utils.get_email, "new_field": "user__email"},
+        {"field": "user_id", "action": backend_org_utils.get_is_user, "new_field": "is_user"},
         {"field": "state", "action": backend_org_utils.get_state_name, "new_field": "user_state"},
         {"field": "position_id", "action": backend_org_utils.get_position_name, "new_field": "position"},
     ]
