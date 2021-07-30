@@ -80,8 +80,6 @@ def bundleButetsAll(request):
                 'name': theme.theme_name,
                 'package': _get_package(theme.theme_id),
             })
-        else:
-            theme.delete()
 
     utils.check_gp_design()
     style_names = geoserver.get_styles()
