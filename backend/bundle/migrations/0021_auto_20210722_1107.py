@@ -10,8 +10,9 @@ def bundle_sort_order_to_theme_id(apps, schema_editor):
     qs_bundle = Bundle.objects
     for bundle in qs_bundle.all():
         theme_id = bundle.ltheme_id
-        bundle.sort_order = theme_id
-        bundle.save()
+        if theme_id:
+            bundle.sort_order = theme_id
+            bundle.save()
 
 
 class Migration(migrations.Migration):

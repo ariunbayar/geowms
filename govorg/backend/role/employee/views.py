@@ -121,12 +121,22 @@ def _get_position_name(postition_id, item):
     return position_name
 
 
+def _get_state_name(state_id, item):
+    if state_id == Employee.STATE_WORKING_CODE:
+        state = Employee.STATE_WORKING
+    elif state_id == Employee.STATE_BREAK_CODE:
+        state = Employee.STATE_BREAK
+    elif state_id == Employee.STATE_FIRED_CODE:
+        state = Employee.STATE_FIRED
+    else:
+        state = Employee.STATE_SICK
+    return state
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def list(request, payload):
-    is_user = payload.get('is_user')
-
     employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org = get_object_or_404(Org, employee=employee)
 
@@ -138,8 +148,13 @@ def list(request, payload):
         "user__last_name"
     ))
 
-    if is_user:
-        qs = qs.filter(user__is_user=True)
+    custom_query = payload.get('custom_query')
+    if custom_query:
+        if 'user__is_user' in custom_query and custom_query['user__is_user'] is True:
+            qs = qs.exclude(state=Employee.STATE_FIRED_CODE)
+            qs = qs.filter(**custom_query)
+        else:
+            qs = qs.filter(**custom_query)
 
     qs = qs.filter(search__icontains=payload.get('query'))
     if not qs:
@@ -150,10 +165,11 @@ def list(request, payload):
         }
         return JsonResponse(rsp)
 
-    оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token']
+    оруулах_талбарууд = ['id', 'state', 'position_id', 'is_admin', 'user_id', 'token']
     хувьсах_талбарууд = [
         {"field": "user_id", "action": _get_name, "new_field": "user__first_name"},
         {"field": "user_id", "action": _get_email, "new_field": "user__email"},
+        {"field": "state", "action": _get_state_name, "new_field": "user_state"},
         {"field": "position_id", "action": _get_position_name, "new_field": "position"},
     ]
     нэмэлт_талбарууд = [
