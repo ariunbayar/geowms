@@ -499,7 +499,11 @@ def employee_list(request, payload, level, pk):
 
     custom_query = payload.get('custom_query')
     if custom_query:
-        qs = qs.filter(**custom_query)
+        if 'user__is_user' in custom_query and custom_query['user__is_user'] is True:
+            qs = qs.exclude(state=Employee.STATE_FIRED_CODE)
+            qs = qs.filter(**custom_query)
+        else:
+            qs = qs.filter(**custom_query)
 
     qs = qs.filter(search__icontains=payload.get('query'))
     if not qs:

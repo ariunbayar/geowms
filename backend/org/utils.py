@@ -631,11 +631,11 @@ def get_position_name(postition_id, item):
 
 
 def get_state_name(state_id, item):
-    if state_id == 1:
+    if state_id == Employee.STATE_WORKING_CODE:
         state = Employee.STATE_WORKING
-    elif state_id == 2:
+    elif state_id == Employee.STATE_BREAK_CODE:
         state = Employee.STATE_BREAK
-    elif state_id == 3:
+    elif state_id == Employee.STATE_FIRED_CODE:
         state = Employee.STATE_FIRED
     else:
         state = Employee.STATE_SICK
