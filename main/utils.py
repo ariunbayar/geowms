@@ -2079,3 +2079,23 @@ def remove_empty_spaces(text):
     ]
     clean_text = " ".join(text_list)
     return clean_text
+
+
+# try catch ashiglaad catch hiisen exception ee error500 ruu hadgalah ni
+def save_to_error500(request, exception):
+    Error500 = apps.get_model('backend_config', 'Error500')
+
+    request_scheme = request.scheme
+    request_url = request.path
+    request_method = request.method
+    request_data = json.dumps(request.POST, indent=4, ensure_ascii=False)
+    request_headers = json.dumps(dict(request.headers), indent=4, ensure_ascii=False)
+
+    Error500.objects.create(
+        request_scheme=request_scheme,
+        request_url=request_url,
+        request_method=request_method,
+        request_data=request_data,
+        request_headers=request_headers,
+        description=exception,
+    )

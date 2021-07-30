@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
 
 from .models import ViewNames, ViewProperties, FeatureOverlaps
 from backend.inspire.models import LThemes, MDatas
@@ -932,9 +933,6 @@ def erese(model_name, model_id, this_ins_idx, will_deletes):
         delete_filter = {'{}__in'.format(child_field_name): child_ids}
         delete_qs = delete_qs.filter(**delete_filter)
 
-        if will_delete == 'feature':
-            feature_ids = child_ids
-
         if will_delete in erese_fields:
             will_erese_fields = erese_fields[will_delete]
             for will_erese_field in will_erese_fields:
@@ -960,6 +958,10 @@ def erese(model_name, model_id, this_ins_idx, will_deletes):
             child_field_name = speciel_delete_fields[will_delete]
 
         child_ids = list(delete_qs.values_list(child_field_name, flat=True))
+
+        if will_delete == 'feature':
+            feature_ids = child_ids
+
         will_delete_qs.append(delete_qs)
 
     will_delete_qs.reverse()
@@ -983,46 +985,54 @@ def remove(request, payload):
 
     Model = _get_Model(model_name)
 
-    with transaction.atomic():
+    try:
+        with transaction.atomic():
 
-        data = Model.objects.filter(pk=model_id)
-        if not data:
+            data = Model.objects.filter(pk=model_id)
+            if not data:
+                rsp = {
+                    'success': False,
+                    'info': 'Хоосон байна'
+                }
+                return JsonResponse(rsp)
+
+            inspire_tree = [
+                ['theme', 'package', 'feature', 'feature_config'],
+                ['data_type', 'data_type_config'],
+                ['value_type'],
+                ['property', 'code_list_config', 'code_list'],
+            ]
+
+            this_ins_idx = ''
+            will_deletes = list()
+            for ins_idx in range(0, len(inspire_tree)):
+                table_names = inspire_tree[ins_idx]
+                this_ins_idx = ins_idx
+                for idx in range(0, len(table_names)):
+                    table_name = table_names[idx]
+                    if table_name == model_name:
+                        will_deletes = table_names[idx:len(table_names)]
+                        break
+
+            if not will_deletes or not this_ins_idx:
+                rsp = {
+                    'success': False,
+                    'info': 'Хүснэгт олдсонгүй'
+                }
+                return JsonResponse(rsp)
+
+            success, info = erese(model_name, model_id, this_ins_idx, will_deletes)
             rsp = {
-                'success': False,
-                'info': 'Хоосон байна'
+                'success': success,
+                'info': info
             }
-            return JsonResponse(rsp)
-
-        inspire_tree = [
-            ['theme', 'package', 'feature', 'feature_config'],
-            ['data_type', 'data_type_config'],
-            ['value_type'],
-            ['property', 'code_list_config', 'code_list'],
-        ]
-
-        this_ins_idx = ''
-        will_deletes = list()
-        for ins_idx in range(0, len(inspire_tree)):
-            table_names = inspire_tree[ins_idx]
-            this_ins_idx = ins_idx
-            for idx in range(0, len(table_names)):
-                table_name = table_names[idx]
-                if table_name == model_name:
-                    will_deletes = table_names[idx:len(table_names)]
-                    break
-
-        if not will_deletes or not this_ins_idx:
-            rsp = {
-                'success': False,
-                'info': 'Хүснэгт олдсонгүй'
-            }
-            return JsonResponse(rsp)
-
-        success, info = erese(model_name, model_id, this_ins_idx, will_deletes)
+    except ProtectedError as e:
+        utils.save_to_error500(request, e)
         rsp = {
-            'success': success,
-            'info': info
+            'success': False,
+            'info': 'Дэд сангын бүтцээс өөр хүснэгттэй холбогдсон байгаа учир алдаа гарлаа'
         }
+        return JsonResponse(rsp)
 
     return JsonResponse(rsp)
 
