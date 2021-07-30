@@ -63,7 +63,6 @@ export class UserTable extends Component {
                     }
                 }
             ],
-            is_user: true,
             is_loading: false,
             text: '',
             drop_name: 'Хэрэглэгч',

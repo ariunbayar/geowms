@@ -28,7 +28,6 @@ export class EmployeeForm extends Component {
                 {"field": "position",  "text": ""},
                 {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
             ],
-            is_user: true,
             drop_name: 'Хэрэглэгч',
 
         }
