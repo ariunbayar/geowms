@@ -751,11 +751,18 @@ def save(request, payload):
         qs = model_qs.filter(pk=datas[model_name + "_id"])
         if qs:
             error = 'ID давхардаж байна'
-            return JsonResponse({'success': False, 'info': error})
 
         qs = model_qs.filter(order_no=datas['order_no'])
         if qs:
             error = 'Order No давхардсан байна!'
+
+        if model_name == 'theme':
+            qs = LThemes.objects.filter(theme_code=datas[model_name + "_code"])
+            if qs:
+                error = 'Theme code давхардсан байна!'
+
+        if error:
+            return JsonResponse({'success': False, 'info': error})
 
         datas['created_by'] = request.user.id
         datas['modified_by'] = request.user.id
@@ -788,6 +795,15 @@ def save(request, payload):
             qs = Model.objects.filter(order_no=datas['order_no'])
             if qs:
                 error = 'Order No давхардсан байна!'
+
+        if model_name == 'theme':
+            if model_obj.theme_code != datas["theme_code"]:
+                qs = LThemes.objects.filter(theme_code=datas[model_name + "_code"])
+                if qs:
+                    error = 'Theme code давхардсан байна!'
+
+        if error:
+            return JsonResponse({'success': False, 'info': error})
 
         model_qs.update(**datas)
 
