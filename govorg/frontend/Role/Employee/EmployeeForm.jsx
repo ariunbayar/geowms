@@ -12,10 +12,11 @@ export class EmployeeForm extends Component {
             refresh: false,
             жагсаалтын_холбоос: `/gov/api/role/employee/`,
             нэмэх_товч: `/gov/perm/employee/add/`,
-            custom_query: {},
+            custom_query: {"user__is_user": true},
             талбарууд: [
                 {'field': 'user__first_name', "title": 'Нэр', 'has_action': true},
                 {'field': 'user__email', "title": 'Цахим шуудан'},
+                {'field': 'user_state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'position', "title": 'Албан тушаал'},
                 {'field': 'role_name', "title": 'Role', "is_sort": true},
                 {'field': 'is_admin', "title": 'Админ', 'has_action': true, "is_center": true},
@@ -23,11 +24,12 @@ export class EmployeeForm extends Component {
             хувьсах_талбарууд: [
                 {"field": "user__first_name", "action": (values) => this.go_link(values)},
                 {"field": "user__email",  "text": ""},
+                {"field": "user_state",  "action": this.setStateColor, "action_type": true},
                 {"field": "position",  "text": ""},
                 {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
             ],
-            is_user: true,
             drop_name: 'Хэрэглэгч',
+
         }
 
         this.handleListChange = this.handleListChange.bind(this)
@@ -41,12 +43,29 @@ export class EmployeeForm extends Component {
         return icon
     }
 
+    setStateColor(user_state){
+        var color
+        if(user_state == 'Ажиллаж байгаа'){
+            color = "text-success"
+        }
+        else if(user_state == 'Чөлөөтэй'){
+            color = "text-secondary"
+        }
+        else if(user_state == 'Чөлөөлөгдсөн'){
+            color = "text-danger"
+        } else {
+            color = "text-warning"
+        }
+        return color
+
+    }
+
     go_link(values) {
         this.props.history.push(`/gov/perm/employee/${values.id}/detail/`)
     }
 
-    handleListChange(is_user, drop_name) {
-        this.setState({ is_user, drop_name })
+    handleListChange(drop_name, custom_query) {
+        this.setState({ drop_name, custom_query })
     }
 
     render() {
@@ -58,7 +77,6 @@ export class EmployeeForm extends Component {
             custom_query,
             нэмэх_товч,
             нэмэлт_талбарууд,
-            is_user,
         } = this.state
         const { is_admin } = this.props.employee
         return (
@@ -71,8 +89,9 @@ export class EmployeeForm extends Component {
                             </a>
 
                             <div className="dropdown-menu mr-2" aria-labelledby="dropdownMenuLink">
-                                <button className="dropdown-item" onClick={() => this.handleListChange(true, 'Хэрэглэгч')}>Хэрэглэгч</button>
-                                <button className="dropdown-item" onClick={() => this.handleListChange(false, 'Бүх ажилчид')}>Бүх ажилчид</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange('Хэрэглэгч', {'user__is_user': true})}>Хэрэглэгч</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange('Бүх ажилчид', {})}>Бүх ажилчид</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange('Чөлөөлөгдсөн ажилчид', {'state':3})}>Чөлөөлөгдсөн ажилчид</button>
                             </div>
                         </div>
                     </div>
@@ -88,7 +107,6 @@ export class EmployeeForm extends Component {
                             нэмэх_товч={is_admin ? нэмэх_товч : null}
                             custom_query={custom_query}
                             нэмэлт_талбарууд={нэмэлт_талбарууд}
-                            is_user={is_user}
                         />
                     </div>
                 </div>
